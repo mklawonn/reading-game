@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "reading-game-dev",
+    "dev": "reading-game-dev",
+    "prod": "reading-game-prod"
+  }
+}

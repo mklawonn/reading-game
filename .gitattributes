@@ -1,0 +1,24 @@
+# Normalize line endings to LF on checkin
+* text=auto eol=lf
+
+# Windows scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Treat these as binary (no diff/merge, no eol conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.mp3 binary
+*.m4a binary
+*.wav binary
+*.ogg binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.ico binary
+
+# NOTE: when recorded art/audio volume grows, consider migrating
+# app/assets/{images,audio} to Git LFS (e.g. `git lfs track "*.mp3"`).

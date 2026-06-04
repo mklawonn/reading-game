@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Reading Game — Storage security rules.
+// Game art/audio under /assets is world-readable (CDN-style delivery) and never
+// client-writable. All other paths are denied.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /assets/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

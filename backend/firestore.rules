@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Reading Game — Firestore security rules.
+// Principle: a parent can touch ONLY their own account subtree. Content is
+// read-only to signed-in clients. Everything else is denied by default
+// (Firestore denies any path with no matching allow).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Parent account and everything beneath it (child profiles, mastery, …).
+    match /parents/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Optional server-published Content Bank metadata: readable, never client-writable.
+    match /content/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+  }
+}

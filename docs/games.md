@@ -1,0 +1,72 @@
+# Games
+
+All games share two invariants: they read content from the **Content Bank**, and **every symbol is
+tappable to hear its sound**. Games are rendered in the child's **current-stage orthography**
+(pictograph → syllabary → letters), so the same game grows with the learner.
+
+## Summary
+
+| Game | Stage(s) | MVP | One-liner |
+|---|---|---|---|
+| Story Builder | 1–4 | M3 | Co-write a branching story with an LLM, constrained to learned vocabulary |
+| Find the Character / Do the Command | 1–2 | M2 | Read a sentence, tap the thing it names |
+| Build-a-Word (blending) | 2 | M2 | Overlap syllable cards to make a target word |
+| Listen & Pick (slow-speak) | 0 | M2 | Hear gapped syllables, choose the picture |
+| Match / Memory | 1+ | later | Match pictograph ↔ sound ↔ word |
+| Rhyme Families | 3 | later | Collect syllables that rhyme |
+| Free Read | 4 | later | Read leveled stories assembled from the bank |
+
+## Story Builder (signature game) — M3
+
+- The child picks a **"story starter"** (e.g. a character + setting + goal assembled from picturable
+  vocabulary).
+- An LLM (**Claude**, via the Cloud Functions proxy) generates the next line(s) **using only the
+  child's learned symbols/words**.
+- Output is rendered in the current-stage orthography with **tap-to-hear** on every symbol; the child
+  makes **choices** that branch the story.
+- **Guardrails (hard):** server-side **vocabulary whitelist**, **safety filter**, age-appropriate
+  system prompt, and **output validation** — nothing out-of-vocabulary or unsafe can reach the screen.
+  See [`architecture.md`](architecture.md).
+- **Why it matters:** turns decoding practice into authorship; the constraint to learned vocabulary is
+  also a natural spaced-review engine.
+
+## Find the Character / Do the Command — M2
+
+- Show a sentence or command in the current orthography; the child **taps the matching pictograph** (or
+  carries out a short command by selecting objects in order).
+- Directly the paper's **Table 2** comprehension test ("GET A CANDY", "GET A PEN BEFORE A CANDY").
+- **Auto-generatable** from the Content Bank, and doubles as a low-stakes **assessment** feeding the
+  mastery model.
+
+## Build-a-Word (blending) — M2
+
+- Present a target (heard and/or pictured); the child **drags/overlaps syllable cards** to construct it
+  (`O`+`PEN` → *open*).
+- The core **syllabary mechanic**; teaches productive blending and that orthography tracks sound.
+- Progresses to phoneme variants in Stage 3 (the `-s` card; `CAN·DY` vs `CAND·Y`).
+
+## Listen & Pick (slow-speak) — M2 (Stage 0)
+
+- Play syllables with gaps; the child picks the matching **picture**. Pure auditory blending, no print.
+
+## Match / Memory — later
+
+- Concentration-style matching across the three representations of an entry: **pictograph ↔ sound ↔
+  word**. Reinforces the symbol–sound pairing.
+
+## Rhyme Families — later (Stage 3)
+
+- Collect syllables that **rhyme** (`and / sand / hand`) into families, seeding phoneme awareness and
+  the continuant-first transition.
+
+## Free Read — later (Stage 4)
+
+- Leveled stories assembled from the bank in (mostly) conventional spelling, with comprehension checks —
+  the bridge to ordinary reading.
+
+## Game ideas parked for later
+
+- **Build-a-Sentence:** arrange word/symbol cards into a valid sentence (productive counterpart to
+  Find-the-Character).
+- **Symbol Hunt / I-Spy:** find the symbol whose sound the narrator says.
+- **Story Theater:** the child's finished Story Builder tale is read back with simple animation.
