@@ -1,6 +1,6 @@
 # Content Bank v1 — Stage-1 vocabulary curation
 
-This is the curated **Stage-1** vocabulary: **51 elements → 67 words**. It expands the v0 seed
+This is the curated **Stage-1** vocabulary: **53 elements → 76 words** (incl. plural `-s` and `-ing`). It expands the v0 seed
 (Gleitman & Rozin's 22-element Table 1) into a set that can actually tell simple stories and feed all
 the games. The data is `content/content_bank.v1.json`; this doc is the **reviewable selection and the
 why**. Methodology: [`docs/content-bank-strategy.md`](../docs/content-bank-strategy.md)
@@ -12,8 +12,8 @@ why**. Methodology: [`docs/content-bank-strategy.md`](../docs/content-bank-strat
 |---|---|---|
 | **Pictographs** (picturable anchors) | 27 | The fun, low-memory-burden core — each is a word *and* a reusable syllable, and most head a rhyme family. This is the "many depictable by instantly-recognizable pictographs" goal. |
 | **Function / verb / adjective glyphs** | 16 | The sentence connective tissue (letter-arrays): articles, prepositions, pronouns, a few high-frequency verbs/adjectives. Higher memory cost, kept lean. |
-| **Suffix & connective glyphs** | 8 | `o` (open/window), `e` (-y), `er`, `day`, plus blend-only syllables `for/get/it/sill`. |
-| **→ generates** | **67 words** | 46 single-element words + 21 blends. |
+| **Suffix & connective glyphs** | 10 | `o` (open/window), `e` (-y), `er`, plural `-s`, `-ing`, `day`, plus blend-only syllables `for/get/it/sill`. |
+| **→ generates** | **76 words** | single words + blends + plural/`-ing` forms. |
 
 **Design lever:** few elements, many words. Picturable anchors were chosen to *recombine* (pen → open,
 penny, pencil) and to *head rhyme families* (so the same 27 pictures power Build-a-Word, Listen & Pick,
@@ -86,9 +86,10 @@ windowsill).
   double duty. Easy to drop if you'd rather stay strictly phonetic.
 - **Spelling-doubling taught early:** `penny/sunny/puppy/sunnier` carry `spelling_variants` (penn-,
   sunn-, pupp-) so the doubling-before-`-y` rule surfaces in context.
-- **Deliberately deferred** (to keep v1 clean / for later stages): plural `-s`, `-ing`, the alphabet,
-  the numeral-rebus `4=for`, `candy`/`d` (kept out to avoid the cheaty `d`=dee), and genuinely
-  irregular words.
+- **Now included (Stage-3 bridge):** plural `-s` (cats, pups — the paper's own pup+s example) and
+  `-ing` (going, raining, running with runn- doubling). Marked `introduced_stage: 3`.
+- **Still deferred** (for later stages): the alphabet, the numeral-rebus `4=for`, `candy`/`d` (kept out
+  to avoid the cheaty `d`=dee), and genuinely irregular words.
 - **Frequency is one signal, not the spine:** Dolch tiers are tagged where they apply, but picturable
   nouns (bug, fox, key…) and combinable anchors earn their place on utility, not frequency.
 
