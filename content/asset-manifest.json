@@ -1,0 +1,1079 @@
+{
+  "version": "1",
+  "generatedFrom": "content_bank.v1.json",
+  "summary": {
+    "pictographImages": 27,
+    "audioClips": 129
+  },
+  "imageSpec": "512x512 PNG exported from an SVG master; transparent background; bold flat line-art, high contrast, one clear subject. See docs/symbol-art-strategy.md.",
+  "audioSpec": "Mono, loudness-normalized; ~0.6-1.2s for syllables, ~1-2s for words; 44.1kHz mp3/m4a; warm child-directed voice. TTS placeholders acceptable to start.",
+  "images": [
+    {
+      "id": "cat",
+      "label": "cat",
+      "asset": "images/pictographs/cat.png",
+      "path": "app/assets/images/pictographs/cat.png"
+    },
+    {
+      "id": "hat",
+      "label": "hat",
+      "asset": "images/pictographs/hat.png",
+      "path": "app/assets/images/pictographs/hat.png"
+    },
+    {
+      "id": "dog",
+      "label": "dog",
+      "asset": "images/pictographs/dog.png",
+      "path": "app/assets/images/pictographs/dog.png"
+    },
+    {
+      "id": "pig",
+      "label": "pig",
+      "asset": "images/pictographs/pig.png",
+      "path": "app/assets/images/pictographs/pig.png"
+    },
+    {
+      "id": "bug",
+      "label": "bug",
+      "asset": "images/pictographs/bug.png",
+      "path": "app/assets/images/pictographs/bug.png"
+    },
+    {
+      "id": "bed",
+      "label": "bed",
+      "asset": "images/pictographs/bed.png",
+      "path": "app/assets/images/pictographs/bed.png"
+    },
+    {
+      "id": "pen",
+      "label": "pen",
+      "asset": "images/pictographs/pen.png",
+      "path": "app/assets/images/pictographs/pen.png"
+    },
+    {
+      "id": "hen",
+      "label": "hen",
+      "asset": "images/pictographs/hen.png",
+      "path": "app/assets/images/pictographs/hen.png"
+    },
+    {
+      "id": "sun",
+      "label": "sun",
+      "asset": "images/pictographs/sun.png",
+      "path": "app/assets/images/pictographs/sun.png"
+    },
+    {
+      "id": "fox",
+      "label": "fox",
+      "asset": "images/pictographs/fox.png",
+      "path": "app/assets/images/pictographs/fox.png"
+    },
+    {
+      "id": "box",
+      "label": "box",
+      "asset": "images/pictographs/box.png",
+      "path": "app/assets/images/pictographs/box.png"
+    },
+    {
+      "id": "pot",
+      "label": "pot",
+      "asset": "images/pictographs/pot.png",
+      "path": "app/assets/images/pictographs/pot.png"
+    },
+    {
+      "id": "net",
+      "label": "net",
+      "asset": "images/pictographs/net.png",
+      "path": "app/assets/images/pictographs/net.png"
+    },
+    {
+      "id": "can",
+      "label": "can",
+      "asset": "images/pictographs/can.png",
+      "path": "app/assets/images/pictographs/can.png"
+    },
+    {
+      "id": "man",
+      "label": "man",
+      "asset": "images/pictographs/man.png",
+      "path": "app/assets/images/pictographs/man.png"
+    },
+    {
+      "id": "pup",
+      "label": "pup",
+      "asset": "images/pictographs/pup.png",
+      "path": "app/assets/images/pictographs/pup.png"
+    },
+    {
+      "id": "bee",
+      "label": "bee",
+      "asset": "images/pictographs/bee.png",
+      "path": "app/assets/images/pictographs/bee.png"
+    },
+    {
+      "id": "key",
+      "label": "key",
+      "asset": "images/pictographs/key.png",
+      "path": "app/assets/images/pictographs/key.png"
+    },
+    {
+      "id": "ball",
+      "label": "ball",
+      "asset": "images/pictographs/ball.png",
+      "path": "app/assets/images/pictographs/ball.png"
+    },
+    {
+      "id": "ring",
+      "label": "ring",
+      "asset": "images/pictographs/ring.png",
+      "path": "app/assets/images/pictographs/ring.png"
+    },
+    {
+      "id": "rain",
+      "label": "rain",
+      "asset": "images/pictographs/rain.png",
+      "path": "app/assets/images/pictographs/rain.png"
+    },
+    {
+      "id": "snow",
+      "label": "snow",
+      "asset": "images/pictographs/snow.png",
+      "path": "app/assets/images/pictographs/snow.png"
+    },
+    {
+      "id": "cow",
+      "label": "cow",
+      "asset": "images/pictographs/cow.png",
+      "path": "app/assets/images/pictographs/cow.png"
+    },
+    {
+      "id": "hand",
+      "label": "hand",
+      "asset": "images/pictographs/hand.png",
+      "path": "app/assets/images/pictographs/hand.png"
+    },
+    {
+      "id": "boy",
+      "label": "boy",
+      "asset": "images/pictographs/boy.png",
+      "path": "app/assets/images/pictographs/boy.png"
+    },
+    {
+      "id": "wind",
+      "label": "wind",
+      "asset": "images/pictographs/wind.png",
+      "path": "app/assets/images/pictographs/wind.png"
+    },
+    {
+      "id": "i",
+      "label": "I",
+      "asset": "images/pictographs/i.png",
+      "path": "app/assets/images/pictographs/i.png"
+    }
+  ],
+  "audio": [
+    {
+      "ref": "cat.mp3",
+      "kind": "syllable",
+      "text": "cat",
+      "asset": "audio/cat.mp3",
+      "path": "app/assets/audio/cat.mp3"
+    },
+    {
+      "ref": "hat.mp3",
+      "kind": "syllable",
+      "text": "hat",
+      "asset": "audio/hat.mp3",
+      "path": "app/assets/audio/hat.mp3"
+    },
+    {
+      "ref": "dog.mp3",
+      "kind": "syllable",
+      "text": "dog",
+      "asset": "audio/dog.mp3",
+      "path": "app/assets/audio/dog.mp3"
+    },
+    {
+      "ref": "pig.mp3",
+      "kind": "syllable",
+      "text": "pig",
+      "asset": "audio/pig.mp3",
+      "path": "app/assets/audio/pig.mp3"
+    },
+    {
+      "ref": "bug.mp3",
+      "kind": "syllable",
+      "text": "bug",
+      "asset": "audio/bug.mp3",
+      "path": "app/assets/audio/bug.mp3"
+    },
+    {
+      "ref": "bed.mp3",
+      "kind": "syllable",
+      "text": "bed",
+      "asset": "audio/bed.mp3",
+      "path": "app/assets/audio/bed.mp3"
+    },
+    {
+      "ref": "pen.mp3",
+      "kind": "syllable",
+      "text": "pen",
+      "asset": "audio/pen.mp3",
+      "path": "app/assets/audio/pen.mp3"
+    },
+    {
+      "ref": "hen.mp3",
+      "kind": "syllable",
+      "text": "hen",
+      "asset": "audio/hen.mp3",
+      "path": "app/assets/audio/hen.mp3"
+    },
+    {
+      "ref": "sun.mp3",
+      "kind": "syllable",
+      "text": "sun",
+      "asset": "audio/sun.mp3",
+      "path": "app/assets/audio/sun.mp3"
+    },
+    {
+      "ref": "fox.mp3",
+      "kind": "syllable",
+      "text": "fox",
+      "asset": "audio/fox.mp3",
+      "path": "app/assets/audio/fox.mp3"
+    },
+    {
+      "ref": "box.mp3",
+      "kind": "syllable",
+      "text": "box",
+      "asset": "audio/box.mp3",
+      "path": "app/assets/audio/box.mp3"
+    },
+    {
+      "ref": "pot.mp3",
+      "kind": "syllable",
+      "text": "pot",
+      "asset": "audio/pot.mp3",
+      "path": "app/assets/audio/pot.mp3"
+    },
+    {
+      "ref": "net.mp3",
+      "kind": "syllable",
+      "text": "net",
+      "asset": "audio/net.mp3",
+      "path": "app/assets/audio/net.mp3"
+    },
+    {
+      "ref": "can.mp3",
+      "kind": "syllable",
+      "text": "can",
+      "asset": "audio/can.mp3",
+      "path": "app/assets/audio/can.mp3"
+    },
+    {
+      "ref": "man.mp3",
+      "kind": "syllable",
+      "text": "man",
+      "asset": "audio/man.mp3",
+      "path": "app/assets/audio/man.mp3"
+    },
+    {
+      "ref": "pup.mp3",
+      "kind": "syllable",
+      "text": "pup",
+      "asset": "audio/pup.mp3",
+      "path": "app/assets/audio/pup.mp3"
+    },
+    {
+      "ref": "bee.mp3",
+      "kind": "syllable",
+      "text": "bee",
+      "asset": "audio/bee.mp3",
+      "path": "app/assets/audio/bee.mp3"
+    },
+    {
+      "ref": "key.mp3",
+      "kind": "syllable",
+      "text": "key",
+      "asset": "audio/key.mp3",
+      "path": "app/assets/audio/key.mp3"
+    },
+    {
+      "ref": "ball.mp3",
+      "kind": "syllable",
+      "text": "ball",
+      "asset": "audio/ball.mp3",
+      "path": "app/assets/audio/ball.mp3"
+    },
+    {
+      "ref": "ring.mp3",
+      "kind": "syllable",
+      "text": "ring",
+      "asset": "audio/ring.mp3",
+      "path": "app/assets/audio/ring.mp3"
+    },
+    {
+      "ref": "rain.mp3",
+      "kind": "syllable",
+      "text": "rain",
+      "asset": "audio/rain.mp3",
+      "path": "app/assets/audio/rain.mp3"
+    },
+    {
+      "ref": "snow.mp3",
+      "kind": "syllable",
+      "text": "snow",
+      "asset": "audio/snow.mp3",
+      "path": "app/assets/audio/snow.mp3"
+    },
+    {
+      "ref": "cow.mp3",
+      "kind": "syllable",
+      "text": "cow",
+      "asset": "audio/cow.mp3",
+      "path": "app/assets/audio/cow.mp3"
+    },
+    {
+      "ref": "hand.mp3",
+      "kind": "syllable",
+      "text": "hand",
+      "asset": "audio/hand.mp3",
+      "path": "app/assets/audio/hand.mp3"
+    },
+    {
+      "ref": "boy.mp3",
+      "kind": "syllable",
+      "text": "boy",
+      "asset": "audio/boy.mp3",
+      "path": "app/assets/audio/boy.mp3"
+    },
+    {
+      "ref": "wind.mp3",
+      "kind": "syllable",
+      "text": "wind",
+      "asset": "audio/wind.mp3",
+      "path": "app/assets/audio/wind.mp3"
+    },
+    {
+      "ref": "i.mp3",
+      "kind": "syllable",
+      "text": "I",
+      "asset": "audio/i.mp3",
+      "path": "app/assets/audio/i.mp3"
+    },
+    {
+      "ref": "a.mp3",
+      "kind": "syllable",
+      "text": "a",
+      "asset": "audio/a.mp3",
+      "path": "app/assets/audio/a.mp3"
+    },
+    {
+      "ref": "the.mp3",
+      "kind": "syllable",
+      "text": "the",
+      "asset": "audio/the.mp3",
+      "path": "app/assets/audio/the.mp3"
+    },
+    {
+      "ref": "is.mp3",
+      "kind": "syllable",
+      "text": "is",
+      "asset": "audio/is.mp3",
+      "path": "app/assets/audio/is.mp3"
+    },
+    {
+      "ref": "in.mp3",
+      "kind": "syllable",
+      "text": "in",
+      "asset": "audio/in.mp3",
+      "path": "app/assets/audio/in.mp3"
+    },
+    {
+      "ref": "on.mp3",
+      "kind": "syllable",
+      "text": "on",
+      "asset": "audio/on.mp3",
+      "path": "app/assets/audio/on.mp3"
+    },
+    {
+      "ref": "to.mp3",
+      "kind": "syllable",
+      "text": "to",
+      "asset": "audio/to.mp3",
+      "path": "app/assets/audio/to.mp3"
+    },
+    {
+      "ref": "up.mp3",
+      "kind": "syllable",
+      "text": "up",
+      "asset": "audio/up.mp3",
+      "path": "app/assets/audio/up.mp3"
+    },
+    {
+      "ref": "and.mp3",
+      "kind": "syllable",
+      "text": "and",
+      "asset": "audio/and.mp3",
+      "path": "app/assets/audio/and.mp3"
+    },
+    {
+      "ref": "go.mp3",
+      "kind": "syllable",
+      "text": "go",
+      "asset": "audio/go.mp3",
+      "path": "app/assets/audio/go.mp3"
+    },
+    {
+      "ref": "see.mp3",
+      "kind": "syllable",
+      "text": "see",
+      "asset": "audio/see.mp3",
+      "path": "app/assets/audio/see.mp3"
+    },
+    {
+      "ref": "my.mp3",
+      "kind": "syllable",
+      "text": "my",
+      "asset": "audio/my.mp3",
+      "path": "app/assets/audio/my.mp3"
+    },
+    {
+      "ref": "run.mp3",
+      "kind": "syllable",
+      "text": "run",
+      "asset": "audio/run.mp3",
+      "path": "app/assets/audio/run.mp3"
+    },
+    {
+      "ref": "sit.mp3",
+      "kind": "syllable",
+      "text": "sit",
+      "asset": "audio/sit.mp3",
+      "path": "app/assets/audio/sit.mp3"
+    },
+    {
+      "ref": "big.mp3",
+      "kind": "syllable",
+      "text": "big",
+      "asset": "audio/big.mp3",
+      "path": "app/assets/audio/big.mp3"
+    },
+    {
+      "ref": "red.mp3",
+      "kind": "syllable",
+      "text": "red",
+      "asset": "audio/red.mp3",
+      "path": "app/assets/audio/red.mp3"
+    },
+    {
+      "ref": "hot.mp3",
+      "kind": "syllable",
+      "text": "hot",
+      "asset": "audio/hot.mp3",
+      "path": "app/assets/audio/hot.mp3"
+    },
+    {
+      "ref": "for.mp3",
+      "kind": "syllable",
+      "text": "for",
+      "asset": "audio/for.mp3",
+      "path": "app/assets/audio/for.mp3"
+    },
+    {
+      "ref": "get.mp3",
+      "kind": "syllable",
+      "text": "get",
+      "asset": "audio/get.mp3",
+      "path": "app/assets/audio/get.mp3"
+    },
+    {
+      "ref": "it.mp3",
+      "kind": "syllable",
+      "text": "it",
+      "asset": "audio/it.mp3",
+      "path": "app/assets/audio/it.mp3"
+    },
+    {
+      "ref": "o.mp3",
+      "kind": "syllable",
+      "text": "O",
+      "asset": "audio/o.mp3",
+      "path": "app/assets/audio/o.mp3"
+    },
+    {
+      "ref": "e.mp3",
+      "kind": "syllable",
+      "text": "E",
+      "asset": "audio/e.mp3",
+      "path": "app/assets/audio/e.mp3"
+    },
+    {
+      "ref": "sill.mp3",
+      "kind": "syllable",
+      "text": "sill",
+      "asset": "audio/sill.mp3",
+      "path": "app/assets/audio/sill.mp3"
+    },
+    {
+      "ref": "day.mp3",
+      "kind": "syllable",
+      "text": "day",
+      "asset": "audio/day.mp3",
+      "path": "app/assets/audio/day.mp3"
+    },
+    {
+      "ref": "er.mp3",
+      "kind": "syllable",
+      "text": "er",
+      "asset": "audio/er.mp3",
+      "path": "app/assets/audio/er.mp3"
+    },
+    {
+      "ref": "s.mp3",
+      "kind": "syllable",
+      "text": "s",
+      "asset": "audio/s.mp3",
+      "path": "app/assets/audio/s.mp3"
+    },
+    {
+      "ref": "ing.mp3",
+      "kind": "syllable",
+      "text": "ing",
+      "asset": "audio/ing.mp3",
+      "path": "app/assets/audio/ing.mp3"
+    },
+    {
+      "ref": "word_cat.mp3",
+      "kind": "word",
+      "text": "cat",
+      "asset": "audio/word_cat.mp3",
+      "path": "app/assets/audio/word_cat.mp3"
+    },
+    {
+      "ref": "word_hat.mp3",
+      "kind": "word",
+      "text": "hat",
+      "asset": "audio/word_hat.mp3",
+      "path": "app/assets/audio/word_hat.mp3"
+    },
+    {
+      "ref": "word_dog.mp3",
+      "kind": "word",
+      "text": "dog",
+      "asset": "audio/word_dog.mp3",
+      "path": "app/assets/audio/word_dog.mp3"
+    },
+    {
+      "ref": "word_pig.mp3",
+      "kind": "word",
+      "text": "pig",
+      "asset": "audio/word_pig.mp3",
+      "path": "app/assets/audio/word_pig.mp3"
+    },
+    {
+      "ref": "word_bug.mp3",
+      "kind": "word",
+      "text": "bug",
+      "asset": "audio/word_bug.mp3",
+      "path": "app/assets/audio/word_bug.mp3"
+    },
+    {
+      "ref": "word_bed.mp3",
+      "kind": "word",
+      "text": "bed",
+      "asset": "audio/word_bed.mp3",
+      "path": "app/assets/audio/word_bed.mp3"
+    },
+    {
+      "ref": "word_pen.mp3",
+      "kind": "word",
+      "text": "pen",
+      "asset": "audio/word_pen.mp3",
+      "path": "app/assets/audio/word_pen.mp3"
+    },
+    {
+      "ref": "word_hen.mp3",
+      "kind": "word",
+      "text": "hen",
+      "asset": "audio/word_hen.mp3",
+      "path": "app/assets/audio/word_hen.mp3"
+    },
+    {
+      "ref": "word_sun.mp3",
+      "kind": "word",
+      "text": "sun",
+      "asset": "audio/word_sun.mp3",
+      "path": "app/assets/audio/word_sun.mp3"
+    },
+    {
+      "ref": "word_fox.mp3",
+      "kind": "word",
+      "text": "fox",
+      "asset": "audio/word_fox.mp3",
+      "path": "app/assets/audio/word_fox.mp3"
+    },
+    {
+      "ref": "word_box.mp3",
+      "kind": "word",
+      "text": "box",
+      "asset": "audio/word_box.mp3",
+      "path": "app/assets/audio/word_box.mp3"
+    },
+    {
+      "ref": "word_pot.mp3",
+      "kind": "word",
+      "text": "pot",
+      "asset": "audio/word_pot.mp3",
+      "path": "app/assets/audio/word_pot.mp3"
+    },
+    {
+      "ref": "word_net.mp3",
+      "kind": "word",
+      "text": "net",
+      "asset": "audio/word_net.mp3",
+      "path": "app/assets/audio/word_net.mp3"
+    },
+    {
+      "ref": "word_can.mp3",
+      "kind": "word",
+      "text": "can",
+      "asset": "audio/word_can.mp3",
+      "path": "app/assets/audio/word_can.mp3"
+    },
+    {
+      "ref": "word_man.mp3",
+      "kind": "word",
+      "text": "man",
+      "asset": "audio/word_man.mp3",
+      "path": "app/assets/audio/word_man.mp3"
+    },
+    {
+      "ref": "word_pup.mp3",
+      "kind": "word",
+      "text": "pup",
+      "asset": "audio/word_pup.mp3",
+      "path": "app/assets/audio/word_pup.mp3"
+    },
+    {
+      "ref": "word_bee.mp3",
+      "kind": "word",
+      "text": "bee",
+      "asset": "audio/word_bee.mp3",
+      "path": "app/assets/audio/word_bee.mp3"
+    },
+    {
+      "ref": "word_key.mp3",
+      "kind": "word",
+      "text": "key",
+      "asset": "audio/word_key.mp3",
+      "path": "app/assets/audio/word_key.mp3"
+    },
+    {
+      "ref": "word_ball.mp3",
+      "kind": "word",
+      "text": "ball",
+      "asset": "audio/word_ball.mp3",
+      "path": "app/assets/audio/word_ball.mp3"
+    },
+    {
+      "ref": "word_ring.mp3",
+      "kind": "word",
+      "text": "ring",
+      "asset": "audio/word_ring.mp3",
+      "path": "app/assets/audio/word_ring.mp3"
+    },
+    {
+      "ref": "word_rain.mp3",
+      "kind": "word",
+      "text": "rain",
+      "asset": "audio/word_rain.mp3",
+      "path": "app/assets/audio/word_rain.mp3"
+    },
+    {
+      "ref": "word_snow.mp3",
+      "kind": "word",
+      "text": "snow",
+      "asset": "audio/word_snow.mp3",
+      "path": "app/assets/audio/word_snow.mp3"
+    },
+    {
+      "ref": "word_cow.mp3",
+      "kind": "word",
+      "text": "cow",
+      "asset": "audio/word_cow.mp3",
+      "path": "app/assets/audio/word_cow.mp3"
+    },
+    {
+      "ref": "word_hand.mp3",
+      "kind": "word",
+      "text": "hand",
+      "asset": "audio/word_hand.mp3",
+      "path": "app/assets/audio/word_hand.mp3"
+    },
+    {
+      "ref": "word_boy.mp3",
+      "kind": "word",
+      "text": "boy",
+      "asset": "audio/word_boy.mp3",
+      "path": "app/assets/audio/word_boy.mp3"
+    },
+    {
+      "ref": "word_i.mp3",
+      "kind": "word",
+      "text": "I",
+      "asset": "audio/word_i.mp3",
+      "path": "app/assets/audio/word_i.mp3"
+    },
+    {
+      "ref": "word_a.mp3",
+      "kind": "word",
+      "text": "a",
+      "asset": "audio/word_a.mp3",
+      "path": "app/assets/audio/word_a.mp3"
+    },
+    {
+      "ref": "word_the.mp3",
+      "kind": "word",
+      "text": "the",
+      "asset": "audio/word_the.mp3",
+      "path": "app/assets/audio/word_the.mp3"
+    },
+    {
+      "ref": "word_is.mp3",
+      "kind": "word",
+      "text": "is",
+      "asset": "audio/word_is.mp3",
+      "path": "app/assets/audio/word_is.mp3"
+    },
+    {
+      "ref": "word_in.mp3",
+      "kind": "word",
+      "text": "in",
+      "asset": "audio/word_in.mp3",
+      "path": "app/assets/audio/word_in.mp3"
+    },
+    {
+      "ref": "word_on.mp3",
+      "kind": "word",
+      "text": "on",
+      "asset": "audio/word_on.mp3",
+      "path": "app/assets/audio/word_on.mp3"
+    },
+    {
+      "ref": "word_to.mp3",
+      "kind": "word",
+      "text": "to",
+      "asset": "audio/word_to.mp3",
+      "path": "app/assets/audio/word_to.mp3"
+    },
+    {
+      "ref": "word_up.mp3",
+      "kind": "word",
+      "text": "up",
+      "asset": "audio/word_up.mp3",
+      "path": "app/assets/audio/word_up.mp3"
+    },
+    {
+      "ref": "word_and.mp3",
+      "kind": "word",
+      "text": "and",
+      "asset": "audio/word_and.mp3",
+      "path": "app/assets/audio/word_and.mp3"
+    },
+    {
+      "ref": "word_go.mp3",
+      "kind": "word",
+      "text": "go",
+      "asset": "audio/word_go.mp3",
+      "path": "app/assets/audio/word_go.mp3"
+    },
+    {
+      "ref": "word_see.mp3",
+      "kind": "word",
+      "text": "see",
+      "asset": "audio/word_see.mp3",
+      "path": "app/assets/audio/word_see.mp3"
+    },
+    {
+      "ref": "word_my.mp3",
+      "kind": "word",
+      "text": "my",
+      "asset": "audio/word_my.mp3",
+      "path": "app/assets/audio/word_my.mp3"
+    },
+    {
+      "ref": "word_run.mp3",
+      "kind": "word",
+      "text": "run",
+      "asset": "audio/word_run.mp3",
+      "path": "app/assets/audio/word_run.mp3"
+    },
+    {
+      "ref": "word_sit.mp3",
+      "kind": "word",
+      "text": "sit",
+      "asset": "audio/word_sit.mp3",
+      "path": "app/assets/audio/word_sit.mp3"
+    },
+    {
+      "ref": "word_big.mp3",
+      "kind": "word",
+      "text": "big",
+      "asset": "audio/word_big.mp3",
+      "path": "app/assets/audio/word_big.mp3"
+    },
+    {
+      "ref": "word_red.mp3",
+      "kind": "word",
+      "text": "red",
+      "asset": "audio/word_red.mp3",
+      "path": "app/assets/audio/word_red.mp3"
+    },
+    {
+      "ref": "word_hot.mp3",
+      "kind": "word",
+      "text": "hot",
+      "asset": "audio/word_hot.mp3",
+      "path": "app/assets/audio/word_hot.mp3"
+    },
+    {
+      "ref": "word_for.mp3",
+      "kind": "word",
+      "text": "for",
+      "asset": "audio/word_for.mp3",
+      "path": "app/assets/audio/word_for.mp3"
+    },
+    {
+      "ref": "word_get.mp3",
+      "kind": "word",
+      "text": "get",
+      "asset": "audio/word_get.mp3",
+      "path": "app/assets/audio/word_get.mp3"
+    },
+    {
+      "ref": "word_it.mp3",
+      "kind": "word",
+      "text": "it",
+      "asset": "audio/word_it.mp3",
+      "path": "app/assets/audio/word_it.mp3"
+    },
+    {
+      "ref": "word_day.mp3",
+      "kind": "word",
+      "text": "day",
+      "asset": "audio/word_day.mp3",
+      "path": "app/assets/audio/word_day.mp3"
+    },
+    {
+      "ref": "word_open.mp3",
+      "kind": "word",
+      "text": "open",
+      "asset": "audio/word_open.mp3",
+      "path": "app/assets/audio/word_open.mp3"
+    },
+    {
+      "ref": "word_penny.mp3",
+      "kind": "word",
+      "text": "penny",
+      "asset": "audio/word_penny.mp3",
+      "path": "app/assets/audio/word_penny.mp3"
+    },
+    {
+      "ref": "word_sunny.mp3",
+      "kind": "word",
+      "text": "sunny",
+      "asset": "audio/word_sunny.mp3",
+      "path": "app/assets/audio/word_sunny.mp3"
+    },
+    {
+      "ref": "word_puppy.mp3",
+      "kind": "word",
+      "text": "puppy",
+      "asset": "audio/word_puppy.mp3",
+      "path": "app/assets/audio/word_puppy.mp3"
+    },
+    {
+      "ref": "word_rainy.mp3",
+      "kind": "word",
+      "text": "rainy",
+      "asset": "audio/word_rainy.mp3",
+      "path": "app/assets/audio/word_rainy.mp3"
+    },
+    {
+      "ref": "word_snowy.mp3",
+      "kind": "word",
+      "text": "snowy",
+      "asset": "audio/word_snowy.mp3",
+      "path": "app/assets/audio/word_snowy.mp3"
+    },
+    {
+      "ref": "word_handy.mp3",
+      "kind": "word",
+      "text": "handy",
+      "asset": "audio/word_handy.mp3",
+      "path": "app/assets/audio/word_handy.mp3"
+    },
+    {
+      "ref": "word_silly.mp3",
+      "kind": "word",
+      "text": "silly",
+      "asset": "audio/word_silly.mp3",
+      "path": "app/assets/audio/word_silly.mp3"
+    },
+    {
+      "ref": "word_windy.mp3",
+      "kind": "word",
+      "text": "windy",
+      "asset": "audio/word_windy.mp3",
+      "path": "app/assets/audio/word_windy.mp3"
+    },
+    {
+      "ref": "word_window.mp3",
+      "kind": "word",
+      "text": "window",
+      "asset": "audio/word_window.mp3",
+      "path": "app/assets/audio/word_window.mp3"
+    },
+    {
+      "ref": "word_into.mp3",
+      "kind": "word",
+      "text": "into",
+      "asset": "audio/word_into.mp3",
+      "path": "app/assets/audio/word_into.mp3"
+    },
+    {
+      "ref": "word_today.mp3",
+      "kind": "word",
+      "text": "today",
+      "asset": "audio/word_today.mp3",
+      "path": "app/assets/audio/word_today.mp3"
+    },
+    {
+      "ref": "word_sunday.mp3",
+      "kind": "word",
+      "text": "Sunday",
+      "asset": "audio/word_sunday.mp3",
+      "path": "app/assets/audio/word_sunday.mp3"
+    },
+    {
+      "ref": "word_cowboy.mp3",
+      "kind": "word",
+      "text": "cowboy",
+      "asset": "audio/word_cowboy.mp3",
+      "path": "app/assets/audio/word_cowboy.mp3"
+    },
+    {
+      "ref": "word_snowman.mp3",
+      "kind": "word",
+      "text": "snowman",
+      "asset": "audio/word_snowman.mp3",
+      "path": "app/assets/audio/word_snowman.mp3"
+    },
+    {
+      "ref": "word_forget.mp3",
+      "kind": "word",
+      "text": "forget",
+      "asset": "audio/word_forget.mp3",
+      "path": "app/assets/audio/word_forget.mp3"
+    },
+    {
+      "ref": "word_sunnier.mp3",
+      "kind": "word",
+      "text": "sunnier",
+      "asset": "audio/word_sunnier.mp3",
+      "path": "app/assets/audio/word_sunnier.mp3"
+    },
+    {
+      "ref": "word_before.mp3",
+      "kind": "word",
+      "text": "before",
+      "asset": "audio/word_before.mp3",
+      "path": "app/assets/audio/word_before.mp3"
+    },
+    {
+      "ref": "word_pencil.mp3",
+      "kind": "word",
+      "text": "pencil",
+      "asset": "audio/word_pencil.mp3",
+      "path": "app/assets/audio/word_pencil.mp3"
+    },
+    {
+      "ref": "word_puppet.mp3",
+      "kind": "word",
+      "text": "puppet",
+      "asset": "audio/word_puppet.mp3",
+      "path": "app/assets/audio/word_puppet.mp3"
+    },
+    {
+      "ref": "word_windowsill.mp3",
+      "kind": "word",
+      "text": "windowsill",
+      "asset": "audio/word_windowsill.mp3",
+      "path": "app/assets/audio/word_windowsill.mp3"
+    },
+    {
+      "ref": "word_cats.mp3",
+      "kind": "word",
+      "text": "cats",
+      "asset": "audio/word_cats.mp3",
+      "path": "app/assets/audio/word_cats.mp3"
+    },
+    {
+      "ref": "word_dogs.mp3",
+      "kind": "word",
+      "text": "dogs",
+      "asset": "audio/word_dogs.mp3",
+      "path": "app/assets/audio/word_dogs.mp3"
+    },
+    {
+      "ref": "word_pups.mp3",
+      "kind": "word",
+      "text": "pups",
+      "asset": "audio/word_pups.mp3",
+      "path": "app/assets/audio/word_pups.mp3"
+    },
+    {
+      "ref": "word_hens.mp3",
+      "kind": "word",
+      "text": "hens",
+      "asset": "audio/word_hens.mp3",
+      "path": "app/assets/audio/word_hens.mp3"
+    },
+    {
+      "ref": "word_bugs.mp3",
+      "kind": "word",
+      "text": "bugs",
+      "asset": "audio/word_bugs.mp3",
+      "path": "app/assets/audio/word_bugs.mp3"
+    },
+    {
+      "ref": "word_going.mp3",
+      "kind": "word",
+      "text": "going",
+      "asset": "audio/word_going.mp3",
+      "path": "app/assets/audio/word_going.mp3"
+    },
+    {
+      "ref": "word_raining.mp3",
+      "kind": "word",
+      "text": "raining",
+      "asset": "audio/word_raining.mp3",
+      "path": "app/assets/audio/word_raining.mp3"
+    },
+    {
+      "ref": "word_snowing.mp3",
+      "kind": "word",
+      "text": "snowing",
+      "asset": "audio/word_snowing.mp3",
+      "path": "app/assets/audio/word_snowing.mp3"
+    },
+    {
+      "ref": "word_running.mp3",
+      "kind": "word",
+      "text": "running",
+      "asset": "audio/word_running.mp3",
+      "path": "app/assets/audio/word_running.mp3"
+    }
+  ]
+}

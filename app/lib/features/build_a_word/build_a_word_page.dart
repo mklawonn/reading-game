@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../content/pictograph_emoji.dart';
+import '../../content/syllable_tile.dart';
 import '../../models/content_bank.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
@@ -263,13 +264,10 @@ class _Chip extends StatelessWidget {
           color: Theme.of(context).colorScheme.secondaryContainer,
           borderRadius: BorderRadius.circular(18),
         ),
-        child: Text(
-          glyph,
-          style: TextStyle(
-            fontSize: isEmoji ? 48 : 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: isEmoji
+            ? Text(glyph,
+                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold))
+            : SyllableTile(glyph, fontSize: 28),
       ),
     );
   }
@@ -339,13 +337,13 @@ class _Slot extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: scheme.outlineVariant, width: 2),
             ),
-            child: Text(
-              glyph ?? '',
-              style: TextStyle(
-                fontSize: isEmoji ? 48 : 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: !filled
+                ? null
+                : isEmoji
+                    ? Text(glyph!,
+                        style: const TextStyle(
+                            fontSize: 48, fontWeight: FontWeight.bold))
+                    : SyllableTile(glyph!, fontSize: 28),
           ),
         );
       },

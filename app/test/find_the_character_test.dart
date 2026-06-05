@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:reading_game/content/syllable_tile.dart';
 import 'package:reading_game/features/find_the_character/find_the_character_page.dart';
 import 'package:reading_game/models/content_bank.dart';
 import 'package:reading_game/services/audio_service.dart';
@@ -48,8 +49,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // The written prompt is shown; its text is the target syllable (== id here).
-    final prompt = tester.widget<Text>(find.byKey(const Key('fc-prompt')));
-    final target = prompt.data!;
+    final prompt = tester.widget<SyllableTile>(find.byKey(const Key('fc-prompt')));
+    final target = prompt.syllable;
 
     await tester.tap(find.byKey(Key('fc-option-$target')));
     await tester.pumpAndSettle();

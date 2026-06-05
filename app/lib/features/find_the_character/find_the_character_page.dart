@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../content/pictograph_emoji.dart';
+import '../../content/syllable_tile.dart';
 import '../../models/content_bank.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
@@ -117,13 +118,10 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    SyllableTile(
                       target.syllable,
                       key: const Key('fc-prompt'),
-                      style: Theme.of(context)
-                          .textTheme
-                          .displaySmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      fontSize: 40,
                     ),
                     IconButton(
                       key: const Key('fc-hear'),
