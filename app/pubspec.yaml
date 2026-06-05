@@ -60,9 +60,9 @@ flutter:
   uses-material-design: true
 
   # The Content Bank is the single source of truth for symbols/words; bundle it for offline play.
-  # (Synced from ../content/content_bank.v0.json.) Pictograph art + audio clips land here in M1.
+  # (Synced from ../content/content_bank.v1.json.) Pictograph art + audio clips land here next.
   assets:
-    - assets/content/content_bank.v0.json
+    - assets/content/content_bank.v1.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

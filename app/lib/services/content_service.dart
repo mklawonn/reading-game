@@ -9,7 +9,7 @@ import '../models/content_bank.dart';
 class ContentService {
   const ContentService();
 
-  static const String assetPath = 'assets/content/content_bank.v0.json';
+  static const String assetPath = 'assets/content/content_bank.v1.json';
 
   Future<ContentBank> load() async {
     final raw = await rootBundle.loadString(assetPath);

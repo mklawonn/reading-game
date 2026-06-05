@@ -2,20 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../../content/pictograph_emoji.dart';
 import '../../models/content_bank.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
-
-/// Emoji stand-ins for pictograph art (real line-art arrives in M1).
-const Map<String, String> kPictographEmoji = {
-  'can': '🥫',
-  'see': '👁️',
-  'bee': '🐝',
-  'pen': '🖊️',
-  'pup': '🐶',
-  'sun': '☀️',
-  'wind': '🪟',
-};
 
 /// **Find the Character** (Stage 1): a written word/command is shown (with
 /// tap-to-hear support) and the child taps the matching picture among options —
