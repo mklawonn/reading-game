@@ -64,11 +64,59 @@ game and screen. It is encoded as the `audio_ref` field on every Content Bank en
 
 ## Profiles & progression
 
-- A **parent/guardian account** owns one or more **child profiles** (no child PII; see
-  [`privacy-compliance.md`](privacy-compliance.md)).
-- **Mastery** is tracked per Content Bank entry and per skill, with spaced practice.
-- **Stage gating:** a child unlocks the next stage when mastery thresholds across the current stage's
-  symbols/skills are met. Gating thresholds live in Remote Config so they can be tuned without a release.
+A **parent/guardian account** owns one or more **child profiles** (no child PII; see
+[`privacy-compliance.md`](privacy-compliance.md)). Each profile carries the progression state below.
+
+### A stage is a center of gravity, not a switch
+
+"Mostly pictographs → mostly syllables" is a **ratio** the game shifts gradually, not a flip. Each
+session is composed from a **mix** weighted by the child's progress (≈ 90/10 → 60/40 → 40/60 → 20/80
+pictograph/syllable); "moved to mostly syllables" just means that mix crossed 50%. This avoids cliffs
+and keeps earlier material resurfacing in spaced review.
+
+### Mastery is measured from gameplay
+
+The games already produce correct/incorrect signals, so **they are the assessment** — no separate test.
+Per Content Bank entry we keep a light mastery state (a **Leitner/SRS box**: promote on correct, demote
+on wrong; "mastered" = a high box reached with a correct recall *after a spacing gap*), plus a few
+tracked **skills** (e.g. `blend`, later `segment`).
+
+### Readiness gate — example: pictographs → syllables
+
+Advance the mix when **all** hold:
+- **Coverage** — mastered ≳ 75% of the Stage's *core* items, **durably** (recalled across ≥ 2 sessions,
+  not one lucky run).
+- **Bridge skill (the real signal)** — the child blends two known pieces into a **novel** word never
+  explicitly taught (a fresh Build-a-Word, or reads a new blend in Find-the-Character). This is the
+  paper's *productive blending* — evidence the syllable idea clicked, and it outranks raw item count.
+- **Stability** — recent accuracy isn't sliding (last ~3 sessions ≥ ~80%).
+
+Two guards against false mastery: require it shown **across modalities** (by ear, by sight, by
+construction — not one game) and **across time** (spacing); plus a **working-set cap** (~5–7 unmastered
+items in flight) so new material enters just above current mastery (i+1), not in a flood.
+
+The same machinery generalizes: **syllable → phoneme** uses *segmenting a known syllable* (CAN·DY vs
+CAND·Y) as its bridge skill; **phoneme → letter** follows.
+
+### Where it lives & what's tunable
+
+Per-child mastery/skill state persists in **Firestore**
+(`/parents/{uid}/children/{id}/mastery/{entryId}` + a profile-level mix vector). Every threshold
+(coverage %, blend accuracy, ramp rate, working-set cap, accuracy floor) lives in **Remote Config** so
+it can be tuned per cohort / A-B without a release. One product dial — **conservative** (be sure before
+advancing) vs **eager** (advance on early evidence) — plus the coverage % sets the overall pace.
+
+Implementation: start with the Leitner-SRS + bridge-gate model (simple, interpretable, tunable);
+optionally upgrade to Bayesian Knowledge Tracing later.
+
+### Gamification sits on top — and stays decoupled
+
+Levels, XP, streaks, and achievements are a **separate layer** that consumes generic **learning events**
+(`{itemId, skill, stage, correct, game}`) emitted by the games. It never references specific words or
+pictographs: achievements are defined over **aggregates and stages** (items mastered, streak length,
+stage %), and stage progress is **derived from the Content Bank's `introduced_stage` metadata**. So the
+curriculum can change — add/reorder/retune content — without touching the game mechanics or the
+progression engine. See `app/lib/progress/` (the `LearningEvent` seam).
 
 ## How stages map to games
 
