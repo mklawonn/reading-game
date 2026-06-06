@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../progress/progress_service.dart';
+import '../progress/progress_screen.dart';
+
 /// One entry in the games menu. New play modes appear in the menu simply by
 /// adding a [GameEntry] (in main.dart) — the menu itself stays generic.
 class GameEntry {
@@ -16,11 +19,13 @@ class GameEntry {
   final WidgetBuilder builder;
 }
 
-/// The home launcher: a tappable list of every play mode.
+/// The home launcher: a tappable list of every play mode, plus a level chip and
+/// a button to the progress screen.
 class GamesMenuPage extends StatelessWidget {
-  const GamesMenuPage({super.key, required this.games});
+  const GamesMenuPage({super.key, required this.games, required this.progress});
 
   final List<GameEntry> games;
+  final ProgressService progress;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +34,25 @@ class GamesMenuPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Reading Game'),
         backgroundColor: scheme.inversePrimary,
+        actions: [
+          ListenableBuilder(
+            listenable: progress,
+            builder: (context, _) => Center(
+              child: Text('Lv ${progress.level}',
+                  style: Theme.of(context).textTheme.labelLarge),
+            ),
+          ),
+          IconButton(
+            key: const Key('menu-progress'),
+            icon: const Icon(Icons.emoji_events),
+            tooltip: 'My progress',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ProgressScreen(progress: progress),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView.separated(

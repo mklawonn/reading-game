@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/pictograph_emoji.dart';
 import '../../content/syllable_tile.dart';
 import '../../models/content_bank.dart';
+import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 
@@ -23,6 +24,7 @@ class BuildAWordPage extends StatefulWidget {
     required this.contentService,
     required this.audioService,
     this.random,
+    this.onEvent,
   });
 
   final ContentService contentService;
@@ -30,6 +32,9 @@ class BuildAWordPage extends StatefulWidget {
 
   /// Inject a seeded [Random] in tests for determinism.
   final Random? random;
+
+  /// Emits a [LearningEvent] on each answer (the progression seam).
+  final void Function(LearningEvent)? onEvent;
 
   @override
   State<BuildAWordPage> createState() => _BuildAWordPageState();
@@ -120,6 +125,13 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
     if (_slots.any((s) => s == null)) return;
     final built = [for (final s in _slots) s!.element.id];
     final correct = _listEquals(built, _word.segmentation);
+    widget.onEvent?.call(LearningEvent(
+      itemId: _word.id,
+      skill: 'blend',
+      stage: 2,
+      correct: correct,
+      game: 'build_a_word',
+    ));
     setState(() {
       if (correct) {
         _solved = true;

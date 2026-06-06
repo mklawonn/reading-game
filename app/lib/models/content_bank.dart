@@ -43,6 +43,7 @@ class SyllableElement {
     required this.picturable,
     this.imageRef,
     this.audioRef,
+    this.introducedStage = 1,
   });
 
   final String id;
@@ -57,6 +58,9 @@ class SyllableElement {
   /// Path under `assets/audio/` for the syllable sound (placeholder in M0).
   final String? audioRef;
 
+  /// Earliest curriculum stage this element appears in (drives stage progress).
+  final int introducedStage;
+
   factory SyllableElement.fromJson(Map<String, dynamic> json) {
     return SyllableElement(
       id: json['id'] as String,
@@ -66,6 +70,7 @@ class SyllableElement {
       picturable: json['picturable'] as bool? ?? false,
       imageRef: json['image_ref'] as String?,
       audioRef: json['audio_ref'] as String?,
+      introducedStage: json['introduced_stage'] as int? ?? 1,
     );
   }
 }

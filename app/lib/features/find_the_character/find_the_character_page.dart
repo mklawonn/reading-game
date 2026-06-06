@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/pictograph_emoji.dart';
 import '../../content/syllable_tile.dart';
 import '../../models/content_bank.dart';
+import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 
@@ -18,6 +19,7 @@ class FindTheCharacterPage extends StatefulWidget {
     required this.audioService,
     this.optionCount = 3,
     this.random,
+    this.onEvent,
   });
 
   final ContentService contentService;
@@ -26,6 +28,9 @@ class FindTheCharacterPage extends StatefulWidget {
 
   /// Inject a seeded [Random] in tests for determinism.
   final Random? random;
+
+  /// Emits a [LearningEvent] on each answer (the progression seam).
+  final void Function(LearningEvent)? onEvent;
 
   @override
   State<FindTheCharacterPage> createState() => _FindTheCharacterPageState();
@@ -68,7 +73,16 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
 
   void _onPick(SyllableElement picked) {
     if (_solved) return;
-    if (picked.id == _target!.id) {
+    final target = _target!;
+    final correct = picked.id == target.id;
+    widget.onEvent?.call(LearningEvent(
+      itemId: target.id,
+      skill: 'recognize',
+      stage: target.introducedStage,
+      correct: correct,
+      game: 'find_the_character',
+    ));
+    if (correct) {
       setState(() {
         _solved = true;
         _score += 1;
