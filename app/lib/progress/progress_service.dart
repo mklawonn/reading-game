@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../models/content_bank.dart';
 import 'achievements.dart';
 import 'learning_event.dart';
+import 'progress_store.dart';
 
 /// Leitner-box mastery for a single item.
 @immutable
@@ -37,10 +39,19 @@ class ItemMastery {
 /// unlocked achievements. It knows the curriculum only as data (stage totals
 /// derived from the Content Bank), so content changes don't ripple into it.
 class ProgressService extends ChangeNotifier {
-  ProgressService({required ContentBank bank, DateTime Function()? clock})
-      : _itemStage = {for (final e in bank.elements) e.id: e.introducedStage},
+  ProgressService({
+    required ContentBank bank,
+    DateTime Function()? clock,
+    ProgressStore store = const NoopProgressStore(),
+    String profileId = 'default',
+  })  : _itemStage = {for (final e in bank.elements) e.id: e.introducedStage},
         _stageTotals = _countByStage(bank),
-        _now = clock ?? DateTime.now;
+        _now = clock ?? DateTime.now,
+        // Named params can't be private initializing formals, so assign here.
+        // ignore: prefer_initializing_formals
+        _store = store,
+        // ignore: prefer_initializing_formals
+        _profileId = profileId;
 
   static const int xpPerCorrect = 10;
   static const int xpMasteryBonus = 25;
@@ -48,6 +59,9 @@ class ProgressService extends ChangeNotifier {
   final Map<String, int> _itemStage;
   final Map<int, int> _stageTotals;
   final DateTime Function() _now;
+  final ProgressStore _store;
+  final String _profileId;
+  Timer? _saveTimer;
 
   int _xp = 0;
   final Map<String, ItemMastery> _mastery = {};
@@ -121,6 +135,32 @@ class ProgressService extends ChangeNotifier {
     _touchStreak();
     _checkAchievements();
     notifyListeners();
+    _scheduleSave();
+  }
+
+  /// Loads saved progress from the store (call once after construction).
+  Future<void> restore() async {
+    final data = await _store.load(_profileId);
+    if (data != null) loadJson(data);
+  }
+
+  void _scheduleSave() {
+    if (_store is NoopProgressStore) return; // nothing to persist (e.g. tests)
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(seconds: 2), flush);
+  }
+
+  /// Writes current progress to the store now (e.g. on app pause).
+  Future<void> flush() async {
+    _saveTimer?.cancel();
+    if (_store is NoopProgressStore) return;
+    await _store.save(_profileId, toJson());
+  }
+
+  @override
+  void dispose() {
+    _saveTimer?.cancel();
+    super.dispose();
   }
 
   void _touchStreak() {
