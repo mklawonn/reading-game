@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Debug-only: allow cleartext traffic to the local Firebase Emulator
+         Suite (Firestore/Auth on 10.0.2.2). Merged into the main <application>
+         for debug builds only; release builds keep the default cleartext block. -->
+    <application android:networkSecurityConfig="@xml/network_security_config" />
 </manifest>
