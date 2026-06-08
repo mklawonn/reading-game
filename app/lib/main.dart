@@ -8,6 +8,7 @@ import 'features/find_the_character/find_the_character_page.dart';
 import 'features/games_menu/games_menu_page.dart';
 import 'features/listen_and_pick/listen_and_pick_page.dart';
 import 'features/pictograph_demo/pictograph_demo_page.dart';
+import 'learning/item_sampler.dart';
 import 'progress/firestore_progress_store.dart';
 import 'progress/local_progress_store.dart';
 import 'progress/progress_service.dart';
@@ -110,6 +111,8 @@ class _ReadingGameAppState extends State<ReadingGameApp>
           if (progress == null) {
             return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
+          // Mastery + stage steer which items each game shows next.
+          final sampler = ItemSampler(progress);
           // Games stay decoupled: they only emit LearningEvents via onEvent.
           final games = <GameEntry>[
             GameEntry(
@@ -128,6 +131,7 @@ class _ReadingGameAppState extends State<ReadingGameApp>
               builder: (_) => ListenAndPickPage(
                 contentService: _contentService,
                 audioService: _audioService,
+                sampler: sampler,
                 onEvent: progress.record,
               ),
             ),
@@ -138,6 +142,7 @@ class _ReadingGameAppState extends State<ReadingGameApp>
               builder: (_) => BuildAWordPage(
                 contentService: _contentService,
                 audioService: _audioService,
+                sampler: sampler,
                 onEvent: progress.record,
               ),
             ),
@@ -148,6 +153,7 @@ class _ReadingGameAppState extends State<ReadingGameApp>
               builder: (_) => FindTheCharacterPage(
                 contentService: _contentService,
                 audioService: _audioService,
+                sampler: sampler,
                 onEvent: progress.record,
               ),
             ),

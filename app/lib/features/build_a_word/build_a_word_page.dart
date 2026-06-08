@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../content/pictograph_emoji.dart';
 import '../../content/syllable_tile.dart';
+import '../../learning/item_sampler.dart';
 import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
@@ -24,6 +25,7 @@ class BuildAWordPage extends StatefulWidget {
     required this.contentService,
     required this.audioService,
     this.random,
+    this.sampler,
     this.onEvent,
   });
 
@@ -32,6 +34,9 @@ class BuildAWordPage extends StatefulWidget {
 
   /// Inject a seeded [Random] in tests for determinism.
   final Random? random;
+
+  /// Mastery-driven target selection. When null, falls back to uniform random.
+  final ItemSampler? sampler;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -49,6 +54,7 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
   List<Word> _buildable = const [];
 
   late Word _word;
+  String? _prevWordId;
   List<_Piece> _scatter = [];
   List<_Piece?> _slots = [];
   int _nextToken = 0;
@@ -76,8 +82,20 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
     }
   }
 
+  // A blend's stage = the latest stage among its component syllables.
+  int _wordStage(Word w) => w.segmentation
+      .map((id) => _elementById[id]?.introducedStage ?? 2)
+      .fold(1, (a, b) => a > b ? a : b);
+
   void _startRound() {
-    _word = _buildable[_random.nextInt(_buildable.length)];
+    _word = widget.sampler?.pick<Word>(
+          _buildable,
+          id: (w) => w.id,
+          stage: _wordStage,
+          exclude: _prevWordId,
+        ) ??
+        _buildable[_random.nextInt(_buildable.length)];
+    _prevWordId = _word.id;
     final pieces = <_Piece>[
       for (final id in _word.segmentation) _Piece(_nextToken++, _elementById[id]!),
     ];

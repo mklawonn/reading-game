@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../learning/mastery_view.dart';
 import '../models/content_bank.dart';
 import 'achievements.dart';
 import 'learning_event.dart';
@@ -38,7 +39,7 @@ class ItemMastery {
 /// exposes XP/level, per-item mastery, a daily streak, per-stage progress and
 /// unlocked achievements. It knows the curriculum only as data (stage totals
 /// derived from the Content Bank), so content changes don't ripple into it.
-class ProgressService extends ChangeNotifier {
+class ProgressService extends ChangeNotifier implements MasteryView {
   ProgressService({
     required ContentBank bank,
     DateTime Function()? clock,
@@ -55,6 +56,14 @@ class ProgressService extends ChangeNotifier {
 
   static const int xpPerCorrect = 10;
   static const int xpMasteryBonus = 25;
+
+  // Stage-mix tunables — the curriculum "center of gravity". Constants now,
+  // Remote-Config-ready later (see docs/curriculum.md).
+  static const double _stageAdvanceCoverage = 0.6; // mastered-fraction to advance
+  static const double _focusStageWeight = 0.60;
+  static const double _reviewStageWeight = 0.15;
+  static const double _introStageWeight = 0.10;
+  static const double _dormantStageWeight = 0.02;
 
   final Map<String, int> _itemStage;
   final Map<int, int> _stageTotals;
@@ -106,6 +115,48 @@ class ProgressService extends ChangeNotifier {
       if (m.mastered && _itemStage[id] == stage) mastered++;
     });
     return mastered / total;
+  }
+
+  // ── MasteryView: the read-only inputs the ItemSampler uses to steer content ──
+  @override
+  int boxOf(String itemId) => (_mastery[itemId] ?? const ItemMastery()).box;
+  @override
+  bool hasSeen(String itemId) => (_mastery[itemId]?.seen ?? 0) > 0;
+  @override
+  bool isMastered(String itemId) => _mastery[itemId]?.mastered ?? false;
+
+  /// The stage the child is actively working in: the lowest stage not yet
+  /// covered to [_stageAdvanceCoverage] mastered, else the highest available
+  /// stage. This is the peak of the stage mix below, and it advances as coverage
+  /// grows — the curriculum's gradual shift, not a switch.
+  int get currentStage {
+    final ss = stages;
+    if (ss.isEmpty) return 1;
+    for (final s in ss) {
+      if (stageProgress(s) < _stageAdvanceCoverage) return s;
+    }
+    return ss.last;
+  }
+
+  /// The center-of-gravity mix as normalized per-stage weights: peaked at
+  /// [currentStage], review weight to earlier stages, a little intro weight to
+  /// the next. (≈ the docs' 90/10 → 20/80 ramp as the peak advances.)
+  @override
+  Map<int, double> stageWeights() {
+    final cs = currentStage;
+    final raw = <int, double>{};
+    for (final s in stages) {
+      raw[s] = s < cs
+          ? _reviewStageWeight
+          : s == cs
+              ? _focusStageWeight
+              : s == cs + 1
+                  ? _introStageWeight
+                  : _dormantStageWeight;
+    }
+    final sum = raw.values.fold(0.0, (a, b) => a + b);
+    if (sum <= 0) return {for (final s in stages) s: 1.0};
+    return {for (final e in raw.entries) e.key: e.value / sum};
   }
 
   /// Achievements unlocked since the last call (for a toast); clears the queue.

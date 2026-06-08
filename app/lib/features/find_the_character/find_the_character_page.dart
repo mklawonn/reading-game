@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../content/pictograph_emoji.dart';
 import '../../content/syllable_tile.dart';
+import '../../learning/item_sampler.dart';
 import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
@@ -19,6 +20,7 @@ class FindTheCharacterPage extends StatefulWidget {
     required this.audioService,
     this.optionCount = 3,
     this.random,
+    this.sampler,
     this.onEvent,
   });
 
@@ -28,6 +30,10 @@ class FindTheCharacterPage extends StatefulWidget {
 
   /// Inject a seeded [Random] in tests for determinism.
   final Random? random;
+
+  /// Mastery-driven target selection. When null, falls back to uniform random
+  /// (keeps widget tests deterministic via [random]).
+  final ItemSampler? sampler;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -59,10 +65,19 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
 
   void _startRound() {
     final count = min(widget.optionCount, _pool.length);
-    final options = ([..._pool]..shuffle(_random)).take(count).toList()
+    // Mastery steers the target; distractors are filled in around it.
+    final target = widget.sampler?.pick(
+          _pool,
+          id: (e) => e.id,
+          stage: (e) => e.introducedStage,
+          exclude: _target?.id,
+        ) ??
+        _pool[_random.nextInt(_pool.length)];
+    final distractors = [..._pool]
+      ..removeWhere((e) => e.id == target.id)
       ..shuffle(_random);
-    _target = options[_random.nextInt(options.length)];
-    _options = options;
+    _options = [target, ...distractors.take(count - 1)]..shuffle(_random);
+    _target = target;
     _solved = false;
   }
 
