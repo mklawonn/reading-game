@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../progress/achievements.dart';
 import '../../progress/progress_service.dart';
+import 'level_map_screen.dart';
 
 // Stage display names are a stable curriculum abstraction (not content).
 const Map<int, String> _stageNames = {
@@ -29,7 +30,11 @@ class ProgressScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _LevelCard(progress: progress),
+              Text('Your journey', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              LevelMap(progress: progress),
+              const SizedBox(height: 8),
+              _LevelSummary(progress: progress),
               const SizedBox(height: 20),
               Text('Stage progress', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
@@ -54,58 +59,26 @@ class ProgressScreen extends StatelessWidget {
   }
 }
 
-class _LevelCard extends StatelessWidget {
-  const _LevelCard({required this.progress});
+class _LevelSummary extends StatelessWidget {
+  const _LevelSummary({required this.progress});
 
   final ProgressService progress;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final into = progress.xpIntoLevel;
     final span = progress.xpForThisLevel;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: scheme.primaryContainer,
-                  child: Text('${progress.level}',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: scheme.onPrimaryContainer, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Level ${progress.level}',
-                          style: Theme.of(context).textTheme.titleLarge),
-                      Text('🔥 ${progress.dayStreak}-day streak   ·   ⭐ ${progress.masteredCount} mastered'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: span == 0 ? 0 : into / span,
-                minHeight: 12,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text('$into / $span XP to level ${progress.level + 1}',
-                style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-      ),
+    return Column(
+      children: [
+        Text('Level ${progress.level}',
+            style: Theme.of(context).textTheme.titleLarge),
+        Text(
+            '🔥 ${progress.dayStreak}-day streak   ·   ⭐ ${progress.masteredCount} mastered',
+            style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 2),
+        Text('$into / $span XP to Level ${progress.level + 1}',
+            style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }
