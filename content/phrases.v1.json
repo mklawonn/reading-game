@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "notes": "Stage-agnostic phrases for the Fill-in-the-Blank game. Every token is a content_bank.v1 element id, so a phrase renders in whichever orthography the child's current stage calls for (pictographs early, letters later) — the same phrase repeats across stages. Blanks point at picturable answers so the dragged candidate is a picture at Stage 1.",
+  "phrases": [
+    { "id": "i_see_a_cat",        "tokens": ["i", "see", "a", "cat"],              "blank": 3 },
+    { "id": "the_dog_is_big",     "tokens": ["the", "dog", "is", "big"],           "blank": 1 },
+    { "id": "the_sun_is_hot",     "tokens": ["the", "sun", "is", "hot"],           "blank": 1 },
+    { "id": "a_fox_in_a_box",     "tokens": ["a", "fox", "in", "a", "box"],        "blank": 1 },
+    { "id": "i_get_my_pup",       "tokens": ["i", "get", "my", "pup"],             "blank": 3 },
+    { "id": "a_hen_and_a_pen",    "tokens": ["a", "hen", "and", "a", "pen"],       "blank": 1 },
+    { "id": "the_cat_on_the_bed", "tokens": ["the", "cat", "is", "on", "the", "bed"], "blank": 5 },
+    { "id": "i_see_the_rain",     "tokens": ["i", "see", "the", "rain"],           "blank": 3 },
+    { "id": "a_bug_on_my_hand",   "tokens": ["a", "bug", "on", "my", "hand"],      "blank": 1 },
+    { "id": "the_pig_is_red",     "tokens": ["the", "pig", "is", "red"],           "blank": 1 },
+    { "id": "go_up_to_the_sun",   "tokens": ["go", "up", "to", "the", "sun"],      "blank": 4 },
+    { "id": "my_cow_and_a_key",   "tokens": ["my", "cow", "and", "a", "key"],      "blank": 1 }
+  ]
+}

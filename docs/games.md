@@ -13,6 +13,7 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 | Build-a-Word (blending) | 2 | M2 | Overlap syllable cards to make a target word |
 | Listen & Pick (slow-speak) | 0 | M2 | Hear gapped syllables, choose the picture |
 | Sound Match | 1–2 | M2 | Drag each symbol onto the sound it makes |
+| Fill the Blank | 1–4 | M2 | Drag the missing symbol into a phrase (renders per stage) |
 | Rhyme Families | 3 | later | Collect syllables that rhyme |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 
@@ -58,6 +59,17 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 - **Later sub-phase:** Stage-4 letters where a *multi-letter grapheme* maps to one phoneme (e.g.
   `sh`→/ʃ/) — needs a grapheme→phoneme map in the Content Bank.
 
+## Fill the Blank — M2
+
+- A short phrase is shown with one token missing; the child **drags the right symbol into the slot**.
+  Tap any token to hear it.
+- Phrases live in `content/phrases.v1.json` as **sequences of Content Bank element ids** — so one
+  authored phrase renders in whatever orthography the child's stage calls for (pictographs early,
+  letters later). This is the engine for the owner's **"repeat stories/phrases across levels"**: the
+  same sentence resurfaces, re-rendered, as the learner advances.
+- The blank is **mastery-driven** (the `ItemSampler` chooses which item to drill), and each answer
+  emits a `read` `LearningEvent`.
+
 ## Rhyme Families — later (Stage 3)
 
 - Collect syllables that **rhyme** (`and / sand / hand`) into families, seeding phoneme awareness and
@@ -70,7 +82,7 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 
 ## Game ideas parked for later
 
-- **Build-a-Sentence:** arrange word/symbol cards into a valid sentence (productive counterpart to
-  Find-the-Character).
+- **Build-a-Sentence:** arrange word/symbol cards into a valid *whole* sentence (the productive
+  counterpart to Fill-the-Blank, which fills a single slot).
 - **Symbol Hunt / I-Spy:** find the symbol whose sound the narrator says.
 - **Story Theater:** the child's finished Story Builder tale is read back with simple animation.
