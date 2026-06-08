@@ -35,6 +35,7 @@ Validate with: `node content/validate.mjs`.
 | `introduced_stage` | int | Earliest stage this element appears. |
 | `frequency` | object | `{ dolch_tier: string\|null, fry_rank: int\|null }` — reference signal only. |
 | `decomposition_cost` | int | 1 (low) … 3 (high). |
+| `graphemes` | array\|absent | Optional letter-group→phoneme decoding map: `[{ "g": "ai", "p": "eɪ" }, …]`. Concatenated `g` must equal `syllable`, concatenated `p` must equal `sound_ipa` (enforced by `validate.mjs`). Present for decodable picturable words; powers Stage-4. Multi-letter graphemes (`ee`, `ng`) are one unit; `x`→`ks` is one letter mapping to two phonemes. |
 | `notes` | string | Free notes (e.g. rebus explanation). |
 
 ## `words[]`

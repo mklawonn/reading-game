@@ -44,6 +44,7 @@ class SyllableElement {
     this.imageRef,
     this.audioRef,
     this.introducedStage = 1,
+    this.graphemes = const [],
   });
 
   final String id;
@@ -61,6 +62,12 @@ class SyllableElement {
   /// Earliest curriculum stage this element appears in (drives stage progress).
   final int introducedStage;
 
+  /// Letter-group → phoneme decoding map: the spelling split into graphemes
+  /// (e.g. `rain` → r·ai·n = /ɹ·eɪ·n/). Present for decodable picturable words,
+  /// empty otherwise. Powers Stage-4 letter/phoneme work (multi-letter graphemes
+  /// like `ee`/`ai`/`ng`, and `x`→/ks/).
+  final List<Grapheme> graphemes;
+
   factory SyllableElement.fromJson(Map<String, dynamic> json) {
     return SyllableElement(
       id: json['id'] as String,
@@ -71,8 +78,27 @@ class SyllableElement {
       imageRef: json['image_ref'] as String?,
       audioRef: json['audio_ref'] as String?,
       introducedStage: json['introduced_stage'] as int? ?? 1,
+      graphemes: (json['graphemes'] as List<dynamic>? ?? const <dynamic>[])
+          .map((g) => Grapheme.fromJson(g as Map<String, dynamic>))
+          .toList(growable: false),
     );
   }
+}
+
+/// One spelling-unit of a word: [letters] (one or more, e.g. `sh`) mapping to a
+/// single [phoneme] in IPA (e.g. `ʃ`) — except `x`→`ks` (one letter, two
+/// phonemes). Concatenating a word's graphemes reproduces both its spelling and
+/// its `sound_ipa`.
+class Grapheme {
+  const Grapheme({required this.letters, required this.phoneme});
+
+  final String letters;
+  final String phoneme;
+
+  factory Grapheme.fromJson(Map<String, dynamic> json) => Grapheme(
+        letters: json['g'] as String,
+        phoneme: json['p'] as String,
+      );
 }
 
 /// A word: a single element (e.g. `can`) or a blend (e.g. `open` = `o` + `pen`).

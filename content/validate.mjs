@@ -72,6 +72,27 @@ for (const [i, el] of elements.entries()) {
   if (isNonEmptyString(el.audio_ref) && !existsSync(audioFull(el.audio_ref))) {
     warn(`${at}: audio_ref not on disk yet → ${el.audio_ref}`);
   }
+
+  // Graphemes (optional): the letter-groups must reconstruct the spelling and
+  // their phonemes must reconstruct sound_ipa — the Stage-4 decoding invariant.
+  if (el.graphemes !== undefined) {
+    if (!Array.isArray(el.graphemes) || el.graphemes.length === 0) {
+      err(`${at}: "graphemes" must be a non-empty array`);
+    } else {
+      let letters = '', phonemes = '';
+      for (const g of el.graphemes) {
+        if (!isNonEmptyString(g?.g) || !isNonEmptyString(g?.p)) {
+          err(`${at}: each grapheme needs non-empty "g" and "p"`);
+        } else { letters += g.g; phonemes += g.p; }
+      }
+      if (letters.toLowerCase() !== String(el.syllable).toLowerCase()) {
+        err(`${at}: graphemes spell "${letters}" ≠ syllable "${el.syllable}"`);
+      }
+      if (phonemes !== el.sound_ipa) {
+        err(`${at}: graphemes sound "${phonemes}" ≠ sound_ipa "${el.sound_ipa}"`);
+      }
+    }
+  }
 }
 
 // ── words ─────────────────────────────────────────────────────────────────

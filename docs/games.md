@@ -56,8 +56,11 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
   plays it (TTS for now). Directly exercises the symbol→sound link, and "right symbol → right sound" is
   a clean per-item progress signal feeding the mastery model.
 - Selection is **mastery-driven** — the round's focus item comes from the `ItemSampler`.
-- **Later sub-phase:** Stage-4 letters where a *multi-letter grapheme* maps to one phoneme (e.g.
-  `sh`→/ʃ/) — needs a grapheme→phoneme map in the Content Bank.
+- **Stage-4 sub-phase (data ready):** the grapheme→phoneme decoding map now lives on each picturable
+  element (`graphemes`, e.g. `rain` → r·ai·n = /ɹ·eɪ·n/; `x`→/ks/), validated by `validate.mjs`. The
+  word-context matcher (drag a letter-group to its phoneme, multi-letter graphemes as one unit) is
+  unblocked **except for isolated phoneme audio** — TTS can't cleanly voice a bare /ʃ/, so this game
+  waits on real phoneme clips (same dependency as the broader audio pipeline).
 
 ## Fill the Blank — M2
 
