@@ -130,6 +130,40 @@ for (const [i, w] of words.entries()) {
   }
 }
 
+// ── phonemes (optional sibling phonemes.v1.json) ─────────────────────────────
+const phonemesPath = join(dirname(bankPath), 'phonemes.v1.json');
+if (existsSync(phonemesPath)) {
+  let ph = { phonemes: [] };
+  try {
+    ph = JSON.parse(readFileSync(phonemesPath, 'utf8'));
+  } catch (e) {
+    err(`phonemes: could not parse ${phonemesPath}: ${e.message}`);
+  }
+  const picturableIds = new Set(elements.filter((e) => e.picturable).map((e) => e.id));
+  const inv = new Set();
+  for (const [i, p] of (ph.phonemes ?? []).entries()) {
+    const at = `phonemes[${i}]${p?.ipa ? ` (${p.ipa})` : ''}`;
+    if (!isNonEmptyString(p?.ipa)) { err(`${at}: missing "ipa"`); continue; }
+    if (inv.has(p.ipa)) err(`${at}: duplicate ipa`);
+    inv.add(p.ipa);
+    if (typeof p.stop !== 'boolean') err(`${at}: "stop" must be boolean`);
+    if (!picturableIds.has(p.anchor)) {
+      err(`${at}: anchor "${p.anchor}" is not a picturable element`);
+    }
+  }
+  // Every phoneme produced by a grapheme must be in the inventory (ks = k + s).
+  const used = new Set();
+  for (const el of elements) {
+    for (const g of el.graphemes ?? []) {
+      if (g.p === 'ks') { used.add('k'); used.add('s'); } else used.add(g.p);
+    }
+  }
+  for (const p of used) {
+    if (!inv.has(p)) err(`phonemes: grapheme phoneme "${p}" missing from inventory`);
+  }
+  console.log(`Phoneme inventory v${ph.version ?? '?'}: ${inv.size} phonemes, ${used.size} used by graphemes`);
+}
+
 // ── report ──────────────────────────────────────────────────────────────────
 console.log(`Content Bank v${bank.version ?? '?'}: ${elements.length} elements, ${words.length} words`);
 if (warnings.length) {

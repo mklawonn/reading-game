@@ -67,6 +67,7 @@ flutter:
   assets:
     - assets/content/content_bank.v1.json
     - assets/content/phrases.v1.json
+    - assets/content/phonemes.v1.json
     # Drop pictograph art here as <id>.png and it appears automatically (GlyphView).
     - assets/images/pictographs/
     # Drop syllable/word audio clips here as <ref>.mp3 (file player added when clips exist).

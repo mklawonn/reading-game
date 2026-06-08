@@ -1,5 +1,7 @@
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../models/phoneme.dart';
+
 /// Plays the sound of a symbol or word — the "tap to hear" primitive used in
 /// every game and screen.
 ///
@@ -32,3 +34,29 @@ class TtsAudioService implements AudioService {
     await _tts.speak(text);
   }
 }
+
+/// Stop/continuant-aware phoneme playback — the "sound layer" (see
+/// docs/curriculum.md). A stop (p,b,t,d,k,ɡ) cannot be voiced in isolation, so
+/// we anchor it in a keyword the child knows ("/k/" → "key"); a continuant is
+/// stretchable, so we play a held approximation. Implemented as an extension on
+/// [AudioService.speak], so every implementation gets it for free and the audio
+/// quality lifts automatically once recorded clips replace TTS — at which point
+/// the stop branch becomes an onset-truncated clip and the continuant branch a
+/// real isolated-stretched clip.
+extension PhonemeSpeech on AudioService {
+  Future<void> speakPhoneme(Phoneme phoneme, {required String anchorSyllable}) {
+    if (phoneme.isStop) return speak(anchorSyllable);
+    return speak(_stretchedTts[phoneme.ipa] ?? anchorSyllable);
+  }
+}
+
+/// TTS-friendly "held" spellings for continuants — a placeholder until recorded
+/// isolated-phoneme clips exist. Stops are intentionally absent (they route to
+/// the keyword anchor). The canonical continuants-first set (s, f, m, n, ŋ) is
+/// the most faithful here; vowels/glides are best-effort.
+const Map<String, String> _stretchedTts = {
+  's': 'ssss', 'f': 'ffff', 'h': 'hhh', 'm': 'mmmm', 'n': 'nnnn', 'ŋ': 'ngng',
+  'l': 'llll', 'r': 'rrrr', 'w': 'wuh', 'æ': 'aaa', 'ɛ': 'ehh', 'ɪ': 'ihh',
+  'ɒ': 'ahh', 'ʌ': 'uhh', 'iː': 'eee', 'ɔː': 'awww', 'eɪ': 'ayy', 'oʊ': 'ohh',
+  'aʊ': 'oww', 'aɪ': 'eye', 'ɔɪ': 'oyy',
+};

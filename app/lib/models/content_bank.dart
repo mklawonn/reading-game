@@ -45,6 +45,8 @@ class SyllableElement {
     this.audioRef,
     this.introducedStage = 1,
     this.graphemes = const [],
+    this.continuant = false,
+    this.rhymeGroup,
   });
 
   final String id;
@@ -68,6 +70,17 @@ class SyllableElement {
   /// like `ee`/`ai`/`ng`, and `x`→/ks/).
   final List<Grapheme> graphemes;
 
+  /// Whether the onset is a continuant consonant (stretchable). Distinguishes
+  /// "stretchy" from "pop" (stop) sounds for the Stage-3 phoneme work.
+  final bool continuant;
+
+  /// Coarse rime tag (e.g. `at`, `ee`) grouping rhyme families; null if none.
+  final String? rhymeGroup;
+
+  /// First phoneme of the word (its onset), from the grapheme map; null if no
+  /// grapheme data. Used to group onset families ("words that start like key").
+  String? get onsetPhoneme => graphemes.isEmpty ? null : graphemes.first.phoneme;
+
   factory SyllableElement.fromJson(Map<String, dynamic> json) {
     return SyllableElement(
       id: json['id'] as String,
@@ -81,6 +94,8 @@ class SyllableElement {
       graphemes: (json['graphemes'] as List<dynamic>? ?? const <dynamic>[])
           .map((g) => Grapheme.fromJson(g as Map<String, dynamic>))
           .toList(growable: false),
+      continuant: json['continuant'] as bool? ?? false,
+      rhymeGroup: json['rhyme_group'] as String?,
     );
   }
 }

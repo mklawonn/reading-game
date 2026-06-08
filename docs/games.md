@@ -14,7 +14,7 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 | Listen & Pick (slow-speak) | 0 | M2 | Hear gapped syllables, choose the picture |
 | Sound Match | 1–2 | M2 | Drag each symbol onto the sound it makes |
 | Fill the Blank | 1–4 | M2 | Drag the missing symbol into a phrase (renders per stage) |
-| Rhyme Families | 3 | later | Collect syllables that rhyme |
+| Sound Families | 3 | M2 | Match by rhyme or shared first sound (teaches stops by contrast) |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 
 ## Story Builder (signature game) — M3
@@ -73,10 +73,16 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 - The blank is **mastery-driven** (the `ItemSampler` chooses which item to drill), and each answer
   emits a `read` `LearningEvent`.
 
-## Rhyme Families — later (Stage 3)
+## Sound Families — M2 (Stage 3)
 
-- Collect syllables that **rhyme** (`and / sand / hand`) into families, seeding phoneme awareness and
-  the continuant-first transition.
+- Minimal-pair contrast: a target word is shown/heard, and the child taps the one option that shares
+  its **rhyme** (cat → hat) or its **onset** (key → can). Modes alternate per round.
+- **This is how we handle stops.** A stop (p, b, t, d, k, ɡ) can't be voiced in isolation, so onset
+  mode teaches it *by contrast* — key·can·cat share a beginning the child hears, never a bare /k/. The
+  "hear the sound" button uses the stop/continuant-aware `speakPhoneme` (keyword anchor for stops,
+  held sound for continuants). See `docs/curriculum.md` → "the sound layer".
+- Data-driven by `rhyme_group` and the grapheme map's first phoneme (`onsetPhoneme`); selection is
+  mastery-weighted via the `ItemSampler`.
 
 ## Free Read — later (Stage 4)
 

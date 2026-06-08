@@ -123,7 +123,66 @@ progression engine. See `app/lib/progress/` (the `LearningEvent` seam).
 | Stage | Primary games (see [`games.md`](games.md)) |
 |---|---|
 | 0 | Listen & Pick |
-| 1 | Find-the-Character, Match/Memory, Story Builder (pictograph render) |
-| 2 | Build-a-Word, Find-the-Character, Story Builder (syllabary render) |
-| 3 | Rhyme Families, Build-a-Word (phoneme variants) |
-| 4 | Free Read, Story Builder (letters render) |
+| 1 | Find-the-Character, Sound Match, Fill-the-Blank (pictograph render) |
+| 2 | Build-a-Word, Fill-the-Blank (syllabary render), Sound Match |
+| 3 | Sound Families (rhyme + onset), Build-a-Word (phoneme variants) |
+| 4 | Fill-the-Blank (letter render); Free Read & Story Builder (later) |
+
+Three things cut across every stage: **tap-to-hear** on every symbol, **mastery-driven selection**
+(the [`ItemSampler`](../app/lib/learning/item_sampler.dart) weights items by stage mix × Leitner box),
+and the **XP level-map** progress view
+([`level_map_screen.dart`](../app/lib/features/progress/level_map_screen.dart)).
+
+## The sound layer — phonemes, continuants, and stops
+
+Stage 3 cracks syllables into phonemes, and one fact shapes everything here: **not every phoneme can be
+said alone.**
+
+### Two kinds of sound — "stretchy" vs "pop"
+- **Continuants (stretchy):** fricatives (`s f h`), nasals (`m n ŋ`), liquids/glides (`l r w`), and all
+  **vowels**. You can *hold* them — "ssss", "mmmm" — so they're teachable in isolation.
+- **Stops (pop):** `p b t d k ɡ`. A stop is a closure **+** release; you cannot voice one without a
+  vowel ("kuh"). Its identity lives in the **release burst and the formant transition into the next
+  vowel** — a stop is *defined by context*. This is a core reason alphabetic phonics trips kids up, and
+  why Gleitman & Rozin teach **syllables first** and, on the way to phonemes, **continuants first**.
+
+### How we handle stops (don't isolate them)
+| Tactic | In the app |
+|---|---|
+| **Teach by contrast** (minimal pairs) | **Sound Families** game — onset mode drills a stop by what `key·can·cat` *share*, never a bare /k/. Keyed on `rhyme_group` + the grapheme onset. |
+| **Reframe: "pop vs stretchy"** | Every phoneme carries a kid-facing class; the UI says "a pop sound — quick!" vs "a stretchy sound — hold it". |
+| **Keyword anchoring** | Each phoneme has an `anchor` word ("/k/ as in **key**"); `speakPhoneme` plays the keyword for stops. |
+| **Onset-truncation** *(with real audio)* | The stop branch of `speakPhoneme` becomes the onset clipped from the word recording — how stops actually sound. |
+| **Pure-sound VO** *(with real audio)* | Short, unaspirated recordings for best-effort isolation, used sparingly and always with a keyword. |
+| **Voiced/voiceless twins** | `p–b`, `t–d`, `k–ɡ` taught as pairs (same mouth, voice off/on); the `voiced` flag drives it. |
+
+Isolated **phoneme audio** is the one real dependency: TTS can't cleanly voice a bare stop, so until
+recorded clips exist the stop path uses the keyword anchor and continuants use a held TTS approximation.
+See [`symbol-art-strategy.md`](symbol-art-strategy.md) for the audio pipeline and sourcing.
+
+### The data behind it
+- **Grapheme map** — `graphemes` on every picturable word: the spelling aligned to its phonemes
+  (`rain` → r·ai·n = /ɹ·eɪ·n/). Multi-letter graphemes (`ee ai ng`) are one unit; `x`→/ks/ is one
+  letter, two phonemes; `ow` reads two ways (`snow` /oʊ/ vs `cow` /aʊ/). Hand-authored — more accurate
+  than automated G2P for a closed vocabulary — and guarded by `validate.mjs`.
+- **Phoneme inventory** — [`phonemes.v1.json`](../content/phonemes.v1.json): the 27 phonemes the
+  vocabulary uses, each tagged stop/continuant, voiced/voiceless, `kind`, and an `anchor` word.
+- **Onset / rime** — `continuant` (is the onset stretchable?) and `rhyme_group` on each element feed the
+  families game.
+- **Audio mode** — `speakPhoneme` ([`audio_service.dart`](../app/lib/services/audio_service.dart))
+  branches stop→keyword vs continuant→held, built on `speak` so recorded clips drop in later.
+
+## Content & data model (the curriculum *is* data)
+
+Games read the curriculum and stay decoupled — a content change never touches game mechanics (see the
+gamification note above).
+
+| Asset | Holds |
+|---|---|
+| [`content_bank.v1.json`](../content/content_bank.v1.json) | 53 elements (27 picturable pictographs + glyphs) → 76 words, with IPA, graphemes, rhyme groups, segmentation, and `-s`/`-ing` morphology. |
+| [`phrases.v1.json`](../content/phrases.v1.json) | Sentences as sequences of element ids → render in **any** stage's orthography (the cross-stage repetition engine; Fill-the-Blank). |
+| [`phonemes.v1.json`](../content/phonemes.v1.json) | The 27-phoneme sound inventory (above). |
+| `validate.mjs` | CI guard: referential integrity + the grapheme & phoneme invariants. |
+
+Selection methodology: [`content-bank-strategy.md`](content-bank-strategy.md) and
+[`curation-v1.md`](../content/curation-v1.md); field reference: [`schema.md`](../content/schema.md).

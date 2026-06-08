@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'features/build_a_word/build_a_word_page.dart';
+import 'features/families/families_page.dart';
 import 'features/fill_blank/fill_blank_page.dart';
 import 'features/find_the_character/find_the_character_page.dart';
 import 'features/games_menu/games_menu_page.dart';
@@ -178,6 +179,17 @@ class _ReadingGameAppState extends State<ReadingGameApp>
                 contentService: _contentService,
                 audioService: _audioService,
                 stage: progress.currentStage,
+                sampler: sampler,
+                onEvent: progress.record,
+              ),
+            ),
+            GameEntry(
+              title: 'Sound Families',
+              subtitle: 'Match by rhyme or first sound',
+              icon: Icons.workspaces,
+              builder: (_) => FamiliesPage(
+                contentService: _contentService,
+                audioService: _audioService,
                 sampler: sampler,
                 onEvent: progress.record,
               ),
