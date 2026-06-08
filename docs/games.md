@@ -12,7 +12,7 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 | Find the Character / Do the Command | 1–2 | M2 | Read a sentence, tap the thing it names |
 | Build-a-Word (blending) | 2 | M2 | Overlap syllable cards to make a target word |
 | Listen & Pick (slow-speak) | 0 | M2 | Hear gapped syllables, choose the picture |
-| Match / Memory | 1+ | later | Match pictograph ↔ sound ↔ word |
+| Sound Match | 1–2 | M2 | Drag each symbol onto the sound it makes |
 | Rhyme Families | 3 | later | Collect syllables that rhyme |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 
@@ -49,10 +49,14 @@ tappable to hear its sound**. Games are rendered in the child's **current-stage 
 
 - Play syllables with gaps; the child picks the matching **picture**. Pure auditory blending, no print.
 
-## Match / Memory — later
+## Sound Match — M2
 
-- Concentration-style matching across the three representations of an entry: **pictograph ↔ sound ↔
-  word**. Reinforces the symbol–sound pairing.
+- The child **drags each symbol** (pictograph/glyph) **onto the sound it makes**; tapping a sound chip
+  plays it (TTS for now). Directly exercises the symbol→sound link, and "right symbol → right sound" is
+  a clean per-item progress signal feeding the mastery model.
+- Selection is **mastery-driven** — the round's focus item comes from the `ItemSampler`.
+- **Later sub-phase:** Stage-4 letters where a *multi-letter grapheme* maps to one phoneme (e.g.
+  `sh`→/ʃ/) — needs a grapheme→phoneme map in the Content Bank.
 
 ## Rhyme Families — later (Stage 3)
 

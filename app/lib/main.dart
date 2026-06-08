@@ -8,6 +8,7 @@ import 'features/find_the_character/find_the_character_page.dart';
 import 'features/games_menu/games_menu_page.dart';
 import 'features/listen_and_pick/listen_and_pick_page.dart';
 import 'features/pictograph_demo/pictograph_demo_page.dart';
+import 'features/sound_match/sound_match_page.dart';
 import 'learning/item_sampler.dart';
 import 'progress/firestore_progress_store.dart';
 import 'progress/local_progress_store.dart';
@@ -151,6 +152,17 @@ class _ReadingGameAppState extends State<ReadingGameApp>
               subtitle: 'Read a word, find the picture',
               icon: Icons.search,
               builder: (_) => FindTheCharacterPage(
+                contentService: _contentService,
+                audioService: _audioService,
+                sampler: sampler,
+                onEvent: progress.record,
+              ),
+            ),
+            GameEntry(
+              title: 'Sound Match',
+              subtitle: 'Drag each picture to its sound',
+              icon: Icons.graphic_eq,
+              builder: (_) => SoundMatchPage(
                 contentService: _contentService,
                 audioService: _audioService,
                 sampler: sampler,
