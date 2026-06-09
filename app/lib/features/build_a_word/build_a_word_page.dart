@@ -26,6 +26,7 @@ class BuildAWordPage extends StatefulWidget {
     required this.audioService,
     this.random,
     this.sampler,
+    this.allowedIds,
     this.onEvent,
   });
 
@@ -37,6 +38,9 @@ class BuildAWordPage extends StatefulWidget {
 
   /// Mastery-driven target selection. When null, falls back to uniform random.
   final ItemSampler? sampler;
+
+  /// Restricts buildable words to those whose syllables are all introduced.
+  final Set<String>? allowedIds;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -74,7 +78,9 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
             !w.isTestBlend &&
             w.segmentation.length >= 2 &&
             w.segmentation.length <= 3 &&
-            w.segmentation.every(_elementById.containsKey))
+            w.segmentation.every(_elementById.containsKey) &&
+            (widget.allowedIds == null ||
+                w.segmentation.every(widget.allowedIds!.contains)))
         .toList(growable: false);
     if (_buildable.isNotEmpty) {
       _startRound();

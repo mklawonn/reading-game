@@ -21,6 +21,7 @@ class FindTheCharacterPage extends StatefulWidget {
     this.optionCount = 3,
     this.random,
     this.sampler,
+    this.allowedIds,
     this.onEvent,
   });
 
@@ -34,6 +35,10 @@ class FindTheCharacterPage extends StatefulWidget {
   /// Mastery-driven target selection. When null, falls back to uniform random
   /// (keeps widget tests deterministic via [random]).
   final ItemSampler? sampler;
+
+  /// Restricts the pool to these element ids (the curriculum's introduced
+  /// symbols). Null = no restriction.
+  final Set<String>? allowedIds;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -55,7 +60,9 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
   Future<void> _load() async {
     final bank = await widget.contentService.load();
     _pool = bank.elements
-        .where((e) => kPictographEmoji.containsKey(e.id))
+        .where((e) =>
+            kPictographEmoji.containsKey(e.id) &&
+            (widget.allowedIds?.contains(e.id) ?? true))
         .toList(growable: false);
     if (_pool.length >= 2) {
       _startRound();

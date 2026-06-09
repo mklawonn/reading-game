@@ -162,6 +162,59 @@ if (existsSync(phonemesPath)) {
     if (!inv.has(p)) err(`phonemes: grapheme phoneme "${p}" missing from inventory`);
   }
   console.log(`Phoneme inventory v${ph.version ?? '?'}: ${inv.size} phonemes, ${used.size} used by graphemes`);
+
+  // Rhyme groups must be sound-based: members share their rime (the phonemes
+  // from the first vowel onward). This catches spelling-rhymes like snow/cow.
+  const vowels = new Set(
+    (ph.phonemes ?? []).filter((p) => ['vowel', 'diphthong'].includes(p.kind)).map((p) => p.ipa));
+  const rimeOf = (el) => {
+    const gs = el.graphemes ?? [];
+    let i = gs.findIndex((g) => vowels.has(g.p));
+    if (i < 0) i = 0;
+    return gs.slice(i).map((g) => g.p).join('');
+  };
+  const byRhyme = new Map();
+  for (const el of elements) {
+    if (!el.picturable || !el.rhyme_group || !(el.graphemes ?? []).length) continue;
+    if (!byRhyme.has(el.rhyme_group)) byRhyme.set(el.rhyme_group, []);
+    byRhyme.get(el.rhyme_group).push(el);
+  }
+  for (const [grp, members] of byRhyme) {
+    if (members.length < 2) continue;
+    if (new Set(members.map(rimeOf)).size > 1) {
+      err(`rhyme_group "${grp}": members don't share a rime sound — ${members.map((m) => `${m.id}=/${rimeOf(m)}/`).join(', ')}`);
+    }
+  }
+}
+
+// ── curriculum schedule (optional sibling curriculum.v1.json) ────────────────
+const curriculumPath = join(dirname(bankPath), 'curriculum.v1.json');
+if (existsSync(curriculumPath)) {
+  let cur = { levels: [] };
+  try {
+    cur = JSON.parse(readFileSync(curriculumPath, 'utf8'));
+  } catch (e) {
+    err(`curriculum: could not parse ${curriculumPath}: ${e.message}`);
+  }
+  const KNOWN_GAMES = new Set([
+    'listen_and_pick', 'find_the_character', 'sound_match', 'families', 'build_a_word', 'fill_blank']);
+  const introduced = new Set();
+  for (const lv of cur.levels ?? []) {
+    for (const id of lv.introduce ?? []) {
+      if (!elementIds.has(id)) err(`curriculum L${lv.id}: introduce "${id}" is not an element`);
+      if (introduced.has(id)) err(`curriculum L${lv.id}: "${id}" introduced twice`);
+      introduced.add(id);
+    }
+    for (const g of lv.games ?? []) {
+      if (!KNOWN_GAMES.has(g)) err(`curriculum L${lv.id}: unknown game "${g}"`);
+    }
+  }
+  for (const e of elements) {
+    if (e.picturable && !introduced.has(e.id)) {
+      warn(`curriculum: pictograph "${e.id}" is never introduced`);
+    }
+  }
+  console.log(`Curriculum v${cur.version ?? '?'}: ${(cur.levels ?? []).length} levels, ${introduced.size} symbols introduced`);
 }
 
 // ── report ──────────────────────────────────────────────────────────────────

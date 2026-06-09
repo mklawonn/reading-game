@@ -24,6 +24,7 @@ class SoundMatchPage extends StatefulWidget {
     this.setSize = 3,
     this.random,
     this.sampler,
+    this.allowedIds,
     this.onEvent,
   });
 
@@ -38,6 +39,9 @@ class SoundMatchPage extends StatefulWidget {
 
   /// Mastery-driven choice of the round's focus item. Null → uniform random.
   final ItemSampler? sampler;
+
+  /// Restricts the pool to these element ids (curriculum's introduced symbols).
+  final Set<String>? allowedIds;
 
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -60,8 +64,12 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
 
   Future<void> _load() async {
     final bank = await widget.contentService.load();
-    // Symbols that can be both shown and heard: the picturable stage-1 set.
-    _pool = bank.elements.where((e) => e.picturable).toList(growable: false);
+    // Symbols that can be both shown and heard: the picturable stage-1 set,
+    // scoped to the curriculum's introduced symbols when provided.
+    _pool = bank.elements
+        .where((e) =>
+            e.picturable && (widget.allowedIds?.contains(e.id) ?? true))
+        .toList(growable: false);
     if (_pool.length >= 2) setState(_startRound);
   }
 

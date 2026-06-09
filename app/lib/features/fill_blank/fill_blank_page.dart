@@ -24,6 +24,7 @@ class FillBlankPage extends StatefulWidget {
     this.optionCount = 3,
     this.random,
     this.sampler,
+    this.allowedIds,
     this.onEvent,
   });
 
@@ -39,6 +40,9 @@ class FillBlankPage extends StatefulWidget {
 
   /// Mastery-driven choice of which blank to drill. Null → uniform random.
   final ItemSampler? sampler;
+
+  /// Restricts phrases (and distractors) to these introduced element ids.
+  final Set<String>? allowedIds;
 
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -69,12 +73,17 @@ class _FillBlankPageState extends State<FillBlankPage> {
     for (final e in bank.elements) {
       _elementById[e.id] = e;
     }
-    _picturablePool =
-        bank.elements.where((e) => e.picturable).toList(growable: false);
+    _picturablePool = bank.elements
+        .where((e) =>
+            e.picturable && (widget.allowedIds?.contains(e.id) ?? true))
+        .toList(growable: false);
     final set = await widget.contentService.loadPhrases();
-    // Keep only phrases whose every token resolves to a known element.
+    // Keep phrases whose every token resolves and (if scoped) is introduced.
     _phrases = set.phrases
-        .where((p) => p.tokens.every(_elementById.containsKey))
+        .where((p) =>
+            p.tokens.every(_elementById.containsKey) &&
+            (widget.allowedIds == null ||
+                p.tokens.every(widget.allowedIds!.contains)))
         .toList(growable: false);
     final answerIds = {for (final p in _phrases) p.answer};
     _answerPool = [

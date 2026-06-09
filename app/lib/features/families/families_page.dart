@@ -27,6 +27,7 @@ class FamiliesPage extends StatefulWidget {
     this.optionCount = 3,
     this.random,
     this.sampler,
+    this.allowedIds,
     this.onEvent,
   });
 
@@ -35,6 +36,9 @@ class FamiliesPage extends StatefulWidget {
   final int optionCount;
   final Random? random;
   final ItemSampler? sampler;
+
+  /// Restricts the pool to these element ids (curriculum's introduced symbols).
+  final Set<String>? allowedIds;
   final void Function(LearningEvent)? onEvent;
 
   @override
@@ -67,7 +71,10 @@ class _FamiliesPageState extends State<FamiliesPage> {
     for (final e in bank.elements) {
       _byId[e.id] = e;
     }
-    _pool = bank.elements.where((e) => e.picturable).toList(growable: false);
+    _pool = bank.elements
+        .where((e) =>
+            e.picturable && (widget.allowedIds?.contains(e.id) ?? true))
+        .toList(growable: false);
     for (final e in _pool) {
       final rg = e.rhymeGroup;
       if (rg != null) (_rhyme[rg] ??= []).add(e);
