@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../learning/mastery_view.dart';
 import '../models/content_bank.dart';
+import '../models/curriculum.dart';
 import 'achievements.dart';
 import 'learning_event.dart';
 import 'progress_store.dart';
@@ -45,6 +46,7 @@ class ProgressService extends ChangeNotifier implements MasteryView {
     DateTime Function()? clock,
     ProgressStore store = const NoopProgressStore(),
     String profileId = 'default',
+    CurriculumSchedule? schedule,
   })  : _itemStage = {for (final e in bank.elements) e.id: e.introducedStage},
         _stageTotals = _countByStage(bank),
         _now = clock ?? DateTime.now,
@@ -52,7 +54,9 @@ class ProgressService extends ChangeNotifier implements MasteryView {
         // ignore: prefer_initializing_formals
         _store = store,
         // ignore: prefer_initializing_formals
-        _profileId = profileId;
+        _profileId = profileId,
+        // ignore: prefer_initializing_formals
+        _schedule = schedule;
 
   static const int xpPerCorrect = 10;
   static const int xpMasteryBonus = 25;
@@ -70,9 +74,14 @@ class ProgressService extends ChangeNotifier implements MasteryView {
   final DateTime Function() _now;
   final ProgressStore _store;
   final String _profileId;
+  final CurriculumSchedule? _schedule;
   Timer? _saveTimer;
 
   int _xp = 0;
+  int _curriculumLevel = 1;
+  int _xpIntoLevel = 0;
+  final Set<String> _seenIntros = {};
+  final List<int> _justLeveledUp = [];
   final Map<String, ItemMastery> _mastery = {};
   final Map<String, int> _skillCorrect = {};
   int _totalCorrect = 0;
@@ -94,9 +103,41 @@ class ProgressService extends ChangeNotifier implements MasteryView {
 
   // ── read-only views (UI + achievement predicates) ──
   int get xp => _xp;
-  int get level => levelForXp(_xp);
-  int get xpIntoLevel => _xp - xpForLevel(level);
-  int get xpForThisLevel => xpForLevel(level + 1) - xpForLevel(level);
+
+  /// The player's level. With a [CurriculumSchedule] this is the **curriculum
+  /// level** (advanced by per-level XP goals); without one it falls back to the
+  /// generic XP curve (keeps schedule-free tests/usages working).
+  int get level => _schedule != null ? _curriculumLevel : levelForXp(_xp);
+  int get xpIntoLevel =>
+      _schedule != null ? _xpIntoLevel : _xp - xpForLevel(level);
+  int get xpForThisLevel => _schedule != null
+      ? _schedule.levelAt(_curriculumLevel).xpToAdvance
+      : xpForLevel(level + 1) - xpForLevel(level);
+
+  /// Total number of levels in the schedule (0 if none).
+  int get totalLevels => _schedule?.length ?? 0;
+
+  /// The current level's nominal stage (for current-stage rendering); falls back
+  /// to the mastery-derived [currentStage] when no schedule is set.
+  int get curriculumStage =>
+      _schedule != null ? _schedule.levelAt(_curriculumLevel).stage : currentStage;
+
+  // ── curriculum intros + level-ups ──
+  Set<String> get seenIntros => Set.unmodifiable(_seenIntros);
+  bool hasSeenIntro(String id) => _seenIntros.contains(id);
+  void markIntroSeen(String id) {
+    if (_seenIntros.add(id)) {
+      notifyListeners();
+      _scheduleSave();
+    }
+  }
+
+  /// Levels reached since the last call — consumed by the level-up animation.
+  List<int> takeJustLeveledUp() {
+    final out = List<int>.from(_justLeveledUp);
+    _justLeveledUp.clear();
+    return out;
+  }
   int get masteredCount => _mastery.values.where((m) => m.mastered).length;
   int get totalCorrect => _totalCorrect;
   int get totalAnswered => _totalAnswered;
@@ -170,6 +211,7 @@ class ProgressService extends ChangeNotifier implements MasteryView {
   void record(LearningEvent e) {
     _totalAnswered++;
     final prev = _mastery[e.itemId] ?? const ItemMastery();
+    var gained = 0;
     if (e.correct) {
       _totalCorrect++;
       _run++;
@@ -177,16 +219,38 @@ class ProgressService extends ChangeNotifier implements MasteryView {
       _skillCorrect[e.skill] = (_skillCorrect[e.skill] ?? 0) + 1;
       final next = prev.promote();
       _mastery[e.itemId] = next;
-      _xp += xpPerCorrect;
-      if (!prev.mastered && next.mastered) _xp += xpMasteryBonus;
+      gained = xpPerCorrect;
+      if (!prev.mastered && next.mastered) gained += xpMasteryBonus;
+      _xp += gained;
     } else {
       _run = 0;
       _mastery[e.itemId] = prev.demote();
     }
+    if (gained > 0) _advanceLevels(gained);
     _touchStreak();
     _checkAchievements();
     notifyListeners();
     _scheduleSave();
+  }
+
+  /// Fills the current level's XP bar and rolls over to the next level(s) once
+  /// the schedule's goal is met (queuing each for the level-up animation).
+  void _advanceLevels(int gained) {
+    final schedule = _schedule;
+    if (schedule == null) return;
+    _xpIntoLevel += gained;
+    while (_curriculumLevel < schedule.length) {
+      final need = schedule.levelAt(_curriculumLevel).xpToAdvance;
+      if (_xpIntoLevel < need) break;
+      _xpIntoLevel -= need;
+      _curriculumLevel++;
+      _justLeveledUp.add(_curriculumLevel);
+    }
+    // At the final level the bar simply caps full.
+    final cap = schedule.levelAt(_curriculumLevel).xpToAdvance;
+    if (_curriculumLevel >= schedule.length && _xpIntoLevel > cap) {
+      _xpIntoLevel = cap;
+    }
   }
 
   /// Loads saved progress from the store (call once after construction).
@@ -256,6 +320,9 @@ class ProgressService extends ChangeNotifier implements MasteryView {
         'dayStreak': _dayStreak,
         'lastDay': _lastDay,
         'unlocked': _unlocked.toList(),
+        'curriculumLevel': _curriculumLevel,
+        'xpIntoLevel': _xpIntoLevel,
+        'seenIntros': _seenIntros.toList(),
       };
 
   void loadJson(Map<String, dynamic> j) {
@@ -276,6 +343,11 @@ class ProgressService extends ChangeNotifier implements MasteryView {
     _unlocked
       ..clear()
       ..addAll((j['unlocked'] as List<dynamic>? ?? const []).cast<String>());
+    _curriculumLevel = j['curriculumLevel'] as int? ?? 1;
+    _xpIntoLevel = j['xpIntoLevel'] as int? ?? 0;
+    _seenIntros
+      ..clear()
+      ..addAll((j['seenIntros'] as List<dynamic>? ?? const []).cast<String>());
     notifyListeners();
   }
 }
