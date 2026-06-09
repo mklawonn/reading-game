@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../profile/profile.dart';
 import '../../progress/progress_service.dart';
+import '../profile/avatars.dart';
 import '../progress/progress_screen.dart';
 
 /// One entry in the games menu. New play modes appear in the menu simply by
@@ -22,17 +24,34 @@ class GameEntry {
 /// The home launcher: a tappable list of every play mode, plus a level chip and
 /// a button to the progress screen.
 class GamesMenuPage extends StatelessWidget {
-  const GamesMenuPage({super.key, required this.games, required this.progress});
+  const GamesMenuPage({
+    super.key,
+    required this.games,
+    required this.progress,
+    this.profile,
+    this.onSwitchProfile,
+  });
 
   final List<GameEntry> games;
   final ProgressService progress;
+  final Profile? profile;
+  final VoidCallback? onSwitchProfile;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reading Game'),
+        leading: profile == null
+            ? null
+            : IconButton(
+                key: const Key('menu-profile'),
+                tooltip: 'Switch player',
+                onPressed: onSwitchProfile,
+                icon: Text(avatarEmoji(profile!.avatar),
+                    style: const TextStyle(fontSize: 24)),
+              ),
+        title: Text(profile?.name ?? 'Reading Game'),
         backgroundColor: scheme.inversePrimary,
         actions: [
           ListenableBuilder(
