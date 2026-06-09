@@ -14,11 +14,15 @@ class IntroduceSymbolScreen extends StatefulWidget {
     required this.element,
     required this.audioService,
     required this.onDone,
+    this.embedded = false,
   });
 
   final SyllableElement element;
   final AudioService audioService;
   final VoidCallback onDone;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   @override
   State<IntroduceSymbolScreen> createState() => _IntroduceSymbolScreenState();
@@ -37,7 +41,7 @@ class _IntroduceSymbolScreenState extends State<IntroduceSymbolScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('New symbol!'),
         backgroundColor: scheme.inversePrimary,
       ),

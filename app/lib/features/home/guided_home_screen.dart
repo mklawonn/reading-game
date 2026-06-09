@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../learning/curriculum_engine.dart';
-import '../../learning/item_sampler.dart';
-import '../../models/content_bank.dart';
 import '../../models/curriculum.dart';
 import '../../profile/profile.dart';
 import '../../progress/progress_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
-import '../build_a_word/build_a_word_page.dart';
-import '../families/families_page.dart';
-import '../fill_blank/fill_blank_page.dart';
-import '../find_the_character/find_the_character_page.dart';
-import '../listen_and_pick/listen_and_pick_page.dart';
 import '../profile/avatars.dart';
 import '../progress/level_map_screen.dart';
 import '../progress/progress_screen.dart';
-import '../sound_match/sound_match_page.dart';
-import 'introduce_symbol_screen.dart';
-import 'level_up_overlay.dart';
+import 'level_session_screen.dart';
 
 /// The guided home: a level path the child can't skip ahead on, and one **Play**
-/// button that runs the curriculum's next activity — a Meet-the-symbol intro for
-/// any new symbol, else a game scoped to the symbols taught so far. Reaching a
-/// level's XP goal pops the level-up celebration.
+/// button that opens the current level as a single continuous session (see
+/// [LevelSessionScreen]) — meet its symbols, then play until beaten or left.
 class GuidedHomeScreen extends StatefulWidget {
   const GuidedHomeScreen({
     super.key,
@@ -49,79 +39,22 @@ class GuidedHomeScreen extends StatefulWidget {
 }
 
 class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
-  late final ItemSampler _sampler = ItemSampler(widget.progress);
-  String? _lastGame;
   bool _busy = false;
 
-  SyllableElement _element(String id) =>
-      widget.engine.bank.elements.firstWhere((e) => e.id == id);
-
-  Future<void> _play() async {
+  Future<void> _openLevel() async {
     if (_busy) return;
     _busy = true;
-    final p = widget.progress;
-    final activity = widget.engine.next(p.level, p.seenIntros, lastGame: _lastGame);
-
-    if (activity is IntroduceActivity) {
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => IntroduceSymbolScreen(
-          element: _element(activity.symbolId),
-          audioService: widget.audioService,
-          onDone: () {
-            widget.progress.markIntroSeen(activity.symbolId);
-            Navigator.of(context).pop();
-          },
-        ),
-      ));
-    } else if (activity is GameActivity) {
-      _lastGame = activity.gameId;
-      await Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => _game(activity.gameId),
-      ));
-    }
-
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => LevelSessionScreen(
+        progress: widget.progress,
+        engine: widget.engine,
+        schedule: widget.schedule,
+        contentService: widget.contentService,
+        audioService: widget.audioService,
+      ),
+    ));
     _busy = false;
-    if (mounted) await _celebrateLevelUps();
-  }
-
-  Future<void> _celebrateLevelUps() async {
-    for (final lv in widget.progress.takeJustLeveledUp()) {
-      if (!mounted) return;
-      final level = widget.schedule.levelAt(lv);
-      await showLevelUp(
-        context,
-        level: level,
-        newSymbols: [for (final id in level.introduce) _element(id)],
-      );
-    }
-  }
-
-  Widget _game(String gameId) {
-    final p = widget.progress;
-    final allowed = widget.engine.introducedThrough(p.level);
-    final cs = widget.contentService;
-    final audio = widget.audioService;
-    switch (gameId) {
-      case 'listen_and_pick':
-        return ListenAndPickPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, onEvent: p.record);
-      case 'sound_match':
-        return SoundMatchPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, onEvent: p.record);
-      case 'families':
-        return FamiliesPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, onEvent: p.record);
-      case 'build_a_word':
-        return BuildAWordPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, onEvent: p.record);
-      case 'fill_blank':
-        return FillBlankPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, stage: p.curriculumStage, onEvent: p.record);
-      case 'find_the_character':
-      default:
-        return FindTheCharacterPage(
-            contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, onEvent: p.record);
-    }
+    if (mounted) setState(() {}); // reflect any level-up
   }
 
   @override
@@ -181,7 +114,7 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   key: const Key('home-play'),
-                  onPressed: _play,
+                  onPressed: _openLevel,
                   icon: const Icon(Icons.play_arrow, size: 32),
                   label: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 28, vertical: 16),

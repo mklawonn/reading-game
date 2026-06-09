@@ -27,6 +27,7 @@ class BuildAWordPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -41,6 +42,9 @@ class BuildAWordPage extends StatefulWidget {
 
   /// Restricts buildable words to those whose syllables are all introduced.
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -185,7 +189,7 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Build a Word'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [

@@ -22,6 +22,7 @@ class FindTheCharacterPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -39,6 +40,9 @@ class FindTheCharacterPage extends StatefulWidget {
   /// Restricts the pool to these element ids (the curriculum's introduced
   /// symbols). Null = no restriction.
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -123,7 +127,7 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Find the Character'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [

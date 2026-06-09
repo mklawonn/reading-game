@@ -25,6 +25,7 @@ class FillBlankPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -43,6 +44,9 @@ class FillBlankPage extends StatefulWidget {
 
   /// Restricts phrases (and distractors) to these introduced element ids.
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -162,7 +166,7 @@ class _FillBlankPageState extends State<FillBlankPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Fill the Blank'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [

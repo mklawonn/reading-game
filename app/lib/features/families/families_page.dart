@@ -28,6 +28,7 @@ class FamiliesPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -39,6 +40,9 @@ class FamiliesPage extends StatefulWidget {
 
   /// Restricts the pool to these element ids (curriculum's introduced symbols).
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
   final void Function(LearningEvent)? onEvent;
 
   @override
@@ -171,7 +175,7 @@ class _FamiliesPageState extends State<FamiliesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Sound Families'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [

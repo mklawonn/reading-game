@@ -25,6 +25,7 @@ class SoundMatchPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -42,6 +43,9 @@ class SoundMatchPage extends StatefulWidget {
 
   /// Restricts the pool to these element ids (curriculum's introduced symbols).
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -125,7 +129,7 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Sound Match'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [

@@ -20,6 +20,7 @@ class ListenAndPickPage extends StatefulWidget {
     this.random,
     this.sampler,
     this.allowedIds,
+    this.embedded = false,
     this.onEvent,
   });
 
@@ -35,6 +36,9 @@ class ListenAndPickPage extends StatefulWidget {
 
   /// Restricts the pool to these element ids (curriculum's introduced symbols).
   final Set<String>? allowedIds;
+
+  /// Drop the page chrome (Scaffold AppBar) when hosted inside a level session.
+  final bool embedded;
 
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
@@ -118,7 +122,7 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.embedded ? null : AppBar(
         title: const Text('Listen & Pick'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
