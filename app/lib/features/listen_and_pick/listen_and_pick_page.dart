@@ -9,6 +9,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 /// **Listen & Pick** (Stage 0–1): the child hears a syllable and taps the
 /// matching picture, building the sound→symbol link purely by ear.
@@ -68,7 +69,7 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
         .toList(growable: false);
     if (_pool.length >= 2) {
       _startRound();
-      _speakTarget();
+      _speakInstruction();
     }
   }
 
@@ -93,6 +94,13 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
   void _speakTarget() {
     final target = _target;
     if (target != null) widget.audioService.speak(target.syllable);
+  }
+
+  /// Spoken on load and on each new round — names the task aloud. The child
+  /// hears the target word framed as an instruction ("Tap the cat!").
+  void _speakInstruction() {
+    final target = _target;
+    if (target != null) widget.audioService.speak('Tap the ${target.syllable}!');
   }
 
   void _onPick(SyllableElement picked) {
@@ -121,7 +129,7 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
 
   void _next() {
     setState(_startRound);
-    _speakTarget();
+    _speakInstruction();
   }
 
   @override
@@ -163,21 +171,9 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
                 // Fixed-height slot: feedback never shoves the options around.
                 FeedbackSlot(
                   child: _solved
-                      ? Column(
+                      ? Text('🎉 Yes!',
                           key: const Key('lp-feedback'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('🎉 Yes!',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 8),
-                            FilledButton(
-                              key: const Key('lp-next'),
-                              onPressed: _next,
-                              child: const Text('Next'),
-                            ),
-                          ],
-                        )
+                          style: Theme.of(context).textTheme.headlineSmall)
                       : _wrong
                           ? Text('Not that one — listen again!',
                               key: const Key('lp-wrong'),
@@ -200,6 +196,15 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
                           onTap: () => _onPick(element),
                         ),
                     ],
+                  ),
+                ),
+                // Big, always-present advance arrow — only tappable once solved.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: NextArrowBar(
+                    key: const Key('lp-next'),
+                    enabled: _solved,
+                    onNext: _next,
                   ),
                 ),
               ],

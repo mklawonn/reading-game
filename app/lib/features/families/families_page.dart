@@ -10,6 +10,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 /// **Sound Families** (Stage 3): minimal-pair contrast. Each round shows a target
 /// word and asks for the one option that belongs to its family —
@@ -142,10 +143,13 @@ class _FamiliesPageState extends State<FamiliesPage> {
   void _playPrompt() {
     final p = _onsetPhoneme;
     if (_mode == 'onset' && p != null) {
+      // Stops can't be voiced alone — play the anchored/stretched onset sound.
       widget.audioService.speakPhoneme(p,
           anchorSyllable: _byId[p.anchor]?.syllable ?? p.ipa);
     } else if (_target != null) {
-      widget.audioService.speak(_target!.syllable);
+      // Rhyme mode names the task aloud so the child knows what to listen for.
+      widget.audioService
+          .speak('Tap the word that rhymes with ${_target!.syllable}.');
     }
   }
 
@@ -237,21 +241,9 @@ class _FamiliesPageState extends State<FamiliesPage> {
                 // Fixed-height slot: feedback never shoves the options around.
                 FeedbackSlot(
                   child: _solved
-                      ? Column(
+                      ? Text('🎉 Yes!',
                           key: const Key('fam-feedback'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('🎉 Yes!',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 8),
-                            FilledButton(
-                              key: const Key('fam-next'),
-                              onPressed: _next,
-                              child: const Text('Next'),
-                            ),
-                          ],
-                        )
+                          style: Theme.of(context).textTheme.headlineSmall)
                       : _wrong
                           ? Text('Not that one — try again',
                               key: const Key('fam-wrong'),
@@ -274,6 +266,15 @@ class _FamiliesPageState extends State<FamiliesPage> {
                           onTap: () => _onPick(e),
                         ),
                     ],
+                  ),
+                ),
+                // Big, always-present advance arrow — only tappable once solved.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: NextArrowBar(
+                    key: const Key('fam-next'),
+                    enabled: _solved,
+                    onNext: _next,
                   ),
                 ),
               ],

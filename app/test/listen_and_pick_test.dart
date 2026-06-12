@@ -50,9 +50,12 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // A target syllable is spoken when the round starts.
+    // The round names its target aloud as an instruction ("Tap the sun!").
     expect(audio.spoken, isNotEmpty);
-    final target = audio.spoken.last; // id == syllable in the fake bank
+    final said = audio.spoken.last;
+    expect(said, startsWith('Tap the '));
+    final target =
+        said.substring('Tap the '.length, said.length - 1); // strip the "!"
 
     // Tapping the picture that matches the heard syllable solves the round.
     await tester.tap(find.byKey(Key('lp-option-$target')));

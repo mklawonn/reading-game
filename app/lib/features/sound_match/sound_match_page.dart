@@ -9,6 +9,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 /// **Sound-Match** (Stages 1–2): the child drags each symbol (pictograph/glyph)
 /// onto **the sound it makes**; tapping a sound chip plays it. This directly
@@ -75,8 +76,14 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
         .where((e) =>
             e.picturable && (widget.allowedIds?.contains(e.id) ?? true))
         .toList(growable: false);
-    if (_pool.length >= 2) setState(_startRound);
+    if (_pool.length >= 2) {
+      setState(_startRound);
+      _speakInstruction();
+    }
   }
+
+  static const _instruction = 'Match each picture to the sound it makes.';
+  void _speakInstruction() => widget.audioService.speak(_instruction);
 
   void _startRound() {
     final n = min(widget.setSize, _pool.length);
@@ -125,7 +132,10 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
     });
   }
 
-  void _next() => setState(_startRound);
+  void _next() {
+    setState(_startRound);
+    _speakInstruction();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -191,22 +201,9 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                   // Fixed-height slot keeps the board steady when it appears.
                   FeedbackSlot(
                     child: _solved
-                        ? Column(
+                        ? Text('🎉 All matched!',
                             key: const Key('sm-feedback'),
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('🎉 All matched!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall),
-                              const SizedBox(height: 8),
-                              FilledButton(
-                                key: const Key('sm-next'),
-                                onPressed: _next,
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          )
+                            style: Theme.of(context).textTheme.headlineSmall)
                         : null,
                   ),
                   // Sound targets (tap to hear, drop a symbol to match).
@@ -229,7 +226,12 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  // Big, always-present advance arrow — only tappable once solved.
+                  NextArrowBar(
+                    key: const Key('sm-next'),
+                    enabled: _solved,
+                    onNext: _next,
+                  ),
                 ],
               ),
             ),

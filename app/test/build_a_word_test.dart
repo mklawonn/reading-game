@@ -52,9 +52,9 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Target word is shown and spoken on round start.
+    // Target word is shown and named aloud as an instruction on round start.
     expect(find.byKey(const Key('bw-target')), findsOneWidget);
-    expect(audio.spoken, contains('open'));
+    expect(audio.spoken, contains('Make the word open.'));
 
     // Tap the pieces in order: o, then pen → fills the two slots left-to-right.
     await tester.tap(find.byKey(const Key('bw-piece-o')));

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// answer grid/chips around right when the child is about to tap — jarring on
 /// small fingers. Reserving the space keeps every target exactly where it was.
 class FeedbackSlot extends StatelessWidget {
-  const FeedbackSlot({super.key, this.height = 116, this.child});
+  const FeedbackSlot({super.key, this.height = 72, this.child});
 
   final double height;
 

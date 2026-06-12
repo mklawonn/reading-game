@@ -10,6 +10,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 /// **Find the Character** (Stage 1): a written word/command is shown (with
 /// tap-to-hear support) and the child taps the matching picture among options —
@@ -72,7 +73,7 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
         .toList(growable: false);
     if (_pool.length >= 2) {
       _startRound();
-      _speakTarget();
+      _speakInstruction();
     }
   }
 
@@ -98,6 +99,13 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
   void _speakTarget() {
     final target = _target;
     if (target != null) widget.audioService.speak(target.syllable);
+  }
+
+  /// Spoken on load and on each new round — names the task aloud so a
+  /// pre-reader always knows what to do without tapping anything.
+  void _speakInstruction() {
+    final target = _target;
+    if (target != null) widget.audioService.speak('Find the ${target.syllable}!');
   }
 
   void _onPick(SyllableElement picked) {
@@ -126,7 +134,7 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
 
   void _next() {
     setState(_startRound);
-    _speakTarget();
+    _speakInstruction();
   }
 
   @override
@@ -182,21 +190,9 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
                 // Fixed-height slot: feedback never shoves the options around.
                 FeedbackSlot(
                   child: _solved
-                      ? Column(
+                      ? Text('🎉 Yes!',
                           key: const Key('fc-feedback'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('🎉 Yes!',
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall),
-                            const SizedBox(height: 8),
-                            FilledButton(
-                              key: const Key('fc-next'),
-                              onPressed: _next,
-                              child: const Text('Next'),
-                            ),
-                          ],
-                        )
+                          style: Theme.of(context).textTheme.headlineSmall)
                       : _wrong
                           ? Text('Not that one — listen again!',
                               key: const Key('fc-wrong'),
@@ -219,6 +215,15 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
                           onTap: () => _onPick(element),
                         ),
                     ],
+                  ),
+                ),
+                // Big, always-present advance arrow — only tappable once solved.
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: NextArrowBar(
+                    key: const Key('fc-next'),
+                    enabled: _solved,
+                    onNext: _next,
                   ),
                 ),
               ],

@@ -32,7 +32,10 @@ class _IntroduceSymbolScreenState extends State<IntroduceSymbolScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _speak());
+    // On arrival, name the symbol aloud ("This is a cat."); tapping it later
+    // plays the clean syllable on its own for phonics.
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => widget.audioService.speak('This is ${widget.element.syllable}.'));
   }
 
   void _speak() => widget.audioService.speak(widget.element.syllable);

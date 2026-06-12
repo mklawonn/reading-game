@@ -10,6 +10,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 class _Piece {
   const _Piece(this.token, this.element);
@@ -89,9 +90,13 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
         .toList(growable: false);
     if (_buildable.isNotEmpty) {
       _startRound();
-      widget.audioService.speak(_word.text);
+      _speakInstruction();
     }
   }
+
+  /// Spoken on load and on each new round — names the target word as a task.
+  void _speakInstruction() =>
+      widget.audioService.speak('Make the word ${_word.text}.');
 
   // A blend's stage = the latest stage among its component syllables.
   int _wordStage(Word w) => w.segmentation
@@ -174,7 +179,7 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
 
   void _next() {
     setState(_startRound);
-    widget.audioService.speak(_word.text);
+    _speakInstruction();
   }
 
   static bool _listEquals(List<String> a, List<String> b) {
@@ -246,21 +251,9 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
                   // Fixed-height slot keeps the board steady when it appears.
                   FeedbackSlot(
                     child: _solved
-                        ? Column(
+                        ? Text('🎉 ${_word.text}!',
                             key: const Key('bw-feedback'),
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('🎉 ${_word.text}!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall),
-                              FilledButton(
-                                key: const Key('bw-next'),
-                                onPressed: _next,
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          )
+                            style: Theme.of(context).textTheme.headlineSmall)
                         : _wrong
                             ? Text('Not yet — try again',
                                 key: const Key('bw-wrong'),
@@ -288,7 +281,12 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  // Big, always-present advance arrow — only tappable once solved.
+                  NextArrowBar(
+                    key: const Key('bw-next'),
+                    enabled: _solved,
+                    onNext: _next,
+                  ),
                 ],
               ),
             ),

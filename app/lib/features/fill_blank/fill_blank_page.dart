@@ -10,6 +10,7 @@ import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
+import '../common/next_arrow_bar.dart';
 
 /// **Fill-in-the-Blank** (Stages 1–4): a short phrase is shown with one token
 /// missing; the child drags the right symbol into the slot. Every token is a
@@ -95,8 +96,14 @@ class _FillBlankPageState extends State<FillBlankPage> {
       for (final id in answerIds)
         if (_elementById[id] != null) _elementById[id]!,
     ];
-    if (_phrases.isNotEmpty) setState(_startRound);
+    if (_phrases.isNotEmpty) {
+      setState(_startRound);
+      _speakInstruction();
+    }
   }
+
+  static const _instruction = 'Finish the sentence.';
+  void _speakInstruction() => widget.audioService.speak(_instruction);
 
   void _startRound() {
     // Mastery picks which answer (blank) to drill; then a phrase that uses it.
@@ -162,7 +169,10 @@ class _FillBlankPageState extends State<FillBlankPage> {
     if (correct) _speak(element);
   }
 
-  void _next() => setState(_startRound);
+  void _next() {
+    setState(_startRound);
+    _speakInstruction();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,21 +236,9 @@ class _FillBlankPageState extends State<FillBlankPage> {
                   // Fixed-height slot keeps the board steady when it appears.
                   FeedbackSlot(
                     child: _solved
-                        ? Column(
+                        ? Text('🎉 Yes!',
                             key: const Key('fb-feedback'),
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('🎉 Yes!',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall),
-                              FilledButton(
-                                key: const Key('fb-next'),
-                                onPressed: _next,
-                                child: const Text('Next'),
-                              ),
-                            ],
-                          )
+                            style: Theme.of(context).textTheme.headlineSmall)
                         : _wrong
                             ? Text('Not quite — try again',
                                 key: const Key('fb-wrong'),
@@ -281,7 +279,12 @@ class _FillBlankPageState extends State<FillBlankPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  // Big, always-present advance arrow — only tappable once solved.
+                  NextArrowBar(
+                    key: const Key('fb-next'),
+                    enabled: _solved,
+                    onNext: _next,
+                  ),
                 ],
               ),
             ),
