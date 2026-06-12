@@ -8,6 +8,7 @@ import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 /// **Listen & Pick** (Stage 0–1): the child hears a syllable and taps the
 /// matching picture, building the sound→symbol link purely by ear.
@@ -55,6 +56,7 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
   SyllableElement? _target;
   List<SyllableElement> _options = const [];
   bool _solved = false;
+  bool _wrong = false;
   int _score = 0;
 
   Future<void> _load() async {
@@ -85,6 +87,7 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
     _options = [target, ...distractors.take(count - 1)]..shuffle(_random);
     _target = target;
     _solved = false;
+    _wrong = false;
   }
 
   void _speakTarget() {
@@ -106,10 +109,12 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
     if (correct) {
       setState(() {
         _solved = true;
+        _wrong = false;
         _score += 1;
       });
       widget.audioService.speak(picked.syllable);
     } else {
+      setState(() => _wrong = true);
       _speakTarget(); // gentle nudge: replay the sound
     }
   }
@@ -155,23 +160,31 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
                   label: const Text('Hear it again'),
                 ),
                 const SizedBox(height: 8),
-                if (_solved)
-                  Padding(
-                    key: const Key('lp-feedback'),
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Text('🎉 Yes!',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          key: const Key('lp-next'),
-                          onPressed: _next,
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
-                  ),
+                // Fixed-height slot: feedback never shoves the options around.
+                FeedbackSlot(
+                  child: _solved
+                      ? Column(
+                          key: const Key('lp-feedback'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🎉 Yes!',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(height: 8),
+                            FilledButton(
+                              key: const Key('lp-next'),
+                              onPressed: _next,
+                              child: const Text('Next'),
+                            ),
+                          ],
+                        )
+                      : _wrong
+                          ? Text('Not that one — listen again!',
+                              key: const Key('lp-wrong'),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error))
+                          : null,
+                ),
                 Expanded(
                   child: GridView.count(
                     padding: const EdgeInsets.all(16),

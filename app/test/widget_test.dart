@@ -51,6 +51,9 @@ class _FakeAudioService implements AudioService {
 
   @override
   Future<void> speak(String text) async => spoken.add(text);
+
+  @override
+  Future<void> stop() async {}
 }
 
 void main() {

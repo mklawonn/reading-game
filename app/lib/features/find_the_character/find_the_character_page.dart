@@ -9,6 +9,7 @@ import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 /// **Find the Character** (Stage 1): a written word/command is shown (with
 /// tap-to-hear support) and the child taps the matching picture among options —
@@ -59,6 +60,7 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
   SyllableElement? _target;
   List<SyllableElement> _options = const [];
   bool _solved = false;
+  bool _wrong = false;
   int _score = 0;
 
   Future<void> _load() async {
@@ -90,6 +92,7 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
     _options = [target, ...distractors.take(count - 1)]..shuffle(_random);
     _target = target;
     _solved = false;
+    _wrong = false;
   }
 
   void _speakTarget() {
@@ -111,11 +114,13 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
     if (correct) {
       setState(() {
         _solved = true;
+        _wrong = false;
         _score += 1;
       });
       widget.audioService.speak(picked.syllable);
     } else {
-      setState(() {}); // surface the "try again" hint
+      setState(() => _wrong = true);
+      _speakTarget(); // gentle nudge: replay the word
     }
   }
 
@@ -155,9 +160,12 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 // The written word — the reading challenge — with audio support.
+                // The leading box mirrors the IconButton so the word itself is
+                // truly centered (not the word+icon pair).
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(width: 48),
                     SyllableTile(
                       target.syllable,
                       key: const Key('fc-prompt'),
@@ -171,23 +179,31 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage> {
                     ),
                   ],
                 ),
-                if (_solved)
-                  Padding(
-                    key: const Key('fc-feedback'),
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Text('🎉 Yes!',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          key: const Key('fc-next'),
-                          onPressed: _next,
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
-                  ),
+                // Fixed-height slot: feedback never shoves the options around.
+                FeedbackSlot(
+                  child: _solved
+                      ? Column(
+                          key: const Key('fc-feedback'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🎉 Yes!',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(height: 8),
+                            FilledButton(
+                              key: const Key('fc-next'),
+                              onPressed: _next,
+                              child: const Text('Next'),
+                            ),
+                          ],
+                        )
+                      : _wrong
+                          ? Text('Not that one — listen again!',
+                              key: const Key('fc-wrong'),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error))
+                          : null,
+                ),
                 Expanded(
                   child: GridView.count(
                     padding: const EdgeInsets.all(16),

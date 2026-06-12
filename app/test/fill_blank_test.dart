@@ -47,6 +47,8 @@ class _FakeContentService extends ContentService {
 class _FakeAudioService implements AudioService {
   @override
   Future<void> speak(String text) async {}
+  @override
+  Future<void> stop() async {}
 }
 
 Future<void> _dragOnto(WidgetTester tester, Finder from, Finder to) async {

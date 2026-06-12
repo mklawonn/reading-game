@@ -39,6 +39,8 @@ class _FakeContentService extends ContentService {
 class _FakeAudio implements AudioService {
   @override
   Future<void> speak(String text) async {}
+  @override
+  Future<void> stop() async {}
 }
 
 void main() {

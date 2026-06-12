@@ -9,6 +9,7 @@ import '../../models/phrase.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 /// **Fill-in-the-Blank** (Stages 1–4): a short phrase is shown with one token
 /// missing; the child drags the right symbol into the slot. Every token is a
@@ -194,76 +195,91 @@ class _FillBlankPageState extends State<FillBlankPage> {
                   Text('Finish the sentence',
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 24),
-                  // The phrase, with the blank rendered as a drop slot.
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      for (var i = 0; i < phrase.tokens.length; i++)
-                        if (i == phrase.blank)
-                          _BlankSlot(
-                            filled: _placed,
-                            stage: widget.stage,
-                            onAccept: _onDrop,
-                          )
-                        else
-                          TokenView(
-                            _elementById[phrase.tokens[i]]!,
-                            stage: widget.stage,
-                            onTap: () =>
-                                _speak(_elementById[phrase.tokens[i]]!),
-                          ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (_wrong)
-                    Text('Not quite — try again',
-                        key: const Key('fb-wrong'),
-                        style:
-                            TextStyle(color: Theme.of(context).colorScheme.error)),
-                  if (_solved)
-                    Column(
-                      key: const Key('fb-feedback'),
+                  // The phrase, with the blank rendered as a drop slot
+                  // (full width ⇒ centering is unconditional).
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10,
+                      runSpacing: 10,
                       children: [
-                        Text('🎉 Yes!',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        FilledButton(
-                          key: const Key('fb-next'),
-                          onPressed: _next,
-                          child: const Text('Next'),
-                        ),
+                        for (var i = 0; i < phrase.tokens.length; i++)
+                          if (i == phrase.blank)
+                            _BlankSlot(
+                              filled: _placed,
+                              stage: widget.stage,
+                              onAccept: _onDrop,
+                            )
+                          else
+                            TokenView(
+                              _elementById[phrase.tokens[i]]!,
+                              stage: widget.stage,
+                              onTap: () =>
+                                  _speak(_elementById[phrase.tokens[i]]!),
+                            ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Fixed-height slot keeps the board steady when it appears.
+                  FeedbackSlot(
+                    child: _solved
+                        ? Column(
+                            key: const Key('fb-feedback'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('🎉 Yes!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                              FilledButton(
+                                key: const Key('fb-next'),
+                                onPressed: _next,
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          )
+                        : _wrong
+                            ? Text('Not quite — try again',
+                                key: const Key('fb-wrong'),
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.error))
+                            : null,
+                  ),
                   const Spacer(),
                   // Draggable candidate symbols.
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      for (final e in _options)
-                        if (_solved && e.id == _placed?.id)
-                          _CandidateChip(
-                              element: e, stage: widget.stage, faded: true)
-                        else
-                          Draggable<SyllableElement>(
-                            key: Key('fb-option-${e.id}'),
-                            data: e,
-                            feedback: Material(
-                                color: Colors.transparent,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        for (final e in _options)
+                          if (_solved && e.id == _placed?.id)
+                            _CandidateChip(
+                                element: e, stage: widget.stage, faded: true)
+                          else
+                            Draggable<SyllableElement>(
+                              key: Key('fb-option-${e.id}'),
+                              data: e,
+                              feedback: Material(
+                                  color: Colors.transparent,
+                                  child: _CandidateChip(
+                                      element: e, stage: widget.stage)),
+                              childWhenDragging: _CandidateChip(
+                                  element: e, stage: widget.stage, faded: true),
+                              child: GestureDetector(
+                                onTap: () => _speak(e),
                                 child: _CandidateChip(
-                                    element: e, stage: widget.stage)),
-                            childWhenDragging: _CandidateChip(
-                                element: e, stage: widget.stage, faded: true),
-                            child: GestureDetector(
-                              onTap: () => _speak(e),
-                              child: _CandidateChip(
-                                  element: e, stage: widget.stage),
+                                    element: e, stage: widget.stage),
+                              ),
                             ),
-                          ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],

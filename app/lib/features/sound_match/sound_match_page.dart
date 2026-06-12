@@ -8,6 +8,7 @@ import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 /// **Sound-Match** (Stages 1–2): the child drags each symbol (pictograph/glyph)
 /// onto **the sound it makes**; tapping a sound chip plays it. This directly
@@ -157,12 +158,14 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                       style: Theme.of(context).textTheme.titleMedium,
                       textAlign: TextAlign.center),
                   const SizedBox(height: 24),
-                  // Draggable symbols.
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
+                  // Draggable symbols (full width ⇒ centering is unconditional).
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
                       for (final e in _symbols)
                         if (_matched.contains(e.id))
                           _SymbolChip(element: e, faded: true)
@@ -181,42 +184,50 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                               child: _SymbolChip(element: e),
                             ),
                           ),
-                    ],
+                      ],
+                    ),
                   ),
                   const Spacer(),
-                  if (_solved)
-                    Padding(
-                      key: const Key('sm-feedback'),
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        children: [
-                          Text('🎉 All matched!',
-                              style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(height: 8),
-                          FilledButton(
-                            key: const Key('sm-next'),
-                            onPressed: _next,
-                            child: const Text('Next'),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // Fixed-height slot keeps the board steady when it appears.
+                  FeedbackSlot(
+                    child: _solved
+                        ? Column(
+                            key: const Key('sm-feedback'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('🎉 All matched!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                              const SizedBox(height: 8),
+                              FilledButton(
+                                key: const Key('sm-next'),
+                                onPressed: _next,
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          )
+                        : null,
+                  ),
                   // Sound targets (tap to hear, drop a symbol to match).
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      for (final e in _sounds)
-                        _SoundChip(
-                          key: Key('sm-sound-${e.id}'),
-                          element: e,
-                          matched: _matched.contains(e.id),
-                          wrong: _wrongSoundId == e.id,
-                          onTap: () => widget.audioService.speak(e.syllable),
-                          onAccept: (symbol) => _onDrop(symbol, e),
-                        ),
-                    ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        for (final e in _sounds)
+                          _SoundChip(
+                            key: Key('sm-sound-${e.id}'),
+                            element: e,
+                            matched: _matched.contains(e.id),
+                            wrong: _wrongSoundId == e.id,
+                            onTap: () => widget.audioService.speak(e.syllable),
+                            onAccept: (symbol) => _onDrop(symbol, e),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],

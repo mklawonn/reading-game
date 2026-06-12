@@ -31,6 +31,8 @@ class _FakeAudioService implements AudioService {
   final List<String> spoken = [];
   @override
   Future<void> speak(String text) async => spoken.add(text);
+  @override
+  Future<void> stop() async {}
 }
 
 Future<void> _dragOnto(WidgetTester tester, Finder from, Finder to) async {

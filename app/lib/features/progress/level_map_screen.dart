@@ -29,35 +29,67 @@ class _LevelMapState extends State<LevelMap> {
   static const double _pad = 24;
 
   final ScrollController _controller = ScrollController();
+  int _centeredLevel = -1;
 
   @override
   void initState() {
     super.initState();
+    widget.progress.addListener(_onProgressChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) => _centerCurrent());
   }
 
   @override
+  void didUpdateWidget(LevelMap old) {
+    super.didUpdateWidget(old);
+    if (!identical(old.progress, widget.progress)) {
+      old.progress.removeListener(_onProgressChanged);
+      widget.progress.addListener(_onProgressChanged);
+      _centeredLevel = -1;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _centerCurrent());
+    }
+  }
+
+  @override
   void dispose() {
+    widget.progress.removeListener(_onProgressChanged);
     _controller.dispose();
     super.dispose();
+  }
+
+  // Keep the current node centered as levels are gained (e.g. returning home
+  // after beating a level) — initState's one-shot centering goes stale.
+  void _onProgressChanged() {
+    if (widget.progress.level == _centeredLevel) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _centerCurrent(animated: true));
   }
 
   double _x(int i) => _pad + _nodeR + i * _hGap;
   double _y(int i, double midY) => midY + _amp * sin(i * pi / 2);
 
-  void _centerCurrent() {
-    if (!_controller.hasClients) return;
+  void _centerCurrent({bool animated = false}) {
+    if (!mounted || !_controller.hasClients) return;
     final current = widget.progress.level;
-    final target = _x(current - 1) -
-        _controller.position.viewportDimension / 2 +
-        _nodeR;
-    _controller.jumpTo(target.clamp(0.0, _controller.position.maxScrollExtent));
+    _centeredLevel = current;
+    final target = (_x(current - 1) -
+            _controller.position.viewportDimension / 2 +
+            _nodeR)
+        .clamp(0.0, _controller.position.maxScrollExtent);
+    if (animated) {
+      _controller.animateTo(target,
+          duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+    } else {
+      _controller.jumpTo(target);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final p = widget.progress;
-    final levels = max(p.level + widget.lookahead, 8);
+    // With a curriculum schedule, the path is exactly its levels — don't draw
+    // phantom locked nodes past the end. Without one, fall back to a window.
+    final levels = p.totalLevels > 0
+        ? p.totalLevels
+        : max(p.level + widget.lookahead, 8);
     final height = 2 * _amp + 2 * _nodeR + 2 * _pad;
     final midY = height / 2;
     final width = _x(levels - 1) + _nodeR + _pad;

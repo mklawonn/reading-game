@@ -9,6 +9,7 @@ import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 class _Piece {
   const _Piece(this.token, this.element);
@@ -242,38 +243,50 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  if (_wrong)
-                    Text('Not yet — try again',
-                        key: const Key('bw-wrong'),
-                        style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                  if (_solved)
-                    Column(
-                      key: const Key('bw-feedback'),
-                      children: [
-                        Text('🎉 ${_word.text}!',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        FilledButton(
-                          key: const Key('bw-next'),
-                          onPressed: _next,
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
+                  // Fixed-height slot keeps the board steady when it appears.
+                  FeedbackSlot(
+                    child: _solved
+                        ? Column(
+                            key: const Key('bw-feedback'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('🎉 ${_word.text}!',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall),
+                              FilledButton(
+                                key: const Key('bw-next'),
+                                onPressed: _next,
+                                child: const Text('Next'),
+                              ),
+                            ],
+                          )
+                        : _wrong
+                            ? Text('Not yet — try again',
+                                key: const Key('bw-wrong'),
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.error))
+                            : null,
+                  ),
                   const Spacer(),
                   // Scattered, draggable pieces.
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 16,
-                    runSpacing: 16,
-                    children: [
-                      for (final piece in _scatter)
-                        _DraggablePiece(
-                          key: Key('bw-piece-${piece.element.id}'),
-                          piece: piece,
-                          glyph: _glyph(piece.element),
-                          onTap: () => _placeNext(piece),
-                        ),
-                    ],
+                  SizedBox(
+                    width: double.infinity,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        for (final piece in _scatter)
+                          _DraggablePiece(
+                            key: Key('bw-piece-${piece.element.id}'),
+                            piece: piece,
+                            glyph: _glyph(piece.element),
+                            onTap: () => _placeNext(piece),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],

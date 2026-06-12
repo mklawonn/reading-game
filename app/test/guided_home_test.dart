@@ -31,6 +31,8 @@ class _FakeContent extends ContentService {
 class _FakeAudio implements AudioService {
   @override
   Future<void> speak(String text) async {}
+  @override
+  Future<void> stop() async {}
 }
 
 Widget _home(ProgressService progress) => MaterialApp(

@@ -9,6 +9,7 @@ import '../../models/phoneme.dart';
 import '../../progress/learning_event.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/feedback_slot.dart';
 
 /// **Sound Families** (Stage 3): minimal-pair contrast. Each round shows a target
 /// word and asks for the one option that belongs to its family —
@@ -207,9 +208,11 @@ class _FamiliesPageState extends State<FamiliesPage> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 12),
+                // Leading box mirrors the IconButton so the glyph is centered.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(width: 48),
                     GlyphView(target, size: 72),
                     IconButton(
                       key: const Key('fam-hear'),
@@ -219,38 +222,43 @@ class _FamiliesPageState extends State<FamiliesPage> {
                     ),
                   ],
                 ),
-                if (onset && _onsetPhoneme != null)
-                  Text(
-                    _onsetPhoneme!.stretchy
-                        ? 'a stretchy sound — hold it'
-                        : 'a pop sound — quick!',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                if (_wrong)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text('Not that one — try again',
-                        key: const Key('fam-wrong'),
-                        style:
-                            TextStyle(color: Theme.of(context).colorScheme.error)),
-                  ),
-                if (_solved)
-                  Padding(
-                    key: const Key('fam-feedback'),
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Text('🎉 Yes!',
-                            style: Theme.of(context).textTheme.headlineSmall),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          key: const Key('fam-next'),
-                          onPressed: _next,
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
-                  ),
+                // Always occupy the hint line so rhyme rounds don't shift up.
+                SizedBox(
+                  height: 20,
+                  child: onset && _onsetPhoneme != null
+                      ? Text(
+                          _onsetPhoneme!.stretchy
+                              ? 'a stretchy sound — hold it'
+                              : 'a pop sound — quick!',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        )
+                      : null,
+                ),
+                // Fixed-height slot: feedback never shoves the options around.
+                FeedbackSlot(
+                  child: _solved
+                      ? Column(
+                          key: const Key('fam-feedback'),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🎉 Yes!',
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(height: 8),
+                            FilledButton(
+                              key: const Key('fam-next'),
+                              onPressed: _next,
+                              child: const Text('Next'),
+                            ),
+                          ],
+                        )
+                      : _wrong
+                          ? Text('Not that one — try again',
+                              key: const Key('fam-wrong'),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error))
+                          : null,
+                ),
                 Expanded(
                   child: GridView.count(
                     padding: const EdgeInsets.all(16),

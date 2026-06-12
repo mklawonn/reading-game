@@ -73,12 +73,17 @@ class _LevelSessionScreenState extends State<LevelSessionScreen> {
     _intros = List.of(
         widget.engine.pendingIntros(_entryLevel, widget.progress.seenIntros));
     _gameId = _pickGame();
+    // Drain any stale level-up queue so a previous flow can never replay its
+    // celebrations inside (or after) this session.
+    widget.progress.takeJustLeveledUp();
     widget.progress.addListener(_onProgress);
   }
 
   @override
   void dispose() {
     widget.progress.removeListener(_onProgress);
+    // Cut any in-flight speech so audio never bleeds onto the home screen.
+    widget.audioService.stop();
     super.dispose();
   }
 
@@ -95,13 +100,19 @@ class _LevelSessionScreenState extends State<LevelSessionScreen> {
   Future<void> _beatLevel() async {
     widget.progress.removeListener(_onProgress);
     await widget.progress.flush(); // commit the win
-    for (final lv in widget.progress.takeJustLeveledUp()) {
-      if (!mounted) return;
-      final level = widget.schedule.levelAt(lv);
+    // One XP grant can cross several thresholds — celebrate once, not in a
+    // rapid-fire sequence of dialogs: show the level reached with every newly
+    // unlocked symbol combined.
+    final reached = widget.progress.takeJustLeveledUp();
+    if (reached.isNotEmpty && mounted) {
       await showLevelUp(
         context,
-        level: level,
-        newSymbols: [for (final id in level.introduce) _element(id)],
+        level: widget.schedule.levelAt(reached.last),
+        newSymbols: [
+          for (final lv in reached)
+            for (final id in widget.schedule.levelAt(lv).introduce)
+              _element(id),
+        ],
       );
     }
     _pop();
@@ -144,6 +155,7 @@ class _LevelSessionScreenState extends State<LevelSessionScreen> {
   }
 
   void _introDone() {
+    if (_intros.isEmpty) return; // guards a double-tap on "Got it!"
     final id = _intros.removeAt(0);
     widget.progress.markIntroSeen(id);
     setState(() {});

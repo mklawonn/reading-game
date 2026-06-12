@@ -10,6 +10,10 @@ import '../models/phoneme.dart';
 /// should be preferred, with TTS kept only as a fallback.
 abstract class AudioService {
   Future<void> speak(String text);
+
+  /// Cancels any in-flight playback. Called on context switches (e.g. leaving a
+  /// level session) so audio never bleeds into the next screen.
+  Future<void> stop();
 }
 
 class TtsAudioService implements AudioService {
@@ -33,6 +37,9 @@ class TtsAudioService implements AudioService {
     await _tts.stop();
     await _tts.speak(text);
   }
+
+  @override
+  Future<void> stop() => _tts.stop();
 }
 
 /// Stop/continuant-aware phoneme playback — the "sound layer" (see
