@@ -10,6 +10,9 @@ import '../models/phoneme.dart';
 /// voiceover clips exist (M1+), a clip referenced by a Content Bank `audio_ref`
 /// should be preferred, with TTS kept only as a fallback.
 abstract class AudioService {
+  /// Speaks [text]. The returned future completes when the utterance has
+  /// FINISHED playing (or was interrupted) — callers that must not talk over
+  /// it (e.g. a lesson auto-advance) can await it. Fakes complete immediately.
   Future<void> speak(String text);
 
   /// Cancels any in-flight playback. Called on context switches (e.g. leaving a
@@ -30,6 +33,10 @@ class TtsAudioService implements AudioService {
     await _tts.setSpeechRate(0.4); // slow and clear for early learners
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
+    // Make speak() resolve when the utterance finishes, so sequenced audio
+    // (last word → sentence echo; praise → next instruction) never talks
+    // over itself.
+    await _tts.awaitSpeakCompletion(true);
     _configured = true;
   }
 

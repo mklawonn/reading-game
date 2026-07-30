@@ -159,10 +159,12 @@ class _SoundMatchPageState extends State<SoundMatchPage> with SingleRoundFlow {
     });
     if (correct) {
       // Finishing the whole board is the effortful win — celebrate it aloud.
-      widget.audioService.speak(_solved
+      final speech = widget.audioService.speak(_solved
           ? '${symbol.syllable}! All matched — great job!'
           : '${symbol.syllable}!');
-      if (_solved) scheduleRoundComplete(widget.onRoundComplete);
+      if (_solved) {
+        scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
+      }
     } else {
       widget.audioService
           .speak('Oops! That sound is ${sound.syllable}. Try another one!');

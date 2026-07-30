@@ -226,8 +226,9 @@ class _BlendRevealPageState extends State<BlendRevealPage>
         _wrong = false;
         _score += 1;
       });
-      widget.audioService.speak('You got it! ${_word.text}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      final speech =
+          widget.audioService.speak('You got it! ${_word.text}!');
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       noteWrongAttempt();
       setState(() => _wrong = true);

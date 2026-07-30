@@ -161,9 +161,9 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage>
         _wrong = false;
         _score += 1;
       });
-      widget.audioService
+      final speech = widget.audioService
           .speak('${praiseLine(_random)} ${picked.syllable}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       noteWrongAttempt();
       setState(() => _wrong = true);

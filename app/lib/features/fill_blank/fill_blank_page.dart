@@ -196,9 +196,9 @@ class _FillBlankPageState extends State<FillBlankPage> with SingleRoundFlow {
       }
     });
     if (correct) {
-      widget.audioService
+      final speech = widget.audioService
           .speak('${praiseLine(_random)} ${element.syllable}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       widget.audioService
           .speak('Oops! ${element.syllable} does not fit. Try again!');

@@ -160,8 +160,9 @@ class SymbolHuntPageState extends State<SymbolHuntPage>
         _wrong = false;
         if (_complete) _score += 1;
       });
-      // The last find is the win — say so, out loud.
-      widget.audioService.speak(_complete
+      // The last find is the win — say so, out loud (and let it finish:
+      // the advance waits for this utterance).
+      final speech = widget.audioService.speak(_complete
           ? '${target.syllable}! You found them all!'
           : target.syllable);
       if (_complete) {
@@ -173,7 +174,7 @@ class SymbolHuntPageState extends State<SymbolHuntPage>
           correct: true,
           game: 'symbol_hunt',
         ));
-        scheduleRoundComplete(widget.onRoundComplete);
+        scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
       }
     } else {
       noteWrongAttempt();

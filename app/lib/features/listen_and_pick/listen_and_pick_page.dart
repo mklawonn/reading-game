@@ -148,10 +148,11 @@ class _ListenAndPickPageState extends State<ListenAndPickPage>
         _wrong = false;
         _score += 1;
       });
-      // Right answers must SOUND right: praise + the word, one utterance.
-      widget.audioService
+      // Right answers must SOUND right: praise + the word, one utterance —
+      // and the lesson waits for it to finish before moving on.
+      final speech = widget.audioService
           .speak('${praiseLine(_random)} ${picked.syllable}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       noteWrongAttempt();
       setState(() => _wrong = true);

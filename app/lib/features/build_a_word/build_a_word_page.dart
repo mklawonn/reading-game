@@ -208,9 +208,9 @@ class _BuildAWordPageState extends State<BuildAWordPage> with SingleRoundFlow {
       }
     });
     if (correct) {
-      widget.audioService
+      final speech = widget.audioService
           .speak('${praiseLine(_random)} ${_word.text}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       widget.audioService
           .speak('Not yet! Listen again: ${_word.text}.');

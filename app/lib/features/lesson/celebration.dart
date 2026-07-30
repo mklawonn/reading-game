@@ -30,10 +30,27 @@ class CelebrationView extends StatefulWidget {
 
 class _CelebrationViewState extends State<CelebrationView>
     with SingleTickerProviderStateMixin {
+  /// The whole show: confetti rains for the full duration (finite, so tests
+  /// and batteries can settle — long enough that the child, not the clock,
+  /// ends the moment). Stars pop within the first [_starPhase].
+  static const Duration _show = Duration(seconds: 15);
+  static const Duration _starPhase = Duration(milliseconds: 2400);
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2400),
+    duration: _show,
   )..forward();
+
+  /// 0..1 over the star phase (the first 2.4s), then holds at 1.
+  double get _starT => (_controller.value *
+          _show.inMilliseconds /
+          _starPhase.inMilliseconds)
+      .clamp(0.0, 1.0);
+
+  /// Monotonic confetti clock — the painter wraps particles itself, so this
+  /// just keeps rising for the whole show.
+  double get _confettiT =>
+      _controller.value * _show.inMilliseconds / _starPhase.inMilliseconds;
 
   static const _praise = ['You did it!', 'Hooray!', 'Great reading!'];
 
@@ -73,7 +90,7 @@ class _CelebrationViewState extends State<CelebrationView>
             animation: _controller,
             builder: (context, _) => CustomPaint(
               painter: _ConfettiPainter(
-                progress: _controller.value,
+                progress: _confettiT,
                 colors: [
                   scheme.primary,
                   scheme.tertiary,
@@ -108,7 +125,7 @@ class _CelebrationViewState extends State<CelebrationView>
                               size: 72, color: scheme.outlineVariant),
                           if (i < widget.stars)
                             Transform.scale(
-                              scale: _starScale(i, _controller.value),
+                              scale: _starScale(i, _starT),
                               child: Icon(
                                 Icons.star_rounded,
                                 key: Key('celebrate-star-$i'),

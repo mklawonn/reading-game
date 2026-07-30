@@ -154,25 +154,22 @@ class _EchoReadPageState extends State<EchoReadPage>
     return pool.take(count).toList(growable: false);
   }
 
-  void _speak(SyllableElement e) => widget.audioService.speak(e.syllable);
+  Future<void> _speak(SyllableElement e) =>
+      widget.audioService.speak(e.syllable);
 
   void _onTapToken(int index) {
     // Tap-to-hear is a hard app invariant: every token always speaks.
-    _speak(_tokens[index]);
+    final speech = _speak(_tokens[index]);
     // Only the expected (leftmost untapped) token advances — no penalty else.
     if (_done || index != _readCount) return;
     setState(() {
       _readCount += 1;
       if (_done) _score += 1;
     });
-    if (_done) _completeRound();
+    if (_done) _completeRound(afterLastWord: speech);
   }
 
-  void _completeRound() {
-    // Speak the whole sentence fluently — the "echo" the child just read —
-    // then praise the finish.
-    widget.audioService
-        .speak('${_tokens.map((e) => e.syllable).join(' ')}. You read it!');
+  void _completeRound({required Future<void> afterLastWord}) {
     widget.onEvent?.call(LearningEvent(
       itemId: _phrase?.answer ?? _tokens.first.id,
       skill: 'read',
@@ -180,8 +177,18 @@ class _EchoReadPageState extends State<EchoReadPage>
       correct: true,
       game: 'echo_read',
     ));
+    // Let the last word ring out ALONE first — speaking over it would rob the
+    // child of the token they just read — then echo the whole sentence
+    // fluently and praise the finish. The lesson advance waits for the echo.
+    final echoed = afterLastWord
+        .timeout(const Duration(seconds: 3), onTimeout: () {})
+        .then((_) {
+      if (!mounted) return Future<void>.value();
+      return widget.audioService
+          .speak('${_tokens.map((e) => e.syllable).join(' ')}. You read it!');
+    });
     // Flawless is always true: noteWrongAttempt is never called here.
-    scheduleRoundComplete(widget.onRoundComplete);
+    scheduleRoundComplete(widget.onRoundComplete, afterSpeech: echoed);
   }
 
   void _next() {

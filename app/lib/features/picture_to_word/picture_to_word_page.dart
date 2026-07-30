@@ -161,9 +161,9 @@ class _PictureToWordPageState extends State<PictureToWordPage>
         _wrong = false;
         _score += 1;
       });
-      widget.audioService
+      final speech = widget.audioService
           .speak('${praiseLine(_random)} ${picked.syllable}!');
-      scheduleRoundComplete(widget.onRoundComplete);
+      scheduleRoundComplete(widget.onRoundComplete, afterSpeech: speech);
     } else {
       setState(() => _wrong = true);
       noteWrongAttempt();

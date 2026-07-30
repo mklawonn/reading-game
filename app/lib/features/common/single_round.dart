@@ -13,25 +13,44 @@ import 'package:flutter/widgets.dart';
 mixin SingleRoundFlow<T extends StatefulWidget> on State<T> {
   Timer? _advanceTimer;
   bool _wrongThisRound = false;
+  int _epoch = 0; // invalidates in-flight completions on reset/dispose
 
-  /// How long the child sees/hears the solve celebration before advancing.
+  /// The minimum time the child sees the solve celebration before advancing.
   static const Duration advanceDelay = Duration(milliseconds: 1500);
+
+  /// Ceiling on waiting for celebration speech — a wedged TTS engine must
+  /// never freeze the lesson.
+  static const Duration _speechWaitCap = Duration(seconds: 6);
 
   /// Call on every wrong attempt this round.
   void noteWrongAttempt() => _wrongThisRound = true;
 
   /// Call when a new round starts.
-  void resetRoundFlaws() => _wrongThisRound = false;
+  void resetRoundFlaws() {
+    _wrongThisRound = false;
+    _epoch++;
+  }
 
-  /// Call when the round is solved: after [advanceDelay], reports completion
-  /// (and whether it was flawless) to [onRoundComplete]. No-op when null —
-  /// standalone pages keep their own "next" flow.
-  void scheduleRoundComplete(void Function({required bool flawless})? onRoundComplete) {
+  /// Call when the round is solved: reports completion (and whether it was
+  /// flawless) to [onRoundComplete] once BOTH [advanceDelay] has elapsed and
+  /// [afterSpeech] (the solve-celebration utterance) has finished — so the
+  /// next step's instruction never cuts the praise off mid-word. No-op when
+  /// null — standalone pages keep their own "next" flow.
+  void scheduleRoundComplete(
+    void Function({required bool flawless})? onRoundComplete, {
+    Future<void>? afterSpeech,
+  }) {
     if (onRoundComplete == null) return;
     final flawless = !_wrongThisRound;
+    final epoch = _epoch;
     _advanceTimer?.cancel();
-    _advanceTimer = Timer(advanceDelay, () {
-      if (mounted) onRoundComplete(flawless: flawless);
+    final minDelay = Completer<void>();
+    _advanceTimer = Timer(advanceDelay, minDelay.complete);
+    final speech = (afterSpeech ?? Future<void>.value())
+        .timeout(_speechWaitCap, onTimeout: () {})
+        .catchError((_) {});
+    Future.wait([minDelay.future, speech]).then((_) {
+      if (mounted && epoch == _epoch) onRoundComplete(flawless: flawless);
     });
   }
 
@@ -49,6 +68,7 @@ mixin SingleRoundFlow<T extends StatefulWidget> on State<T> {
   @override
   void dispose() {
     _advanceTimer?.cancel();
+    _epoch++;
     super.dispose();
   }
 }
