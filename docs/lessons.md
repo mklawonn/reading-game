@@ -30,14 +30,25 @@ Home (level path) ─ Play ─▶ Lesson (≈8 steps) ─▶ Celebration (1–3 
 * A **level** = `lessons` (2–3) short lessons; finishing all of them levels up.
   Progress is *lessons completed*, not raw XP (XP remains underneath for the
   decoupled rewards layer — achievements, streaks).
-* A **lesson** = an ordered plan of steps built by [`LessonPlan`](../app/lib/learning/lesson_plan.dart):
-  * every not-yet-met symbol → a **Meet card** immediately followed by an exercise
-    *focused on that symbol* (guarantees new symbols get practiced — this also fixes
-    the working-set-cap starvation of unseen items);
-  * remaining slots are filled from the level's game list in shuffled "bags" so types
-    vary and never repeat back-to-back;
-  * an exercise answered wrong is **re-queued** once near the end ("let's try that
-    one again"), capped so a lesson always ends.
+* A **lesson** = an ordered plan of steps built by [`LessonPlan`](../app/lib/learning/lesson_plan.dart).
+  Every lesson carries one **theme** — a coherent focus, not a random game salad:
+  * **Meet & drill** (while the level has unmet symbols): each new symbol gets its
+    two-beat Meet card (picture+name, then the written form revealed as its own
+    taught fact: "And this says cat!") **immediately followed by an escalating
+    drill block focused on it** — hear it (`listen_and_pick`), hunt it
+    (`symbol_hunt`/`sound_match`), then read it (`find_the_character`/
+    `picture_to_word`). Print exposure always follows sound ownership, and
+    retention drilling happens *now*, not three exercises later. (This also fixes
+    the working-set-cap starvation of unseen items.)
+  * **Sounds** (middle lessons): listening/matching games only.
+  * **Reading** (the level's closing lesson): print-direction games only, opening
+    with the level's new symbols for retention.
+  * Within a theme, slots are filled from shuffled "bags" so types vary and never
+    repeat back-to-back; an exercise answered wrong is **re-queued** once near the
+    end ("let's try that one again"), capped so a lesson always ends.
+* **Look-alike guard**: pictographs a child can't tell apart at emoji fidelity
+  (dog/pup, man/boy, can/pot — `kConfusablePictographs`) are never seated in the
+  same round; otherwise the voice's request looks unmatchable.
 * Each exercise is **one round** of a game (`singleRound: true`): on solve the game
   celebrates briefly and **auto-advances** (no "next" tap). The segmented progress
   bar at the top fills one notch per step.

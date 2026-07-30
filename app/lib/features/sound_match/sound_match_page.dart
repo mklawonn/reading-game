@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../content/glyph_view.dart';
+import '../../content/pictograph_emoji.dart';
 import '../../learning/item_sampler.dart';
 import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
@@ -126,7 +127,8 @@ class _SoundMatchPageState extends State<SoundMatchPage> with SingleRoundFlow {
     final rest = [..._pool]
       ..removeWhere((e) => e.id == primary.id)
       ..shuffle(_random);
-    final round = [primary, ...rest.take(n - 1)];
+    // Never seat look-alike pictures in one matching board (dog vs pup, …).
+    final round = fillVisuallyDistinct([primary], rest, n, (e) => e.id);
     // Shuffle the two columns independently so positions don't line up.
     _symbols = [...round]..shuffle(_random);
     _sounds = [...round]..shuffle(_random);

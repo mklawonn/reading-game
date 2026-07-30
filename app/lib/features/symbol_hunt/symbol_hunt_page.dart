@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../content/glyph_view.dart';
+import '../../content/pictograph_emoji.dart';
 import '../../learning/item_sampler.dart';
 import '../../models/content_bank.dart';
 import '../../progress/learning_event.dart';
@@ -125,9 +126,18 @@ class SymbolHuntPageState extends State<SymbolHuntPage>
     _firstRound = false;
 
     // 2–3 copies of the target (never crowding out the distractors), the rest
-    // random OTHER symbols — duplicates among the others are fine.
+    // random OTHER symbols — duplicates among the others are fine, but a
+    // look-alike of the target (dog vs pup, …) would make the hunt unfair.
     final targetCount = min(2 + _random.nextInt(2), max(1, widget.gridSize - 2));
-    final others = _pool.where((e) => e.id != target!.id).toList(growable: false);
+    var others = _pool
+        .where((e) =>
+            e.id != target!.id && !confusablePictographs(e.id, target.id))
+        .toList(growable: false);
+    if (others.isEmpty) {
+      // Degenerate pool (every other symbol is a look-alike): better an
+      // unfair-ish board than a crash — real curricula never hit this.
+      others = _pool.where((e) => e.id != target!.id).toList(growable: false);
+    }
     _cells = [
       for (var i = 0; i < targetCount; i++) target,
       for (var i = targetCount; i < widget.gridSize; i++)

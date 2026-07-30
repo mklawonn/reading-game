@@ -120,7 +120,9 @@ class _FindTheCharacterPageState extends State<FindTheCharacterPage>
     final distractors = [..._pool]
       ..removeWhere((e) => e.id == target.id)
       ..shuffle(_random);
-    _options = [target, ...distractors.take(count - 1)]..shuffle(_random);
+    // Never seat look-alike pictures together (dog vs pup, …).
+    _options = fillVisuallyDistinct([target], distractors, count, (e) => e.id)
+      ..shuffle(_random);
     _target = target;
     _solved = false;
     _wrong = false;

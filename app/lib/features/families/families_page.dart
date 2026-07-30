@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../content/glyph_view.dart';
+import '../../content/pictograph_emoji.dart';
 import '../../learning/item_sampler.dart';
 import '../../models/content_bank.dart';
 import '../../models/phoneme.dart';
@@ -150,14 +151,17 @@ class _FamiliesPageState extends State<FamiliesPage> with SingleRoundFlow {
         _family(target, mode).where((e) => e.id != target.id).toList();
     final answer = family[_random.nextInt(family.length)];
 
-    // Distractors: outside this family (different rime / onset) and not the answer.
+    // Distractors: outside this family (different rime / onset), not the
+    // answer, and never a look-alike of the prompt or of each other.
     final distractors = _pool.where((e) {
       if (e.id == target.id || e.id == answer.id) return false;
+      if (confusablePictographs(e.id, target.id)) return false;
       return _familyKey(e, mode) != key;
     }).toList()
       ..shuffle(_random);
 
-    _options = [answer, ...distractors.take(widget.optionCount - 1)]
+    _options = fillVisuallyDistinct(
+        [answer], distractors, widget.optionCount, (e) => e.id)
       ..shuffle(_random);
     _target = target;
     _answer = answer;

@@ -5,50 +5,116 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:reading_game/learning/lesson_plan.dart';
 import 'package:reading_game/models/curriculum.dart';
 
-CurriculumLevel _level({List<String> introduce = const [], List<String> games = const ['find_the_character']}) =>
-    CurriculumLevel(id: 1, stage: 1, title: 'T', introduce: introduce, games: games, xpToAdvance: 50);
+CurriculumLevel _level({
+  List<String> introduce = const [],
+  List<String> games = const ['find_the_character'],
+  int lessons = 3,
+}) =>
+    CurriculumLevel(
+        id: 1,
+        stage: 1,
+        title: 'T',
+        introduce: introduce,
+        games: games,
+        xpToAdvance: 50,
+        lessons: lessons);
 
 void main() {
-  test('every unmet symbol gets an intro chased by a focused exercise', () {
+  test('meet lesson: each new symbol is taught then drilled in an escalating block', () {
     final steps = LessonPlan.build(
-      level: _level(introduce: ['cat', 'dog'], games: ['listen_and_pick', 'sound_match']),
+      level: _level(
+          introduce: ['cat', 'dog'],
+          games: ['find_the_character', 'symbol_hunt', 'listen_and_pick']),
       seenIntros: const {},
       random: Random(1),
     );
 
+    // Intro cat → three drills on cat, ear-first and print-last.
     expect(steps[0], isA<IntroStep>().having((s) => s.symbolId, 'symbol', 'cat'));
     expect(
-        steps[1],
-        isA<ExerciseStep>()
-            .having((s) => s.focusId, 'focus', 'cat')
-            .having((s) => s.gameId, 'game', 'listen_and_pick'));
-    expect(steps[2], isA<IntroStep>().having((s) => s.symbolId, 'symbol', 'dog'));
-    expect(steps[3], isA<ExerciseStep>().having((s) => s.focusId, 'focus', 'dog'));
+        steps.sublist(1, 4),
+        everyElement(
+            isA<ExerciseStep>().having((s) => s.focusId, 'focus', 'cat')));
+    expect(
+        [for (final s in steps.sublist(1, 4)) (s as ExerciseStep).gameId],
+        ['listen_and_pick', 'symbol_hunt', 'find_the_character']);
+    // Then the same treatment for dog.
+    expect(steps[4], isA<IntroStep>().having((s) => s.symbolId, 'symbol', 'dog'));
+    expect(
+        steps.sublist(5, 8),
+        everyElement(
+            isA<ExerciseStep>().having((s) => s.focusId, 'focus', 'dog')));
   });
 
-  test('already-met symbols are skipped and the lesson is pure exercises', () {
+  test('meeting three or more symbols shortens each drill block to two', () {
     final steps = LessonPlan.build(
-      level: _level(introduce: ['cat'], games: ['listen_and_pick', 'sound_match', 'symbol_hunt']),
-      seenIntros: const {'cat'},
+      level: _level(
+          introduce: ['a', 'b', 'c'],
+          games: ['listen_and_pick', 'symbol_hunt', 'find_the_character']),
+      seenIntros: const {},
       random: Random(1),
+    );
+    expect(steps.whereType<IntroStep>().length, 3);
+    expect(steps.whereType<ExerciseStep>().length, 6); // 3 × 2
+  });
+
+  test('middle lessons are sounds-themed and open with the level symbols', () {
+    final steps = LessonPlan.build(
+      level: _level(
+          introduce: ['cat', 'dog'],
+          games: [
+            'find_the_character', 'listen_and_pick', 'sound_match',
+            'symbol_hunt', 'picture_to_word',
+          ]),
+      seenIntros: const {'cat', 'dog'},
+      lessonIndex: 1, // middle of a 3-lesson level
+      random: Random(2),
     );
     expect(steps.whereType<IntroStep>(), isEmpty);
-    expect(steps.length, LessonPlan.defaultExerciseCount);
+    final exercises = steps.whereType<ExerciseStep>().toList();
+    // Only listening/matching games.
+    for (final e in exercises) {
+      expect(LessonPlan.soundGames, contains(e.gameId), reason: e.gameId);
+    }
+    // The level's own symbols come back first (retention).
+    expect({exercises[0].focusId, exercises[1].focusId}, {'cat', 'dog'});
   });
 
-  test('low-variety levels get shorter lessons', () {
+  test('the last lesson of a level is reading-themed', () {
     final steps = LessonPlan.build(
-      level: _level(games: ['listen_and_pick', 'sound_match']),
-      seenIntros: const {},
-      random: Random(1),
+      level: _level(
+          introduce: ['cat', 'dog'],
+          games: [
+            'find_the_character', 'listen_and_pick', 'sound_match',
+            'picture_to_word', 'echo_read',
+          ]),
+      seenIntros: const {'cat', 'dog'},
+      lessonIndex: 2, // last of 3
+      random: Random(3),
     );
-    expect(steps.length, LessonPlan.defaultExerciseCount - 2);
+    for (final e in steps.whereType<ExerciseStep>()) {
+      expect(LessonPlan.readingGames, contains(e.gameId), reason: e.gameId);
+    }
   });
 
-  test('games vary — never the same type twice in a row', () {
+  test('a theme that cannot fill falls back to the whole game list', () {
     final steps = LessonPlan.build(
-      level: _level(games: ['a', 'b', 'c']),
+      level: _level(
+          introduce: ['cat'],
+          games: ['find_the_character', 'listen_and_pick']),
+      seenIntros: const {'cat'},
+      lessonIndex: 1, // sounds theme, but only one sound game available
+      random: Random(4),
+    );
+    final ids = steps.whereType<ExerciseStep>().map((s) => s.gameId).toSet();
+    expect(ids, containsAll(['find_the_character', 'listen_and_pick']));
+  });
+
+  test('games vary — never the same type twice in a row when avoidable', () {
+    final steps = LessonPlan.build(
+      level: _level(games: ['listen_and_pick', 'sound_match', 'symbol_hunt']),
       seenIntros: const {},
+      lessonIndex: 1,
       random: Random(7),
     );
     final ids = steps.whereType<ExerciseStep>().map((s) => s.gameId).toList();
@@ -61,20 +127,10 @@ void main() {
     final steps = LessonPlan.build(
       level: _level(games: ['find_the_character']),
       seenIntros: const {},
+      lessonIndex: 2,
       random: Random(2),
     );
-    expect(steps.length, LessonPlan.defaultExerciseCount - 2);
+    expect(steps, isNotEmpty);
     expect(steps.whereType<ExerciseStep>().length, steps.length);
-  });
-
-  test('total exercise count stays at the lesson size with intros present', () {
-    final steps = LessonPlan.build(
-      level: _level(introduce: ['cat', 'dog'], games: ['a', 'b', 'c']),
-      seenIntros: const {},
-      random: Random(3),
-    );
-    expect(steps.whereType<IntroStep>().length, 2);
-    expect(steps.whereType<ExerciseStep>().length,
-        LessonPlan.defaultExerciseCount);
   });
 }

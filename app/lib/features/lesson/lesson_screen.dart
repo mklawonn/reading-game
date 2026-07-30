@@ -82,6 +82,7 @@ class _LessonScreenState extends State<LessonScreen> {
     _steps = List.of(LessonPlan.build(
       level: widget.schedule.levelAt(_level),
       seenIntros: widget.progress.seenIntros,
+      lessonIndex: widget.progress.lessonsIntoLevel,
       random: _random,
     ));
     // Drain any stale level-up queue so a previous flow can never replay its
