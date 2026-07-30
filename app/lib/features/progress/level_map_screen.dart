@@ -11,12 +11,27 @@ import '../../progress/progress_service.dart';
 /// current level shows an XP ring, future levels are locked. Scrolls
 /// horizontally and auto-centers the current level.
 class LevelMap extends StatefulWidget {
-  const LevelMap({super.key, required this.progress, this.lookahead = 4});
+  const LevelMap({
+    super.key,
+    required this.progress,
+    this.lookahead = 4,
+    this.badges = const {},
+    this.onTapNode,
+  });
 
   final ProgressService progress;
 
   /// How many locked levels to show beyond the current one.
   final int lookahead;
+
+  /// Called with the 1-based level number of a tapped node. Children tap the
+  /// shiny path nodes constantly — dead taps read as "the app ignores me".
+  final ValueChanged<int>? onTapNode;
+
+  /// Per-level badge (level id → emoji/short syllable): each node wears the
+  /// symbol its level teaches, so the path shows *what* was learned and what's
+  /// coming — not just numbers. Empty = classic number/star/lock faces.
+  final Map<int, String> badges;
 
   @override
   State<LevelMap> createState() => _LevelMapState();
@@ -120,13 +135,18 @@ class _LevelMapState extends State<LevelMap> {
                 Positioned(
                   left: points[i].dx - _nodeR - (i + 1 == p.level ? 4 : 0),
                   top: points[i].dy - _nodeR - (i + 1 == p.level ? 4 : 0),
-                  child: _LevelNode(
-                    level: i + 1,
-                    current: p.level,
-                    radius: _nodeR,
-                    xpFraction: p.xpForThisLevel == 0
-                        ? 0
-                        : p.xpIntoLevel / p.xpForThisLevel,
+                  child: GestureDetector(
+                    key: Key('map-node-${i + 1}'),
+                    onTap: widget.onTapNode == null
+                        ? null
+                        : () => widget.onTapNode!(i + 1),
+                    child: _LevelNode(
+                      level: i + 1,
+                      current: p.level,
+                      radius: _nodeR,
+                      fraction: p.levelFraction,
+                      badge: widget.badges[i + 1],
+                    ),
                   ),
                 ),
             ],
@@ -173,13 +193,23 @@ class _LevelNode extends StatelessWidget {
     required this.level,
     required this.current,
     required this.radius,
-    required this.xpFraction,
+    required this.fraction,
+    this.badge,
   });
 
   final int level;
   final int current;
   final double radius;
-  final double xpFraction;
+
+  /// How much of the current level is complete (lessons done / needed).
+  final double fraction;
+
+  /// The symbol this level teaches (emoji or short syllable); null = classic
+  /// number/star/lock face.
+  final String? badge;
+
+  bool get _emojiBadge =>
+      badge != null && badge!.isNotEmpty && badge!.runes.first > 0x2000;
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +231,28 @@ class _LevelNode extends StatelessWidget {
       fg = scheme.outline;
     }
 
+    // The face: the level's own symbol when we have one (faded+locked until
+    // reached — a teaser of what's coming), else number/star/lock.
+    final Widget center;
+    if (badge != null) {
+      final text = Text(
+        badge!,
+        style: _emojiBadge
+            ? TextStyle(fontSize: r * 0.95)
+            : TextStyle(
+                fontSize: r * 0.55, fontWeight: FontWeight.w800, color: fg),
+      );
+      center = done || isCurrent ? text : Opacity(opacity: 0.4, child: text);
+    } else if (done) {
+      center = Icon(Icons.star, color: fg, size: r);
+    } else if (isCurrent) {
+      center = Text('$level',
+          style: TextStyle(
+              color: fg, fontWeight: FontWeight.bold, fontSize: r * 0.8));
+    } else {
+      center = Icon(Icons.lock, color: fg, size: r * 0.8);
+    }
+
     final Widget face = Container(
       width: r * 2,
       height: r * 2,
@@ -210,17 +262,29 @@ class _LevelNode extends StatelessWidget {
         shape: BoxShape.circle,
         border: isCurrent ? Border.all(color: scheme.primary, width: 2) : null,
       ),
-      child: done
-          ? Icon(Icons.star, color: fg, size: r)
-          : isCurrent
-              ? Text('$level',
-                  style: TextStyle(
-                      color: fg, fontWeight: FontWeight.bold, fontSize: r * 0.8))
-              : Icon(Icons.lock, color: fg, size: r * 0.8),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          center,
+          // Badge-faced locked/done nodes keep a tiny status marker.
+          if (badge != null && !done && !isCurrent)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Icon(Icons.lock, color: fg, size: r * 0.55),
+            ),
+          if (badge != null && done)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Icon(Icons.star, color: Colors.amber, size: r * 0.6),
+            ),
+        ],
+      ),
     );
 
     if (!isCurrent) return face;
-    // Current level: wrap the node in an XP-fill ring.
+    // Current level: wrap the node in a lesson-fill ring.
     return SizedBox(
       width: r * 2 + 10,
       height: r * 2 + 10,
@@ -231,7 +295,7 @@ class _LevelNode extends StatelessWidget {
             width: r * 2 + 10,
             height: r * 2 + 10,
             child: CircularProgressIndicator(
-              value: xpFraction.clamp(0.0, 1.0),
+              value: fraction.clamp(0.0, 1.0),
               strokeWidth: 5,
               backgroundColor: scheme.surfaceContainerHighest,
             ),

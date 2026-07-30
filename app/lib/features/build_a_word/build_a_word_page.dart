@@ -11,6 +11,8 @@ import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
 import '../common/next_arrow_bar.dart';
+import '../common/praise.dart';
+import '../common/single_round.dart';
 
 class _Piece {
   const _Piece(this.token, this.element);
@@ -19,8 +21,11 @@ class _Piece {
 }
 
 /// **Build-a-Word** (Stage 2): the core syllabary blending mechanic. The target
-/// word is shown and heard; the child drags (or taps) scattered syllable cards
-/// into ordered slots to blend them into the word — e.g. `o` + `pen` → `open`.
+/// word is **heard** (not shown — showing its print would let the child match
+/// letter shapes instead of blending sounds); the child drags (or taps)
+/// scattered syllable cards into ordered slots to blend them into the word —
+/// e.g. `o` + `pen` → `open`. The printed word is revealed on the solve as
+/// reinforcement.
 class BuildAWordPage extends StatefulWidget {
   const BuildAWordPage({
     super.key,
@@ -31,6 +36,9 @@ class BuildAWordPage extends StatefulWidget {
     this.allowedIds,
     this.embedded = false,
     this.onEvent,
+    this.singleRound = false,
+    this.focusId,
+    this.onRoundComplete,
   });
 
   final ContentService contentService;
@@ -51,11 +59,21 @@ class BuildAWordPage extends StatefulWidget {
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
 
+  /// Lesson-step mode: play exactly one round, then auto-advance via
+  /// [onRoundComplete] (no "next" tap). See [SingleRoundFlow].
+  final bool singleRound;
+
+  /// Prefer the word with this id — or containing this element — first.
+  final String? focusId;
+
+  /// Called when the single round is done; `flawless` = no wrong builds.
+  final void Function({required bool flawless})? onRoundComplete;
+
   @override
   State<BuildAWordPage> createState() => _BuildAWordPageState();
 }
 
-class _BuildAWordPageState extends State<BuildAWordPage> {
+class _BuildAWordPageState extends State<BuildAWordPage> with SingleRoundFlow {
   late final Random _random = widget.random ?? Random();
   late final Future<void> _ready = _load();
 
@@ -91,6 +109,8 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
     if (_buildable.isNotEmpty) {
       _startRound();
       _speakInstruction();
+    } else {
+      skipUnplayableRound(widget.onRoundComplete);
     }
   }
 
@@ -103,8 +123,20 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
       .map((id) => _elementById[id]?.introducedStage ?? 2)
       .fold(1, (a, b) => a > b ? a : b);
 
+  Word? _focusWord() {
+    if (_prevWordId != null) return null; // first round only
+    final id = widget.focusId;
+    if (id == null) return null;
+    for (final w in _buildable) {
+      if (w.id == id || w.segmentation.contains(id)) return w;
+    }
+    return null;
+  }
+
   void _startRound() {
-    _word = widget.sampler?.pick<Word>(
+    resetRoundFlaws();
+    _word = _focusWord() ??
+        widget.sampler?.pick<Word>(
           _buildable,
           id: (w) => w.id,
           stage: _wordStage,
@@ -171,10 +203,18 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
         _solved = true;
         _score += 1;
       } else {
+        noteWrongAttempt();
         _wrong = true;
       }
     });
-    if (correct) widget.audioService.speak(_word.text);
+    if (correct) {
+      widget.audioService
+          .speak('${praiseLine(_random)} ${_word.text}!');
+      scheduleRoundComplete(widget.onRoundComplete);
+    } else {
+      widget.audioService
+          .speak('Not yet! Listen again: ${_word.text}.');
+    }
   }
 
   void _next() {
@@ -219,14 +259,31 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Text('Make this word', style: Theme.of(context).textTheme.titleMedium),
+                  Text('Listen, then build the word',
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(_word.text,
-                      key: const Key('bw-target'),
-                      style: Theme.of(context).textTheme.displaySmall),
+                  // The printed word only appears once solved — before that the
+                  // target lives in the child's ear, so they must blend sounds
+                  // rather than match letter shapes.
+                  SizedBox(
+                    height: 48,
+                    child: _solved
+                        ? Text(_word.text,
+                            key: const Key('bw-target'),
+                            style: Theme.of(context).textTheme.displaySmall)
+                        : Text('? ? ?',
+                            key: const Key('bw-mystery'),
+                            style: Theme.of(context)
+                                .textTheme
+                                .displaySmall
+                                ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outline)),
+                  ),
                   FilledButton.icon(
                     key: const Key('bw-hear'),
-                    onPressed: () => widget.audioService.speak(_word.text),
+                    onPressed: _speakInstruction,
                     icon: const Icon(Icons.volume_up),
                     label: const Text('Hear it'),
                   ),
@@ -281,12 +338,14 @@ class _BuildAWordPageState extends State<BuildAWordPage> {
                       ],
                     ),
                   ),
-                  // Big, always-present advance arrow — only tappable once solved.
-                  NextArrowBar(
-                    key: const Key('bw-next'),
-                    enabled: _solved,
-                    onNext: _next,
-                  ),
+                  // Big, always-present advance arrow — only tappable once
+                  // solved. Lesson steps auto-advance instead, so no arrow.
+                  if (!widget.singleRound)
+                    NextArrowBar(
+                      key: const Key('bw-next'),
+                      enabled: _solved,
+                      onNext: _next,
+                    ),
                 ],
               ),
             ),

@@ -10,6 +10,7 @@ import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
 import '../common/next_arrow_bar.dart';
+import '../common/single_round.dart';
 
 /// **Sound-Match** (Stages 1–2): the child drags each symbol (pictograph/glyph)
 /// onto **the sound it makes**; tapping a sound chip plays it. This directly
@@ -29,6 +30,9 @@ class SoundMatchPage extends StatefulWidget {
     this.allowedIds,
     this.embedded = false,
     this.onEvent,
+    this.singleRound = false,
+    this.focusId,
+    this.onRoundComplete,
   });
 
   final ContentService contentService;
@@ -52,11 +56,21 @@ class SoundMatchPage extends StatefulWidget {
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
 
+  /// Lesson-step mode: play exactly one round, then auto-advance via
+  /// [onRoundComplete] (no "next" tap). See [SingleRoundFlow].
+  final bool singleRound;
+
+  /// Prefer this element as the round's focus item.
+  final String? focusId;
+
+  /// Called when the single round is done; `flawless` = no wrong drops.
+  final void Function({required bool flawless})? onRoundComplete;
+
   @override
   State<SoundMatchPage> createState() => _SoundMatchPageState();
 }
 
-class _SoundMatchPageState extends State<SoundMatchPage> {
+class _SoundMatchPageState extends State<SoundMatchPage> with SingleRoundFlow {
   late final Random _random = widget.random ?? Random();
   late final Future<void> _ready = _load();
 
@@ -79,16 +93,29 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
     if (_pool.length >= 2) {
       setState(_startRound);
       _speakInstruction();
+    } else {
+      skipUnplayableRound(widget.onRoundComplete);
     }
   }
 
   static const _instruction = 'Match each picture to the sound it makes.';
   void _speakInstruction() => widget.audioService.speak(_instruction);
 
+  SyllableElement? _focusElement() {
+    if (_primaryId != null) return null; // first round only
+    for (final e in _pool) {
+      if (e.id == widget.focusId) return e;
+    }
+    return null;
+  }
+
   void _startRound() {
+    resetRoundFlaws();
     final n = min(widget.setSize, _pool.length);
-    // Mastery picks the round's focus item; the rest fill in around it.
-    final primary = widget.sampler?.pick(
+    // The lesson's focus item wins; else mastery picks the round's focus item;
+    // the rest fill in around it.
+    final primary = _focusElement() ??
+        widget.sampler?.pick<SyllableElement>(
           _pool,
           id: (e) => e.id,
           stage: (e) => e.introducedStage,
@@ -120,16 +147,32 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
       correct: correct,
       game: 'sound_match',
     ));
-    widget.audioService.speak(sound.syllable);
     setState(() {
       if (correct) {
         _matched.add(symbol.id);
         _wrongSoundId = null;
         if (_solved) _score += 1;
       } else {
+        noteWrongAttempt();
         _wrongSoundId = sound.id;
       }
     });
+    if (correct) {
+      // Finishing the whole board is the effortful win — celebrate it aloud.
+      widget.audioService.speak(_solved
+          ? '${symbol.syllable}! All matched — great job!'
+          : '${symbol.syllable}!');
+      if (_solved) scheduleRoundComplete(widget.onRoundComplete);
+    } else {
+      widget.audioService
+          .speak('Oops! That sound is ${sound.syllable}. Try another one!');
+    }
+  }
+
+  /// Any drop that missed every target still answers the child aloud —
+  /// silence after an honest near-miss reads as "the game is broken".
+  void _onDragMissed() {
+    widget.audioService.speak('Almost! Drop it on a sound.');
   }
 
   void _next() {
@@ -183,6 +226,12 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                           Draggable<SyllableElement>(
                             key: Key('sm-symbol-${e.id}'),
                             data: e,
+                            // A fresh attempt clears any lingering "wrong" red.
+                            onDragStarted: () =>
+                                setState(() => _wrongSoundId = null),
+                            onDragEnd: (details) {
+                              if (!details.wasAccepted) _onDragMissed();
+                            },
                             feedback: Material(
                                 color: Colors.transparent,
                                 child: _SymbolChip(element: e)),
@@ -197,15 +246,9 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                       ],
                     ),
                   ),
-                  const Spacer(),
-                  // Fixed-height slot keeps the board steady when it appears.
-                  FeedbackSlot(
-                    child: _solved
-                        ? Text('🎉 All matched!',
-                            key: const Key('sm-feedback'),
-                            style: Theme.of(context).textTheme.headlineSmall)
-                        : null,
-                  ),
+                  // Keep the two rows close: a full-screen drag is beyond
+                  // little arms and thumbs.
+                  const SizedBox(height: 20),
                   // Sound targets (tap to hear, drop a symbol to match).
                   SizedBox(
                     width: double.infinity,
@@ -221,17 +264,32 @@ class _SoundMatchPageState extends State<SoundMatchPage> {
                             matched: _matched.contains(e.id),
                             wrong: _wrongSoundId == e.id,
                             onTap: () => widget.audioService.speak(e.syllable),
+                            // Hovering a chip while dragging plays its sound —
+                            // the child never has to pre-memorize the mapping.
+                            onHover: () =>
+                                widget.audioService.speak(e.syllable),
                             onAccept: (symbol) => _onDrop(symbol, e),
                           ),
                       ],
                     ),
                   ),
-                  // Big, always-present advance arrow — only tappable once solved.
-                  NextArrowBar(
-                    key: const Key('sm-next'),
-                    enabled: _solved,
-                    onNext: _next,
+                  // Fixed-height slot keeps the board steady when it appears.
+                  FeedbackSlot(
+                    child: _solved
+                        ? Text('🎉 All matched!',
+                            key: const Key('sm-feedback'),
+                            style: Theme.of(context).textTheme.headlineSmall)
+                        : null,
                   ),
+                  const Spacer(),
+                  // Big, always-present advance arrow — only tappable once
+                  // solved. Lesson steps auto-advance instead, so no arrow.
+                  if (!widget.singleRound)
+                    NextArrowBar(
+                      key: const Key('sm-next'),
+                      enabled: _solved,
+                      onNext: _next,
+                    ),
                 ],
               ),
             ),
@@ -273,6 +331,7 @@ class _SoundChip extends StatelessWidget {
     required this.matched,
     required this.wrong,
     required this.onTap,
+    required this.onHover,
     required this.onAccept,
   });
 
@@ -280,12 +339,19 @@ class _SoundChip extends StatelessWidget {
   final bool matched;
   final bool wrong;
   final VoidCallback onTap;
+
+  /// A dragged symbol entered this target — play the sound it stands for.
+  final VoidCallback onHover;
   final ValueChanged<SyllableElement> onAccept;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return DragTarget<SyllableElement>(
+      onWillAcceptWithDetails: (details) {
+        if (!matched) onHover();
+        return true;
+      },
       onAcceptWithDetails: (details) => onAccept(details.data),
       builder: (context, candidate, rejected) {
         final highlight = candidate.isNotEmpty;
@@ -296,20 +362,25 @@ class _SoundChip extends StatelessWidget {
                 : scheme.surfaceContainerHighest;
         return GestureDetector(
           onTap: onTap,
-          child: Container(
-            width: 88,
-            height: 88,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: scheme.outlineVariant, width: 2),
+          // The invisible margin widens the drop zone: a near-miss from a
+          // wobbly little hand still lands.
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Container(
+              width: 88,
+              height: 88,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: scheme.outlineVariant, width: 2),
+              ),
+              // Once matched, the chip shows the symbol it captured.
+              child: matched
+                  ? GlyphView(element, size: 48)
+                  : Icon(Icons.volume_up,
+                      size: 36, color: scheme.onSurfaceVariant),
             ),
-            // Once matched, the chip shows the symbol it captured.
-            child: matched
-                ? GlyphView(element, size: 48)
-                : Icon(Icons.volume_up,
-                    size: 36, color: scheme.onSurfaceVariant),
           ),
         );
       },

@@ -11,6 +11,8 @@ import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
 import '../common/next_arrow_bar.dart';
+import '../common/praise.dart';
+import '../common/single_round.dart';
 
 /// **Fill-in-the-Blank** (Stages 1–4): a short phrase is shown with one token
 /// missing; the child drags the right symbol into the slot. Every token is a
@@ -29,6 +31,9 @@ class FillBlankPage extends StatefulWidget {
     this.allowedIds,
     this.embedded = false,
     this.onEvent,
+    this.singleRound = false,
+    this.focusId,
+    this.onRoundComplete,
   });
 
   final ContentService contentService;
@@ -53,11 +58,21 @@ class FillBlankPage extends StatefulWidget {
   /// Emits a [LearningEvent] on each drop (the progression seam).
   final void Function(LearningEvent)? onEvent;
 
+  /// Lesson-step mode: play exactly one round, then auto-advance via
+  /// [onRoundComplete] (no "next" tap). See [SingleRoundFlow].
+  final bool singleRound;
+
+  /// Prefer a phrase whose blank is this element for the first round.
+  final String? focusId;
+
+  /// Called when the single round is done; `flawless` = no wrong drops.
+  final void Function({required bool flawless})? onRoundComplete;
+
   @override
   State<FillBlankPage> createState() => _FillBlankPageState();
 }
 
-class _FillBlankPageState extends State<FillBlankPage> {
+class _FillBlankPageState extends State<FillBlankPage> with SingleRoundFlow {
   late final Random _random = widget.random ?? Random();
   late final Future<void> _ready = _load();
 
@@ -99,15 +114,28 @@ class _FillBlankPageState extends State<FillBlankPage> {
     if (_phrases.isNotEmpty) {
       setState(_startRound);
       _speakInstruction();
+    } else {
+      skipUnplayableRound(widget.onRoundComplete);
     }
   }
 
   static const _instruction = 'Finish the sentence.';
   void _speakInstruction() => widget.audioService.speak(_instruction);
 
+  SyllableElement? _focusElement() {
+    if (_phrase != null) return null; // first round only
+    for (final e in _answerPool) {
+      if (e.id == widget.focusId) return e;
+    }
+    return null;
+  }
+
   void _startRound() {
-    // Mastery picks which answer (blank) to drill; then a phrase that uses it.
-    final answer = widget.sampler?.pick(
+    resetRoundFlaws();
+    // The lesson's focus wins; else mastery picks which answer (blank) to
+    // drill; then a phrase that uses it.
+    final answer = _focusElement() ??
+        widget.sampler?.pick<SyllableElement>(
           _answerPool,
           id: (e) => e.id,
           stage: (e) => e.introducedStage,
@@ -163,10 +191,18 @@ class _FillBlankPageState extends State<FillBlankPage> {
         _wrong = false;
         _score += 1;
       } else {
+        noteWrongAttempt();
         _wrong = true;
       }
     });
-    if (correct) _speak(element);
+    if (correct) {
+      widget.audioService
+          .speak('${praiseLine(_random)} ${element.syllable}!');
+      scheduleRoundComplete(widget.onRoundComplete);
+    } else {
+      widget.audioService
+          .speak('Oops! ${element.syllable} does not fit. Try again!');
+    }
   }
 
   void _next() {
@@ -279,12 +315,14 @@ class _FillBlankPageState extends State<FillBlankPage> {
                       ],
                     ),
                   ),
-                  // Big, always-present advance arrow — only tappable once solved.
-                  NextArrowBar(
-                    key: const Key('fb-next'),
-                    enabled: _solved,
-                    onNext: _next,
-                  ),
+                  // Big, always-present advance arrow — only tappable once
+                  // solved. Lesson steps auto-advance instead, so no arrow.
+                  if (!widget.singleRound)
+                    NextArrowBar(
+                      key: const Key('fb-next'),
+                      enabled: _solved,
+                      onNext: _next,
+                    ),
                 ],
               ),
             ),

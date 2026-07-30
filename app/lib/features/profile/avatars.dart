@@ -27,3 +27,8 @@ String avatarEmoji(String id) {
   }
   return '🙂';
 }
+
+/// A speakable, display-ready name for an avatar ('fox' → 'Fox') — also the
+/// default profile name, so a child who can't type still gets a named player.
+String avatarName(String id) =>
+    id.isEmpty ? 'Player' : id[0].toUpperCase() + id.substring(1);

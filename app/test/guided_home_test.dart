@@ -19,7 +19,8 @@ const _bank = ContentBank(
 );
 
 const _schedule = CurriculumSchedule(version: '0', levels: [
-  CurriculumLevel(id: 1, stage: 1, title: 'A', introduce: ['cat', 'dog'], games: ['find_the_character'], xpToAdvance: 100),
+  CurriculumLevel(id: 1, stage: 1, title: 'A', introduce: ['cat', 'dog'], games: ['find_the_character'], xpToAdvance: 100, lessons: 1),
+  CurriculumLevel(id: 2, stage: 1, title: 'B', introduce: [], games: ['find_the_character'], xpToAdvance: 100, lessons: 1),
 ]);
 
 class _FakeContent extends ContentService {
@@ -45,32 +46,91 @@ Widget _home(ProgressService progress) => MaterialApp(
       ),
     );
 
+/// Solves the current Find-the-Character round by trying both options; if no
+/// round is on screen (e.g. the pre-celebration beat), just lets time pass.
+Future<void> _solveRound(WidgetTester tester) async {
+  if (find.byKey(const Key('fc-option-cat')).evaluate().isNotEmpty) {
+    await tester.tap(find.byKey(const Key('fc-option-cat')));
+    await tester.pumpAndSettle();
+    if (find.byKey(const Key('fc-feedback')).evaluate().isEmpty) {
+      await tester.tap(find.byKey(const Key('fc-option-dog')));
+      await tester.pumpAndSettle();
+    }
+  }
+  // Let the auto-advance (and the pre-celebration beat) timers fire.
+  await tester.pump(const Duration(milliseconds: 1600));
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  testWidgets('Play runs one continuous level: intros chained, then a game',
+  testWidgets('a lesson interleaves intros with focused exercises',
       (tester) async {
     final progress = ProgressService(bank: _bank, schedule: _schedule);
     await tester.pumpWidget(_home(progress));
     await tester.pumpAndSettle();
 
-    // Enter the level — meet cat, then dog, without returning home in between.
     await tester.tap(find.byKey(const Key('home-play')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('intro-symbol')), findsOneWidget);
 
+    // Meet cat…
+    expect(find.byKey(const Key('intro-symbol')), findsOneWidget);
     await tester.tap(find.byKey(const Key('intro-done')));
     await tester.pumpAndSettle();
     expect(progress.hasSeenIntro('cat'), isTrue);
-    expect(find.byKey(const Key('intro-symbol')), findsOneWidget); // still inside
 
+    // …then immediately practice it: the exercise is focused on cat.
+    expect(find.byKey(const Key('fc-prompt')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('fc-option-cat')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fc-feedback')), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pumpAndSettle();
+
+    // Next up: meet dog.
+    expect(find.byKey(const Key('intro-symbol')), findsOneWidget);
     await tester.tap(find.byKey(const Key('intro-done')));
     await tester.pumpAndSettle();
     expect(progress.hasSeenIntro('dog'), isTrue);
-
-    // Both met → the game is now playing, still inside the same session.
-    expect(find.byKey(const Key('fc-prompt')), findsOneWidget);
   });
 
-  testWidgets('leaving a level discards the session progress', (tester) async {
+  testWidgets('finishing a lesson celebrates, levels up, and returns home',
+      (tester) async {
+    final progress = ProgressService(bank: _bank, schedule: _schedule);
+    await tester.pumpWidget(_home(progress));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home-play')));
+    await tester.pumpAndSettle();
+
+    // Play through every step (intros + exercises + possible re-queues).
+    for (var i = 0; i < 40; i++) {
+      if (find.byKey(const Key('celebrate-continue')).evaluate().isNotEmpty) {
+        break;
+      }
+      if (find.byKey(const Key('intro-done')).evaluate().isNotEmpty) {
+        await tester.tap(find.byKey(const Key('intro-done')));
+        await tester.pumpAndSettle();
+      } else {
+        await _solveRound(tester);
+      }
+    }
+
+    // The finish line: stars + continue.
+    expect(find.byKey(const Key('celebrate-continue')), findsOneWidget);
+    expect(find.byKey(const Key('celebrate-star-0')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('celebrate-continue')));
+    await tester.pumpAndSettle();
+
+    // One lesson beats level 1 → the level-up overlay, then home.
+    expect(find.byKey(const Key('levelup-continue')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('levelup-continue')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('home-play')), findsOneWidget);
+    expect(progress.level, 2);
+  });
+
+  testWidgets('leaving a lesson keeps progress — it is never punished',
+      (tester) async {
     final progress = ProgressService(bank: _bank, schedule: _schedule);
     await tester.pumpWidget(_home(progress));
     await tester.pumpAndSettle();
@@ -81,13 +141,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(progress.hasSeenIntro('cat'), isTrue);
 
-    // Exit → confirm Leave → discards.
+    // Exit → confirm leave (icon dialog).
     await tester.tap(find.byKey(const Key('session-exit')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('session-leave')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('home-play')), findsOneWidget); // back home
-    expect(progress.hasSeenIntro('cat'), isFalse); // session was discarded
+    expect(progress.hasSeenIntro('cat'), isTrue); // met symbols stay met
+    expect(progress.lessonsIntoLevel, 0); // but the lesson didn't count
   });
 }

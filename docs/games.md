@@ -4,16 +4,24 @@ All games share two invariants: they read content from the **Content Bank**, and
 tappable to hear its sound**. Games are rendered in the child's **current-stage orthography**
 (pictograph → syllabary → letters), so the same game grows with the learner.
 
+Every game is playable two ways: standalone (its own rounds + next arrow) and as a
+**single-round lesson step** (`singleRound` + `focusId` + `onRoundComplete`) inside the
+lesson loop — see [`lessons.md`](lessons.md).
+
 ## Summary
 
 | Game | Stage(s) | MVP | One-liner |
 |---|---|---|---|
 | Story Builder | 1–4 | M3 | Co-write a branching story with an LLM, constrained to learned vocabulary |
 | Find the Character / Do the Command | 1–2 | M2 | Read a sentence, tap the thing it names |
-| Build-a-Word (blending) | 2 | M2 | Overlap syllable cards to make a target word |
+| Picture to Word | 1–2 | M2 | See a picture + hear its name, pick the **written** word (reverse of Find-the-Character) |
+| Symbol Hunt (I-Spy) | 1 | M2 | "Find **all** the cats!" — tap every target in a grid |
+| Build-a-Word (blending) | 2 | M2 | Hear a word, blend syllable cards to build it (print revealed on solve) |
+| Blend Magic (reveal) | 2 | M2 | Watch two syllable cards slide together and blend aloud, pick the word made |
 | Listen & Pick (slow-speak) | 0 | M2 | Hear gapped syllables, choose the picture |
 | Sound Match | 1–2 | M2 | Drag each symbol onto the sound it makes |
 | Fill the Blank | 1–4 | M2 | Drag the missing symbol into a phrase (renders per stage) |
+| Echo Read | 1–4 | M2 | Tap a phrase's tokens left-to-right, hear it read back fluently |
 | Sound Families | 3 | M2 | Match by rhyme or shared first sound (teaches stops by contrast) |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 

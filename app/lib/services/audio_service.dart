@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../models/phoneme.dart';
@@ -21,6 +22,8 @@ class TtsAudioService implements AudioService {
 
   final FlutterTts _tts = FlutterTts();
   bool _configured = false;
+  String? _lastText;
+  DateTime _lastAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   Future<void> _ensureConfigured() async {
     if (_configured) return;
@@ -33,6 +36,19 @@ class TtsAudioService implements AudioService {
   @override
   Future<void> speak(String text) async {
     if (text.trim().isEmpty) return;
+    // Small children mash: the same utterance re-requested within a beat is
+    // dropped instead of stuttering ("ca- ca- cat"). A *different* utterance
+    // still interrupts immediately.
+    final now = DateTime.now();
+    if (text == _lastText &&
+        now.difference(_lastAt) < const Duration(milliseconds: 600)) {
+      return;
+    }
+    _lastText = text;
+    _lastAt = now;
+    // Debug builds log every utterance — lets silent test rigs (widget tests,
+    // headless emulators, playtest agents reading logcat) "hear" the app.
+    if (kDebugMode) debugPrint('[speak] $text');
     await _ensureConfigured();
     await _tts.stop();
     await _tts.speak(text);

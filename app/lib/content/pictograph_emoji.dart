@@ -28,6 +28,6 @@ const Map<String, String> kPictographEmoji = {
   'cow': '🐄',
   'hand': '✋',
   'boy': '👦',
-  'wind': '🪟',
+  'wind': '💨',
   'i': '👁️',
 };

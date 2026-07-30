@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../../profile/profile.dart';
+import '../../services/audio_service.dart';
 import 'avatars.dart';
 
-/// First-run (and "add profile") screen: choose an avatar + type a name. Calls
-/// [onCreate] with the new profile; the caller persists it and loads its progress.
+/// First-run (and "add profile") screen: pick an avatar, optionally type a
+/// name, go. A pre-reader can complete it alone — every step is narrated, the
+/// avatar tap answers aloud, and the name is optional (it defaults to the
+/// avatar's name, e.g. "Fox"); typing is a grown-up nicety, not a gate.
 class CreateProfileScreen extends StatefulWidget {
-  const CreateProfileScreen({super.key, required this.onCreate, this.onBack});
+  const CreateProfileScreen({
+    super.key,
+    required this.onCreate,
+    this.onBack,
+    this.audioService,
+  });
 
   final void Function(Profile profile) onCreate;
 
   /// Shown as a back affordance when there are already profiles to return to.
   final VoidCallback? onBack;
+
+  /// Narrates the screen when provided (null keeps old tests/hosts silent).
+  final AudioService? audioService;
 
   @override
   State<CreateProfileScreen> createState() => _CreateProfileScreenState();
@@ -22,17 +33,28 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   String _avatar = kAvatars.first.id;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.audioService
+        ?.speak('Who is playing? Pick your favorite animal!'));
+  }
+
+  @override
   void dispose() {
     _name.dispose();
     super.dispose();
   }
 
+  void _pickAvatar(Avatar a) {
+    setState(() => _avatar = a.id);
+    widget.audioService?.speak('${avatarName(a.id)}! Press the big button!');
+  }
+
   void _submit() {
-    final name = _name.text.trim();
-    if (name.isEmpty) return;
+    final typed = _name.text.trim();
     widget.onCreate(Profile(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
-      name: name,
+      name: typed.isEmpty ? avatarName(_avatar) : typed,
       avatar: _avatar,
     ));
   }
@@ -63,7 +85,7 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                 for (final a in kAvatars)
                   GestureDetector(
                     key: Key('avatar-${a.id}'),
-                    onTap: () => setState(() => _avatar = a.id),
+                    onTap: () => _pickAvatar(a),
                     child: Container(
                       width: 66,
                       height: 66,
@@ -89,18 +111,28 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
               key: const Key('profile-name'),
               controller: _name,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                  labelText: 'Name', border: OutlineInputBorder()),
+              decoration: InputDecoration(
+                  labelText: 'Name (optional — grown-ups can type one)',
+                  hintText: avatarName(_avatar),
+                  border: const OutlineInputBorder()),
               onChanged: (_) => setState(() {}),
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              key: const Key('profile-start'),
-              onPressed: _name.text.trim().isEmpty ? null : _submit,
-              child: const Padding(
-                padding: EdgeInsets.all(12),
-                child: Text('Start playing'),
+            // Always enabled: an avatar is preselected and the name defaults,
+            // so the child can never dead-end here.
+            SizedBox(
+              height: 72,
+              child: FilledButton.icon(
+                key: const Key('profile-start'),
+                onPressed: _submit,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22)),
+                ),
+                icon: const Icon(Icons.play_arrow_rounded, size: 44),
+                label: Text(avatarEmoji(_avatar),
+                    style: const TextStyle(fontSize: 30)),
               ),
             ),
           ],

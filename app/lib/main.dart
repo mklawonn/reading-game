@@ -171,6 +171,7 @@ class _ReadingGameAppState extends State<ReadingGameApp>
     if (_profiles.profiles.isEmpty || _addingProfile) {
       return CreateProfileScreen(
         onCreate: (p) => _activate(p, isNew: true),
+        audioService: _audioService,
         onBack: _profiles.profiles.isEmpty
             ? null
             : () => setState(() => _addingProfile = false),
@@ -180,6 +181,7 @@ class _ReadingGameAppState extends State<ReadingGameApp>
       profiles: _profiles.profiles,
       onSelect: (p) => _activate(p, isNew: false),
       onAdd: () => setState(() => _addingProfile = true),
+      audioService: _audioService,
     );
   }
 }

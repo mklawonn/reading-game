@@ -12,6 +12,7 @@ class CurriculumLevel {
     required this.introduce,
     required this.games,
     required this.xpToAdvance,
+    this.lessons = 2,
   });
 
   final int id;
@@ -19,7 +20,8 @@ class CurriculumLevel {
   final String title;
   final List<String> introduce; // element ids newly taught this level
   final List<String> games; // game ids playable this level
-  final int xpToAdvance; // XP to reach the next level
+  final int xpToAdvance; // XP to reach the next level (legacy reward curve)
+  final int lessons; // short lessons to complete before leveling up
 
   factory CurriculumLevel.fromJson(Map<String, dynamic> json) => CurriculumLevel(
         id: json['id'] as int,
@@ -32,6 +34,7 @@ class CurriculumLevel {
             .map((s) => s as String)
             .toList(growable: false),
         xpToAdvance: json['xpToAdvance'] as int? ?? 50,
+        lessons: json['lessons'] as int? ?? 2,
       );
 }
 

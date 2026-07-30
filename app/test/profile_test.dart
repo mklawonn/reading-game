@@ -40,9 +40,10 @@ void main() {
       home: CreateProfileScreen(onCreate: (p) => created = p),
     ));
 
-    // "Start" is disabled until a name is entered.
+    // "Start" is always enabled — a child who can't type must never dead-end
+    // here (the name defaults from the avatar; see the test below).
     final startBtn = tester.widget<FilledButton>(find.byKey(const Key('profile-start')));
-    expect(startBtn.onPressed, isNull);
+    expect(startBtn.onPressed, isNotNull);
 
     await tester.enterText(find.byKey(const Key('profile-name')), 'Pip');
     await tester.tap(find.byKey(const Key('avatar-owl')));
@@ -51,6 +52,22 @@ void main() {
 
     expect(created, isNotNull);
     expect(created!.name, 'Pip');
+    expect(created!.avatar, 'owl');
+  });
+
+  testWidgets('CreateProfileScreen needs no typing — name defaults from avatar',
+      (tester) async {
+    Profile? created;
+    await tester.pumpWidget(MaterialApp(
+      home: CreateProfileScreen(onCreate: (p) => created = p),
+    ));
+
+    await tester.tap(find.byKey(const Key('avatar-owl')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('profile-start')));
+
+    expect(created, isNotNull);
+    expect(created!.name, 'Owl');
     expect(created!.avatar, 'owl');
   });
 }

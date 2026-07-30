@@ -11,6 +11,8 @@ import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
 import '../common/next_arrow_bar.dart';
+import '../common/praise.dart';
+import '../common/single_round.dart';
 
 /// **Sound Families** (Stage 3): minimal-pair contrast. Each round shows a target
 /// word and asks for the one option that belongs to its family —
@@ -32,6 +34,9 @@ class FamiliesPage extends StatefulWidget {
     this.allowedIds,
     this.embedded = false,
     this.onEvent,
+    this.singleRound = false,
+    this.focusId,
+    this.onRoundComplete,
   });
 
   final ContentService contentService;
@@ -47,11 +52,21 @@ class FamiliesPage extends StatefulWidget {
   final bool embedded;
   final void Function(LearningEvent)? onEvent;
 
+  /// Lesson-step mode: play exactly one round, then auto-advance via
+  /// [onRoundComplete] (no "next" tap). See [SingleRoundFlow].
+  final bool singleRound;
+
+  /// Prefer this element as the first round's target (if it's playable).
+  final String? focusId;
+
+  /// Called when the single round is done; `flawless` = no wrong attempts.
+  final void Function({required bool flawless})? onRoundComplete;
+
   @override
   State<FamiliesPage> createState() => _FamiliesPageState();
 }
 
-class _FamiliesPageState extends State<FamiliesPage> {
+class _FamiliesPageState extends State<FamiliesPage> with SingleRoundFlow {
   late final Random _random = widget.random ?? Random();
   late final Future<void> _ready = _load();
 
@@ -91,7 +106,11 @@ class _FamiliesPageState extends State<FamiliesPage> {
     _playable = _pool
         .where((e) => _familySize(e, 'rhyme') >= 2 || _familySize(e, 'onset') >= 2)
         .toList(growable: false);
-    if (_playable.isNotEmpty) setState(_startRound);
+    if (_playable.isNotEmpty) {
+      setState(_startRound);
+    } else {
+      skipUnplayableRound(widget.onRoundComplete);
+    }
   }
 
   List<SyllableElement> _family(SyllableElement e, String mode) =>
@@ -101,8 +120,18 @@ class _FamiliesPageState extends State<FamiliesPage> {
   String? _familyKey(SyllableElement e, String mode) =>
       mode == 'rhyme' ? e.rhymeGroup : e.onsetPhoneme;
 
+  SyllableElement? _focusElement() {
+    if (_target != null) return null; // first round only
+    for (final e in _playable) {
+      if (e.id == widget.focusId) return e;
+    }
+    return null;
+  }
+
   void _startRound() {
-    final target = widget.sampler?.pick(
+    resetRoundFlaws();
+    final target = _focusElement() ??
+        widget.sampler?.pick<SyllableElement>(
           _playable,
           id: (e) => e.id,
           stage: (e) => e.introducedStage,
@@ -169,9 +198,14 @@ class _FamiliesPageState extends State<FamiliesPage> {
         _wrong = false;
         _score += 1;
       });
-      widget.audioService.speak(picked.syllable);
+      widget.audioService
+          .speak('${praiseLine(_random)} ${picked.syllable}!');
+      scheduleRoundComplete(widget.onRoundComplete);
     } else {
+      noteWrongAttempt();
       setState(() => _wrong = true);
+      widget.audioService
+          .speak('Oops! ${picked.syllable} does not match. Try again!');
     }
   }
 
@@ -268,15 +302,17 @@ class _FamiliesPageState extends State<FamiliesPage> {
                     ],
                   ),
                 ),
-                // Big, always-present advance arrow — only tappable once solved.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: NextArrowBar(
-                    key: const Key('fam-next'),
-                    enabled: _solved,
-                    onNext: _next,
+                // Big, always-present advance arrow — only tappable once
+                // solved. Lesson steps auto-advance instead, so no arrow.
+                if (!widget.singleRound)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: NextArrowBar(
+                      key: const Key('fam-next'),
+                      enabled: _solved,
+                      onNext: _next,
+                    ),
                   ),
-                ),
               ],
             ),
           );

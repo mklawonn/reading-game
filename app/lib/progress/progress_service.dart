@@ -80,6 +80,7 @@ class ProgressService extends ChangeNotifier implements MasteryView {
   int _xp = 0;
   int _curriculumLevel = 1;
   int _xpIntoLevel = 0;
+  int _lessonsIntoLevel = 0;
   final Set<String> _seenIntros = {};
   final List<int> _justLeveledUp = [];
   final Map<String, ItemMastery> _mastery = {};
@@ -116,6 +117,46 @@ class ProgressService extends ChangeNotifier implements MasteryView {
 
   /// Total number of levels in the schedule (0 if none).
   int get totalLevels => _schedule?.length ?? 0;
+
+  // ── lesson-based progression (the schedule path) ──
+  /// Lessons completed within the current level.
+  int get lessonsIntoLevel => _lessonsIntoLevel;
+
+  /// Lessons required to beat the current level (1 without a schedule).
+  int get lessonsForThisLevel =>
+      _schedule != null ? max(1, _schedule.levelAt(_curriculumLevel).lessons) : 1;
+
+  /// Fraction (0..1) of the current level completed — lessons with a schedule,
+  /// the XP curve without one. Drives the home progress ring/bar.
+  double get levelFraction => _schedule != null
+      ? (_lessonsIntoLevel / lessonsForThisLevel).clamp(0.0, 1.0)
+      : (xpForThisLevel == 0 ? 0.0 : xpIntoLevel / xpForThisLevel);
+
+  /// Whether every level's every lesson is done (the path is complete).
+  bool get pathComplete =>
+      _schedule != null &&
+      _curriculumLevel >= _schedule.length &&
+      _lessonsIntoLevel >= lessonsForThisLevel;
+
+  /// Marks one lesson finished. Levels up (queuing the celebration) once the
+  /// level's lesson count is met; at the final level the bar just caps full.
+  void completeLesson() {
+    final schedule = _schedule;
+    if (schedule == null) return;
+    _lessonsIntoLevel++;
+    final need = lessonsForThisLevel;
+    if (_lessonsIntoLevel >= need) {
+      if (_curriculumLevel < schedule.length) {
+        _curriculumLevel++;
+        _lessonsIntoLevel = 0;
+        _justLeveledUp.add(_curriculumLevel);
+      } else {
+        _lessonsIntoLevel = need;
+      }
+    }
+    notifyListeners();
+    _scheduleSave();
+  }
 
   /// The current level's nominal stage (for current-stage rendering); falls back
   /// to the mastery-derived [currentStage] when no schedule is set.
@@ -226,31 +267,13 @@ class ProgressService extends ChangeNotifier implements MasteryView {
       _run = 0;
       _mastery[e.itemId] = prev.demote();
     }
-    if (gained > 0) _advanceLevels(gained);
+    // Levels advance via [completeLesson] (schedule mode) or the XP curve
+    // (schedule-free fallback) — never directly from a single answer.
+    if (gained > 0) _xpIntoLevel += gained;
     _touchStreak();
     _checkAchievements();
     notifyListeners();
     _scheduleSave();
-  }
-
-  /// Fills the current level's XP bar and rolls over to the next level(s) once
-  /// the schedule's goal is met (queuing each for the level-up animation).
-  void _advanceLevels(int gained) {
-    final schedule = _schedule;
-    if (schedule == null) return;
-    _xpIntoLevel += gained;
-    while (_curriculumLevel < schedule.length) {
-      final need = schedule.levelAt(_curriculumLevel).xpToAdvance;
-      if (_xpIntoLevel < need) break;
-      _xpIntoLevel -= need;
-      _curriculumLevel++;
-      _justLeveledUp.add(_curriculumLevel);
-    }
-    // At the final level the bar simply caps full.
-    final cap = schedule.levelAt(_curriculumLevel).xpToAdvance;
-    if (_curriculumLevel >= schedule.length && _xpIntoLevel > cap) {
-      _xpIntoLevel = cap;
-    }
   }
 
   /// Loads saved progress from the store (call once after construction).
@@ -322,6 +345,7 @@ class ProgressService extends ChangeNotifier implements MasteryView {
         'unlocked': _unlocked.toList(),
         'curriculumLevel': _curriculumLevel,
         'xpIntoLevel': _xpIntoLevel,
+        'lessonsIntoLevel': _lessonsIntoLevel,
         'seenIntros': _seenIntros.toList(),
       };
 
@@ -345,6 +369,7 @@ class ProgressService extends ChangeNotifier implements MasteryView {
       ..addAll((j['unlocked'] as List<dynamic>? ?? const []).cast<String>());
     _curriculumLevel = j['curriculumLevel'] as int? ?? 1;
     _xpIntoLevel = j['xpIntoLevel'] as int? ?? 0;
+    _lessonsIntoLevel = j['lessonsIntoLevel'] as int? ?? 0;
     _seenIntros
       ..clear()
       ..addAll((j['seenIntros'] as List<dynamic>? ?? const []).cast<String>());

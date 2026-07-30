@@ -66,8 +66,8 @@ class _LevelSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final into = progress.xpIntoLevel;
-    final span = progress.xpForThisLevel;
+    // Levels advance by completed lessons (docs/lessons.md); total XP is the
+    // rewards-layer stat and reads as a plain total, never "X / Y".
     return Column(
       children: [
         Text('Level ${progress.level}',
@@ -76,7 +76,9 @@ class _LevelSummary extends StatelessWidget {
             '🔥 ${progress.dayStreak}-day streak   ·   ⭐ ${progress.masteredCount} mastered',
             style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 2),
-        Text('$into / $span XP to Level ${progress.level + 1}',
+        Text(
+            '${progress.lessonsIntoLevel} of ${progress.lessonsForThisLevel} '
+            'lessons this level   ·   ${progress.xp} XP total',
             style: Theme.of(context).textTheme.bodySmall),
       ],
     );

@@ -10,6 +10,8 @@ import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/feedback_slot.dart';
 import '../common/next_arrow_bar.dart';
+import '../common/praise.dart';
+import '../common/single_round.dart';
 
 /// **Listen & Pick** (Stage 0–1): the child hears a syllable and taps the
 /// matching picture, building the sound→symbol link purely by ear.
@@ -24,6 +26,9 @@ class ListenAndPickPage extends StatefulWidget {
     this.allowedIds,
     this.embedded = false,
     this.onEvent,
+    this.singleRound = false,
+    this.focusId,
+    this.onRoundComplete,
   });
 
   final ContentService contentService;
@@ -45,11 +50,22 @@ class ListenAndPickPage extends StatefulWidget {
   /// Emits a [LearningEvent] on each answer (the progression seam).
   final void Function(LearningEvent)? onEvent;
 
+  /// Lesson-step mode: play exactly one round, then auto-advance via
+  /// [onRoundComplete] (no "next" tap). See [SingleRoundFlow].
+  final bool singleRound;
+
+  /// Prefer this element as the first round's target.
+  final String? focusId;
+
+  /// Called when the single round is done; `flawless` = no wrong attempts.
+  final void Function({required bool flawless})? onRoundComplete;
+
   @override
   State<ListenAndPickPage> createState() => _ListenAndPickPageState();
 }
 
-class _ListenAndPickPageState extends State<ListenAndPickPage> {
+class _ListenAndPickPageState extends State<ListenAndPickPage>
+    with SingleRoundFlow {
   late final Random _random = widget.random ?? Random();
   late final Future<void> _ready = _load();
 
@@ -70,12 +86,24 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
     if (_pool.length >= 2) {
       _startRound();
       _speakInstruction();
+    } else {
+      skipUnplayableRound(widget.onRoundComplete);
     }
   }
 
+  SyllableElement? _focusElement() {
+    if (_target != null) return null; // focus applies to the first round only
+    for (final e in _pool) {
+      if (e.id == widget.focusId) return e;
+    }
+    return null;
+  }
+
   void _startRound() {
+    resetRoundFlaws();
     final count = min(widget.optionCount, _pool.length);
-    final target = widget.sampler?.pick(
+    final target = _focusElement() ??
+        widget.sampler?.pick<SyllableElement>(
           _pool,
           id: (e) => e.id,
           stage: (e) => e.introducedStage,
@@ -120,10 +148,17 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
         _wrong = false;
         _score += 1;
       });
-      widget.audioService.speak(picked.syllable);
+      // Right answers must SOUND right: praise + the word, one utterance.
+      widget.audioService
+          .speak('${praiseLine(_random)} ${picked.syllable}!');
+      scheduleRoundComplete(widget.onRoundComplete);
     } else {
+      noteWrongAttempt();
       setState(() => _wrong = true);
-      _speakTarget(); // gentle nudge: replay the sound
+      // A distinct gentle miss: name what they touched (never binding the
+      // target's label to the wrong picture), then replay the target.
+      widget.audioService.speak(
+          'Oops! That is the ${picked.syllable}. Listen: ${target.syllable}!');
     }
   }
 
@@ -198,15 +233,17 @@ class _ListenAndPickPageState extends State<ListenAndPickPage> {
                     ],
                   ),
                 ),
-                // Big, always-present advance arrow — only tappable once solved.
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: NextArrowBar(
-                    key: const Key('lp-next'),
-                    enabled: _solved,
-                    onNext: _next,
+                // Big, always-present advance arrow — only tappable once
+                // solved. Lesson steps auto-advance instead, so no arrow.
+                if (!widget.singleRound)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: NextArrowBar(
+                      key: const Key('lp-next'),
+                      enabled: _solved,
+                      onNext: _next,
+                    ),
                   ),
-                ),
               ],
             ),
           );

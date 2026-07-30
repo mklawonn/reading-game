@@ -52,8 +52,10 @@ void main() {
     ));
     await tester.pumpAndSettle();
 
-    // Target word is shown and named aloud as an instruction on round start.
-    expect(find.byKey(const Key('bw-target')), findsOneWidget);
+    // The target is named aloud but NOT shown — the child blends from the ear,
+    // not by matching letter shapes. Its print is revealed on the solve.
+    expect(find.byKey(const Key('bw-target')), findsNothing);
+    expect(find.byKey(const Key('bw-mystery')), findsOneWidget);
     expect(audio.spoken, contains('Make the word open.'));
 
     // Tap the pieces in order: o, then pen → fills the two slots left-to-right.
@@ -62,7 +64,8 @@ void main() {
     await tester.tap(find.byKey(const Key('bw-piece-pen')));
     await tester.pumpAndSettle();
 
-    // The blend is recognized.
+    // The blend is recognized and the printed word is revealed.
     expect(find.byKey(const Key('bw-feedback')), findsOneWidget);
+    expect(find.byKey(const Key('bw-target')), findsOneWidget);
   });
 }

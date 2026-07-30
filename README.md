@@ -5,8 +5,10 @@ pictograph → rebus → syllabary → alphabet — based on Gleitman & Rozin (1
 *Teaching Reading by Use of a Syllabary* (see [`docs/research/`](docs/research/)).
 
 Children build a profile and progress through five stages, always able to **tap any symbol to hear its
-sound**. Games include an LLM-powered **Story Builder**, a **Find-the-Character** reading game, and a
-syllable **Build-a-Word** blending game.
+sound**. Play happens in short Duolingo-ABC-style **lessons** — mixed single-round exercises with a
+guide character, auto-advance pacing, and starred celebrations (see [`docs/lessons.md`](docs/lessons.md)) —
+drawing on ten exercise types from **Listen & Pick** through **Build-a-Word** blending, plus an
+LLM-powered **Story Builder** (planned).
 
 > **Status: M0 — Foundations.** This repo currently contains the roadmap, design docs, a seed Content
 > Bank, a Firebase scaffold, and a runnable Flutter skeleton that demonstrates the tap-to-hear loop.

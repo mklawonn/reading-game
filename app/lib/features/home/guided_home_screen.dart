@@ -1,19 +1,23 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../content/pictograph_emoji.dart';
 import '../../learning/curriculum_engine.dart';
 import '../../models/curriculum.dart';
 import '../../profile/profile.dart';
 import '../../progress/progress_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../lesson/lesson_screen.dart';
 import '../profile/avatars.dart';
 import '../progress/level_map_screen.dart';
 import '../progress/progress_screen.dart';
-import 'level_session_screen.dart';
 
-/// The guided home: a level path the child can't skip ahead on, and one **Play**
-/// button that opens the current level as a single continuous session (see
-/// [LevelSessionScreen]) — meet its symbols, then play until beaten or left.
+/// The guided home: a level path the child can't skip ahead on (each node
+/// wearing the symbol it teaches), lesson pips showing how far into the level
+/// they are, and one big **Play** button that opens the next short lesson
+/// (see [LessonScreen]).
 class GuidedHomeScreen extends StatefulWidget {
   const GuidedHomeScreen({
     super.key,
@@ -40,12 +44,33 @@ class GuidedHomeScreen extends StatefulWidget {
 
 class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
   bool _busy = false;
+  Timer? _greetTimer;
 
-  Future<void> _openLevel() async {
+  @override
+  void initState() {
+    super.initState();
+    // Never strand a non-reader on a silent screen: greet by name and point
+    // at the one thing to do.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final name = widget.profile?.name;
+      widget.audioService.speak(name == null || name.isEmpty
+          ? 'Hi! Tap the big button to play!'
+          : 'Hi $name! Tap the big button to play!');
+    });
+  }
+
+  @override
+  void dispose() {
+    _greetTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _openLesson() async {
     if (_busy) return;
     _busy = true;
+    _greetTimer?.cancel();
     await Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => LevelSessionScreen(
+      builder: (_) => LessonScreen(
         progress: widget.progress,
         engine: widget.engine,
         schedule: widget.schedule,
@@ -54,7 +79,27 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
       ),
     ));
     _busy = false;
-    if (mounted) setState(() {}); // reflect any level-up
+    if (!mounted) return;
+    setState(() {}); // reflect any level-up
+    // Re-orient after the lesson — delayed so a goodbye or level-up line
+    // finishes ringing first.
+    _greetTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (!mounted) return;
+      final p = widget.progress;
+      widget.audioService.speak(p.pathComplete
+          ? 'You did everything! Amazing!'
+          : 'Level ${p.level}! Tap the big button to keep going!');
+    });
+  }
+
+  /// The badge a path node wears: the level's first pictured new symbol, else
+  /// its first new syllable in print, else a star.
+  String _badge(CurriculumLevel level) {
+    for (final id in level.introduce) {
+      final emoji = kPictographEmoji[id];
+      if (emoji != null) return emoji;
+    }
+    return level.introduce.isNotEmpty ? level.introduce.first : '⭐';
   }
 
   @override
@@ -90,35 +135,72 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
           builder: (context, _) {
             final p = widget.progress;
             final level = widget.schedule.levelAt(p.level);
-            final span = p.xpForThisLevel;
+            final badges = {
+              for (final l in widget.schedule.levels) l.id: _badge(l),
+            };
             return Column(
               children: [
                 const SizedBox(height: 16),
-                LevelMap(progress: p),
+                // The path is the prettiest thing on screen and WILL be
+                // tapped: the current node plays, the rest answer aloud.
+                LevelMap(
+                  progress: p,
+                  badges: badges,
+                  onTapNode: (level) {
+                    if (level == p.level) {
+                      _openLesson();
+                    } else if (level > p.level) {
+                      widget.audioService
+                          .speak('Locked! Keep playing to get there!');
+                    } else {
+                      widget.audioService.speak('You beat that one already!');
+                    }
+                  },
+                ),
                 const Spacer(),
                 Text('Level ${level.id}',
                     style: Theme.of(context).textTheme.titleLarge),
                 Text(level.title,
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 12),
-                SizedBox(
-                  width: 220,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: span == 0 ? 0 : p.xpIntoLevel / span,
-                      minHeight: 10,
-                    ),
+                // One pip per lesson in this level — tomorrow's "almost
+                // there!" is legible to a child who can't read numbers yet.
+                // Check-circles, not stars: stars are the lesson-quality
+                // currency (celebration screen) and must mean only that.
+                if (p.pathComplete)
+                  const Text('🏆', style: TextStyle(fontSize: 34))
+                else
+                  Row(
+                    key: const Key('home-pips'),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < p.lessonsForThisLevel; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: Icon(
+                            i < p.lessonsIntoLevel
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            size: 30,
+                            color: i < p.lessonsIntoLevel
+                                ? scheme.primary
+                                : scheme.outlineVariant,
+                          ),
+                        ),
+                    ],
                   ),
-                ),
                 const SizedBox(height: 24),
-                FilledButton.icon(
-                  key: const Key('home-play'),
-                  onPressed: _openLevel,
-                  icon: const Icon(Icons.play_arrow, size: 32),
-                  label: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                    child: Text('Play', style: TextStyle(fontSize: 22)),
+                SizedBox(
+                  width: 200,
+                  height: 84,
+                  child: FilledButton(
+                    key: const Key('home-play'),
+                    onPressed: _openLesson,
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28)),
+                    ),
+                    child: const Icon(Icons.play_arrow_rounded, size: 52),
                   ),
                 ),
                 const Spacer(),

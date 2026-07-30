@@ -1,25 +1,45 @@
 import 'package:flutter/material.dart';
 
 import '../../profile/profile.dart';
+import '../../services/audio_service.dart';
 import 'avatars.dart';
 
 /// Launch chooser when profiles already exist: tap a player to load them, or add
-/// a new one.
-class ProfileChooserScreen extends StatelessWidget {
+/// a new one. Narrated, because the players it lists can't read their own names.
+class ProfileChooserScreen extends StatefulWidget {
   const ProfileChooserScreen({
     super.key,
     required this.profiles,
     required this.onSelect,
     required this.onAdd,
+    this.audioService,
   });
 
   final List<Profile> profiles;
   final void Function(Profile profile) onSelect;
   final VoidCallback onAdd;
 
+  /// Narrates the screen when provided (null keeps old tests/hosts silent).
+  final AudioService? audioService;
+
+  @override
+  State<ProfileChooserScreen> createState() => _ProfileChooserScreenState();
+}
+
+class _ProfileChooserScreenState extends State<ProfileChooserScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.audioService
+        ?.speak('Who is playing today? Tap your picture!'));
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final profiles = widget.profiles;
+    final onSelect = widget.onSelect;
+    final onAdd = widget.onAdd;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choose a player'),

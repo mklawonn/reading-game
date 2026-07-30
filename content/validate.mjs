@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Validates content/content_bank.v0.json:
+// Validates the shipped Content Bank (content_bank.v1.json by default; pass a
+// path to validate another, e.g. the v0 seed bank):
 //  - ERRORS (exit 1): malformed JSON, missing/!valid fields, duplicate ids,
 //    unresolved segmentation refs, picturable element missing image_ref.
 //  - WARNINGS (exit 0): referenced image/audio asset not present on disk
@@ -15,7 +16,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
 const bankPath = process.argv[2]
   ? resolve(process.argv[2])
-  : join(scriptDir, 'content_bank.v0.json');
+  : join(scriptDir, 'content_bank.v1.json');
 
 const errors = [];
 const warnings = [];
@@ -197,7 +198,8 @@ if (existsSync(curriculumPath)) {
     err(`curriculum: could not parse ${curriculumPath}: ${e.message}`);
   }
   const KNOWN_GAMES = new Set([
-    'listen_and_pick', 'find_the_character', 'sound_match', 'families', 'build_a_word', 'fill_blank']);
+    'listen_and_pick', 'find_the_character', 'sound_match', 'families', 'build_a_word', 'fill_blank',
+    'picture_to_word', 'symbol_hunt', 'echo_read', 'blend_reveal']);
   const introduced = new Set();
   for (const lv of cur.levels ?? []) {
     for (const id of lv.introduce ?? []) {
