@@ -24,6 +24,7 @@ import '../find_the_character/find_the_character_page.dart';
 import '../hidden_glyph/hidden_glyph_page.dart';
 import '../home/introduce_symbol_screen.dart';
 import '../home/level_up_overlay.dart';
+import '../home/world_scenery.dart';
 import '../listen_and_pick/listen_and_pick_page.dart';
 import '../picture_to_word/picture_to_word_page.dart';
 import '../sound_match/sound_match_page.dart';
@@ -169,10 +170,17 @@ class _LessonScreenState extends State<LessonScreen> {
   Future<void> _celebrationDone() async {
     final reached = widget.progress.takeJustLeveledUp();
     if (reached.isNotEmpty && mounted) {
-      widget.audioService.speak('Level ${reached.last}! New friends to meet!');
+      // Crossing into a new world is the journey's big beat — say so.
+      final fromUnit = widget.schedule.unitFor(_level);
+      final toUnit = widget.schedule.unitFor(reached.last);
+      final newWorld = toUnit.id != fromUnit.id ? toUnit : null;
+      widget.audioService.speak(newWorld != null
+          ? 'You finished ${fromUnit.title}! Welcome to ${newWorld.title}!'
+          : 'Level ${reached.last}! New friends to meet!');
       await showLevelUp(
         context,
         level: widget.schedule.levelAt(reached.last),
+        worldWelcome: newWorld,
         newSymbols: [
           for (final lv in reached)
             for (final id in widget.schedule.levelAt(lv).introduce)
@@ -275,7 +283,20 @@ class _LessonScreenState extends State<LessonScreen> {
         if (!didPop) _exit();
       },
       child: Scaffold(
-        body: SafeArea(
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            // A whisper of this world's sky follows the child into lessons.
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                for (final c
+                    in worldThemeFor(widget.schedule.unitFor(_level).id).sky)
+                  c.withValues(alpha: 0.5),
+              ],
+            ),
+          ),
+          child: SafeArea(
           child: _celebrating
               ? CelebrationView(
                   stars: _stars,
@@ -318,6 +339,7 @@ class _LessonScreenState extends State<LessonScreen> {
                     ),
                   ],
                 ),
+          ),
         ),
       ),
     );

@@ -5,24 +5,30 @@ import '../../models/content_bank.dart';
 import '../../models/curriculum.dart';
 
 /// Celebratory pop-in shown when the child reaches a new curriculum level —
-/// names the level and previews the symbols it unlocks. No extra dependencies.
+/// names the level and previews the symbols it unlocks. When the level-up
+/// crossed into a new world, [worldWelcome] turns it into that world's
+/// welcome party. No extra dependencies.
 Future<void> showLevelUp(
   BuildContext context, {
   required CurriculumLevel level,
   required List<SyllableElement> newSymbols,
+  CurriculumUnit? worldWelcome,
 }) {
   return showDialog<void>(
     context: context,
     barrierColor: Colors.black54,
-    builder: (_) => _LevelUpDialog(level: level, newSymbols: newSymbols),
+    builder: (_) => _LevelUpDialog(
+        level: level, newSymbols: newSymbols, worldWelcome: worldWelcome),
   );
 }
 
 class _LevelUpDialog extends StatelessWidget {
-  const _LevelUpDialog({required this.level, required this.newSymbols});
+  const _LevelUpDialog(
+      {required this.level, required this.newSymbols, this.worldWelcome});
 
   final CurriculumLevel level;
   final List<SyllableElement> newSymbols;
+  final CurriculumUnit? worldWelcome;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +46,23 @@ class _LevelUpDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('🎉', style: TextStyle(fontSize: 56)),
-              Text('Level ${level.id}!',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              Text(worldWelcome?.emoji ?? '🎉',
+                  style: const TextStyle(fontSize: 56)),
+              if (worldWelcome != null) ...[
+                Text('Welcome to ${worldWelcome!.title}!',
+                    key: const Key('levelup-world'),
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+              ] else
+                Text('Level ${level.id}!',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text(level.title,
                   textAlign: TextAlign.center,

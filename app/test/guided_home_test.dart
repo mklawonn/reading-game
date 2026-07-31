@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:reading_game/features/home/guided_home_screen.dart';
+import 'package:reading_game/features/home/world_scenery.dart';
 import 'package:reading_game/learning/curriculum_engine.dart';
 import 'package:reading_game/models/content_bank.dart';
 import 'package:reading_game/models/curriculum.dart';
@@ -63,6 +64,9 @@ Future<void> _solveRound(WidgetTester tester) async {
 }
 
 void main() {
+  setUp(() => WorldScenery.animate = false); // let screens settle in tests
+  tearDown(() => WorldScenery.animate = true);
+
   testWidgets('a lesson interleaves intros with focused exercises',
       (tester) async {
     final progress = ProgressService(bank: _bank, schedule: _schedule);

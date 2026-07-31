@@ -13,6 +13,7 @@ import '../../services/content_service.dart';
 import '../lesson/lesson_screen.dart';
 import '../profile/avatars.dart';
 import '../progress/progress_screen.dart';
+import 'world_scenery.dart';
 
 /// The guided home, organized in three tiers (docs/lessons.md):
 ///
@@ -57,9 +58,11 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     // at the one thing to do.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final name = widget.profile?.name;
-      widget.audioService.speak(name == null || name.isEmpty
-          ? 'Hi! Tap the big button to play!'
-          : 'Hi $name! Tap the big button to play!');
+      widget.audioService.speak(
+        name == null || name.isEmpty
+            ? 'Hi! Tap the big button to play!'
+            : 'Hi $name! Tap the big button to play!',
+      );
     });
   }
 
@@ -73,15 +76,17 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     if (_busy) return;
     _busy = true;
     _greetTimer?.cancel();
-    await Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (_) => LessonScreen(
-        progress: widget.progress,
-        engine: widget.engine,
-        schedule: widget.schedule,
-        contentService: widget.contentService,
-        audioService: widget.audioService,
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => LessonScreen(
+          progress: widget.progress,
+          engine: widget.engine,
+          schedule: widget.schedule,
+          contentService: widget.contentService,
+          audioService: widget.audioService,
+        ),
       ),
-    ));
+    );
     _busy = false;
     if (!mounted) return;
     setState(() {}); // reflect any level-up
@@ -90,9 +95,11 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     _greetTimer = Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
       final p = widget.progress;
-      widget.audioService.speak(p.pathComplete
-          ? 'You did everything! Amazing!'
-          : 'Level ${p.level}! Tap the big button to keep going!');
+      widget.audioService.speak(
+        p.pathComplete
+            ? 'You did everything! Amazing!'
+            : 'Level ${p.level}! Tap the big button to keep going!',
+      );
     });
   }
 
@@ -114,13 +121,17 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     final p = widget.progress;
     if (i == p.lessonsIntoLevel) {
       return LessonPlan.themeFor(
-          level: level, seenIntros: p.seenIntros, lessonIndex: i);
+        level: level,
+        seenIntros: p.seenIntros,
+        lessonIndex: i,
+      );
     }
     if (i == 0 && level.introduce.isNotEmpty) return LessonTheme.meet;
     return LessonPlan.themeFor(
-        level: level,
-        seenIntros: {...p.seenIntros, ...level.introduce},
-        lessonIndex: i);
+      level: level,
+      seenIntros: {...p.seenIntros, ...level.introduce},
+      lessonIndex: i,
+    );
   }
 
   static const Map<LessonTheme, String> _themeEmoji = {
@@ -151,8 +162,10 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
                 key: const Key('home-profile'),
                 tooltip: 'Switch player',
                 onPressed: widget.onSwitchProfile,
-                icon: Text(avatarEmoji(widget.profile!.avatar),
-                    style: const TextStyle(fontSize: 24)),
+                icon: Text(
+                  avatarEmoji(widget.profile!.avatar),
+                  style: const TextStyle(fontSize: 24),
+                ),
               ),
         title: Text(widget.profile?.name ?? 'Reading Game'),
         actions: [
@@ -160,98 +173,136 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
             key: const Key('home-progress'),
             icon: const Icon(Icons.emoji_events),
             tooltip: 'My progress',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-              builder: (_) => ProgressScreen(progress: widget.progress),
-            )),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ProgressScreen(progress: widget.progress),
+              ),
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: ListenableBuilder(
-          listenable: widget.progress,
-          builder: (context, _) {
-            final p = widget.progress;
-            final level = widget.schedule.levelAt(p.level);
-            final unit = widget.schedule.unitFor(p.level);
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                // ── Tier 1: the worlds ──
-                _WorldStrip(
-                  schedule: widget.schedule,
-                  progress: p,
-                  onTap: (u) {
-                    if (u.id == unit.id) {
-                      _speak('${u.title}! Tap the big button to play!');
-                    } else if (u.levels.first > p.level) {
-                      _speak('Locked! Keep playing to get to ${u.title}!');
-                    } else {
-                      _speak('You finished ${u.title}!');
-                    }
-                  },
-                ),
-                const SizedBox(height: 10),
-                Text('${unit.emoji}  ${unit.title}',
-                    key: const Key('home-world-title'),
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 10),
-                // ── Tier 2: this world's rooms ──
-                _RoomRow(
-                  unit: unit,
-                  progress: p,
-                  badgeOf: (id) => _badge(widget.schedule.levelAt(id)),
-                  onTap: (id) {
-                    if (id == p.level) {
-                      _speak('${widget.schedule.levelAt(id).title}! '
-                          'Tap the big button to play!');
-                    } else if (id > p.level) {
-                      _speak('Locked! Keep playing to get there!');
-                    } else {
-                      _speak('You beat that one already!');
-                    }
-                  },
-                ),
-                const Spacer(),
-                Text(level.title,
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 14),
-                // ── Tier 3: the lesson nodes ──
-                if (p.pathComplete)
-                  const Text('🏆', style: TextStyle(fontSize: 44))
-                else
-                  _LessonNodePath(
-                    count: p.lessonsForThisLevel,
-                    done: p.lessonsIntoLevel,
-                    emojiOf: (i) => _themeEmoji[_nodeTheme(level, i)] ?? '⭐',
-                    onTap: (i) {
-                      if (i == p.lessonsIntoLevel) {
-                        _openLesson();
-                      } else if (i < p.lessonsIntoLevel) {
-                        _speak('Done!');
-                      } else {
-                        _speak(_themeLine[_nodeTheme(level, i)] ?? 'Soon!');
-                      }
-                    },
-                  ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: 200,
-                  height: 84,
-                  child: FilledButton(
-                    key: const Key('home-play'),
-                    onPressed: _openLesson,
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28)),
+      body: ListenableBuilder(
+        listenable: widget.progress,
+        builder: (context, _) {
+          final p = widget.progress;
+          final level = widget.schedule.levelAt(p.level);
+          final unit = widget.schedule.unitFor(p.level);
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              // The world itself: sky, horizon art, drifting particles.
+              WorldScenery(unitId: unit.id),
+              SafeArea(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    // ── Tier 1: the worlds ──
+                    _WorldStrip(
+                      schedule: widget.schedule,
+                      progress: p,
+                      onTap: (u) {
+                        if (u.id == unit.id) {
+                          _speak('${u.title}! Tap the big button to play!');
+                        } else if (u.levels.first > p.level) {
+                          _speak('Locked! Keep playing to get to ${u.title}!');
+                        } else {
+                          _speak('You finished ${u.title}!');
+                        }
+                      },
                     ),
-                    child: const Icon(Icons.play_arrow_rounded, size: 52),
-                  ),
+                    const SizedBox(height: 10),
+                    // A soft chip keeps the title readable over any scenery.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surface.withValues(alpha: 0.72),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        '${unit.emoji}  ${unit.title}',
+                        key: const Key('home-world-title'),
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // ── Tier 2: this world's rooms ──
+                    _RoomRow(
+                      unit: unit,
+                      progress: p,
+                      badgeOf: (id) => _badge(widget.schedule.levelAt(id)),
+                      onTap: (id) {
+                        if (id == p.level) {
+                          _speak(
+                            '${widget.schedule.levelAt(id).title}! '
+                            'Tap the big button to play!',
+                          );
+                        } else if (id > p.level) {
+                          _speak('Locked! Keep playing to get there!');
+                        } else {
+                          _speak('You beat that one already!');
+                        }
+                      },
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surface.withValues(alpha: 0.72),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        level.title,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    // ── Tier 3: the lesson nodes ──
+                    if (p.pathComplete)
+                      const Text('🏆', style: TextStyle(fontSize: 44))
+                    else
+                      _LessonNodePath(
+                        count: p.lessonsForThisLevel,
+                        done: p.lessonsIntoLevel,
+                        emojiOf: (i) =>
+                            _themeEmoji[_nodeTheme(level, i)] ?? '⭐',
+                        onTap: (i) {
+                          if (i == p.lessonsIntoLevel) {
+                            _openLesson();
+                          } else if (i < p.lessonsIntoLevel) {
+                            _speak('Done!');
+                          } else {
+                            _speak(_themeLine[_nodeTheme(level, i)] ?? 'Soon!');
+                          }
+                        },
+                      ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: 200,
+                      height: 84,
+                      child: FilledButton(
+                        key: const Key('home-play'),
+                        onPressed: _openLesson,
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        child: const Icon(Icons.play_arrow_rounded, size: 52),
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
-                const Spacer(),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -304,9 +355,13 @@ class _WorldStrip extends StatelessWidget {
   }
 
   Widget _buildLandmark(
-      BuildContext context, ColorScheme scheme, CurriculumUnit u) {
+    BuildContext context,
+    ColorScheme scheme,
+    CurriculumUnit u,
+  ) {
     final current = u.levels.contains(progress.level);
-    final done = u.levels.every((l) => l < progress.level) ||
+    final done =
+        u.levels.every((l) => l < progress.level) ||
         (progress.pathComplete && u.levels.contains(progress.level));
     final locked = !current && !done;
 
@@ -319,8 +374,8 @@ class _WorldStrip extends StatelessWidget {
         color: done
             ? scheme.primaryContainer
             : current
-                ? scheme.primaryContainer
-                : scheme.surfaceContainerHighest,
+            ? scheme.primaryContainer
+            : scheme.surfaceContainerHighest,
       ),
       child: Opacity(
         opacity: locked ? 0.4 : 1,
@@ -335,14 +390,16 @@ class _WorldStrip extends StatelessWidget {
         face,
         if (done)
           const Positioned(
-              right: -2,
-              bottom: -2,
-              child: Icon(Icons.star, color: Colors.amber, size: 16)),
+            right: -2,
+            bottom: -2,
+            child: Icon(Icons.star, color: Colors.amber, size: 16),
+          ),
         if (locked)
           Positioned(
-              right: -2,
-              bottom: -2,
-              child: Icon(Icons.lock, color: scheme.outline, size: 14)),
+            right: -2,
+            bottom: -2,
+            child: Icon(Icons.lock, color: scheme.outline, size: 14),
+          ),
       ],
     );
 
@@ -406,30 +463,36 @@ class _RoomRow extends StatelessWidget {
                     color: id == progress.level
                         ? scheme.primaryContainer
                         : id < progress.level
-                            ? scheme.primaryContainer.withValues(alpha: 0.6)
-                            : scheme.surfaceContainerHighest,
+                        ? scheme.primaryContainer.withValues(alpha: 0.6)
+                        : scheme.surfaceContainerHighest,
                     border: id == progress.level
                         ? Border.all(color: scheme.primary, width: 3)
                         : null,
                   ),
                   child: Opacity(
                     opacity: id > progress.level ? 0.4 : 1,
-                    child: Text(badgeOf(id),
-                        style: const TextStyle(fontSize: 22)),
+                    child: Text(
+                      badgeOf(id),
+                      style: const TextStyle(fontSize: 22),
+                    ),
                   ),
                 ),
                 if (id < progress.level)
                   const Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Icon(Icons.check_circle,
-                          color: Colors.green, size: 16)),
+                    right: -2,
+                    bottom: -2,
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 16,
+                    ),
+                  ),
                 if (id > progress.level)
                   Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child:
-                          Icon(Icons.lock, color: scheme.outline, size: 14)),
+                    right: -2,
+                    bottom: -2,
+                    child: Icon(Icons.lock, color: scheme.outline, size: 14),
+                  ),
               ],
             ),
           ),
@@ -489,24 +552,30 @@ class _LessonNodePath extends StatelessWidget {
                     color: i < done
                         ? scheme.primary
                         : i == done
-                            ? scheme.primaryContainer
-                            : scheme.surfaceContainerHighest,
+                        ? scheme.primaryContainer
+                        : scheme.surfaceContainerHighest,
                     border: i == done
                         ? Border.all(color: scheme.primary, width: 3)
                         : null,
                   ),
                   child: Opacity(
                     opacity: i > done ? 0.45 : 1,
-                    child: Text(emojiOf(i),
-                        style: TextStyle(fontSize: i == done ? 28 : 24)),
+                    child: Text(
+                      emojiOf(i),
+                      style: TextStyle(fontSize: i == done ? 28 : 24),
+                    ),
                   ),
                 ),
                 if (i < done)
                   Positioned(
-                      right: -2,
-                      bottom: -2,
-                      child: Icon(Icons.check_circle,
-                          color: Colors.green.shade600, size: 20)),
+                    right: -2,
+                    bottom: -2,
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Colors.green.shade600,
+                      size: 20,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -516,7 +585,9 @@ class _LessonNodePath extends StatelessWidget {
               height: 5,
               margin: const EdgeInsets.symmetric(horizontal: 3),
               decoration: BoxDecoration(
-                color: i < done ? scheme.primary : scheme.surfaceContainerHighest,
+                color: i < done
+                    ? scheme.primary
+                    : scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
