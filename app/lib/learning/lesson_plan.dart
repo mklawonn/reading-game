@@ -26,10 +26,11 @@ class ExerciseStep extends LessonStep {
 ///
 ///  * [meet] — the level's first lesson(s): teach each new symbol, then drill
 ///    it immediately in an escalating block (hear it → hunt it → read it);
-///  * [sounds] — middle lessons: listening and matching games;
+///  * [sounds] — early-middle lessons: listening and matching games;
+///  * [story] — a whole node devoted to a tap-along Story Time tale;
 ///  * [reading] — the level's last lesson: print-direction games, opening
 ///    with the level's new symbols for retention.
-enum LessonTheme { meet, sounds, reading }
+enum LessonTheme { meet, sounds, story, reading }
 
 /// Builds the ordered step plan for one lesson. Pure Dart — unit-testable.
 class LessonPlan {
@@ -41,12 +42,13 @@ class LessonPlan {
   /// supporting one.
   static const Set<String> soundGames = {
     'listen_and_pick', 'sound_match', 'symbol_hunt', 'families',
+    'hidden_glyph', 'feed_the_guide',
   };
 
   /// Print-direction games: the child decodes or composes written forms.
   static const Set<String> readingGames = {
     'find_the_character', 'picture_to_word', 'echo_read',
-    'fill_blank', 'build_a_word', 'blend_reveal',
+    'fill_blank', 'build_a_word', 'blend_reveal', 'build_a_sentence',
   };
 
   /// The escalating drill block for a just-met symbol, in teaching order:
@@ -54,15 +56,18 @@ class LessonPlan {
   /// so reading a symbol is always preceded by owning its sound.
   static const List<String> _drillOrder = [
     'listen_and_pick',
+    'feed_the_guide',
     'symbol_hunt',
+    'hidden_glyph',
     'sound_match',
     'find_the_character',
     'picture_to_word',
   ];
 
   /// The theme this lesson should carry: meet while any of the level's
-  /// symbols are unmet, else sounds for middle lessons and reading to close
-  /// the level out.
+  /// symbols are unmet; then sounds through the middle, Story Time on the
+  /// second-to-last node (when the level has an unlocked story), and reading
+  /// to close the level out.
   static LessonTheme themeFor({
     required CurriculumLevel level,
     required Set<String> seenIntros,
@@ -71,9 +76,11 @@ class LessonPlan {
     if (level.introduce.any((id) => !seenIntros.contains(id))) {
       return LessonTheme.meet;
     }
-    return lessonIndex >= level.lessons - 1
-        ? LessonTheme.reading
-        : LessonTheme.sounds;
+    if (lessonIndex >= level.lessons - 1) return LessonTheme.reading;
+    if (level.story && level.lessons >= 2 && lessonIndex == level.lessons - 2) {
+      return LessonTheme.story;
+    }
+    return LessonTheme.sounds;
   }
 
   static List<LessonStep> build({
@@ -91,6 +98,8 @@ class LessonPlan {
     return switch (theme) {
       LessonTheme.meet =>
         _meetLesson(level, seenIntros, games, exerciseCount, rng),
+      // A Story Time node IS the story — one immersive step, nothing else.
+      LessonTheme.story => const [ExerciseStep('story_time')],
       _ => _themedLesson(level, games, theme, exerciseCount, rng),
     };
   }

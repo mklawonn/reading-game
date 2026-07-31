@@ -1,0 +1,100 @@
+{
+  "version": "1",
+  "notes": "Tap-along stories for Story Time lesson nodes (docs/lessons.md). Each line is a sequence of Content Bank element ids, rendered in the child's current-stage orthography. Stories may use symbols beyond the taught pool — the child taps along and hears every token (tap-to-hear), they are never quizzed on unknown glyphs. `unlock_level` is the first curriculum level whose Story Time lessons may pick this story; prefer the newest unlocked stories so tales grow with the reader. `title` is parent-facing.",
+  "stories": [
+    {
+      "id": "the_cat",
+      "title": "The Cat",
+      "unlock_level": 1,
+      "lines": [
+        ["cat"],
+        ["the", "cat", "is", "big"],
+        ["the", "cat", "can", "see", "the", "sun"],
+        ["the", "sun", "is", "hot"]
+      ]
+    },
+    {
+      "id": "my_sunhat",
+      "title": "My Sun Hat",
+      "unlock_level": 2,
+      "lines": [
+        ["the", "sun", "is", "up"],
+        ["the", "sun", "is", "hot"],
+        ["a", "hat"],
+        ["my", "hat"],
+        ["the", "sun", "and", "my", "hat"]
+      ]
+    },
+    {
+      "id": "pig_and_bug",
+      "title": "Pig and Bug",
+      "unlock_level": 5,
+      "lines": [
+        ["a", "pig", "and", "a", "bug"],
+        ["the", "bug", "is", "on", "the", "pig"],
+        ["the", "pig", "is", "in", "the", "pen"],
+        ["run", "pig", "run"]
+      ]
+    },
+    {
+      "id": "the_fox",
+      "title": "The Fox and the Hen",
+      "unlock_level": 8,
+      "lines": [
+        ["a", "fox", "in", "a", "box"],
+        ["the", "fox", "can", "see", "the", "hen"],
+        ["run", "hen", "run"],
+        ["the", "hen", "is", "in", "the", "box"],
+        ["the", "fox", "can", "sit"]
+      ]
+    },
+    {
+      "id": "pup_at_home",
+      "title": "Pup at Home",
+      "unlock_level": 11,
+      "lines": [
+        ["my", "pup", "is", "on", "the", "bed"],
+        ["the", "pup", "can", "see", "the", "pot"],
+        ["the", "pot", "is", "hot"],
+        ["get", "up", "pup"],
+        ["the", "pup", "can", "run", "to", "my", "hand"]
+      ]
+    },
+    {
+      "id": "bee_and_key",
+      "title": "The Bee and the Key",
+      "unlock_level": 13,
+      "lines": [
+        ["a", "bee", "and", "a", "key"],
+        ["the", "bee", "is", "on", "the", "key"],
+        ["the", "bee", "can", "go", "up"],
+        ["the", "key", "is", "in", "the", "box"],
+        ["see", "the", "bee", "go"]
+      ]
+    },
+    {
+      "id": "rain_day",
+      "title": "A Rain Day",
+      "unlock_level": 16,
+      "lines": [
+        ["the", "rain", "is", "on", "my", "hand"],
+        ["the", "cow", "can", "see", "the", "rain"],
+        ["the", "boy", "and", "the", "cow", "run"],
+        ["the", "rain", "can", "go"],
+        ["the", "sun", "is", "up"]
+      ]
+    },
+    {
+      "id": "snow_man",
+      "title": "The Snow Man",
+      "unlock_level": 18,
+      "lines": [
+        ["see", "the", "snow"],
+        ["the", "boy", "can", "get", "the", "snow"],
+        ["a", "snow", "man"],
+        ["the", "snow", "man", "is", "big"],
+        ["the", "boy", "and", "the", "snow", "man"]
+      ]
+    }
+  ]
+}

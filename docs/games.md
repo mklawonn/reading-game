@@ -22,6 +22,10 @@ lesson loop — see [`lessons.md`](lessons.md).
 | Sound Match | 1–2 | M2 | Drag each symbol onto the sound it makes |
 | Fill the Blank | 1–4 | M2 | Drag the missing symbol into a phrase (renders per stage) |
 | Echo Read | 1–4 | M2 | Tap a phrase's tokens left-to-right, hear it read back fluently |
+| Story Time | 1–4 | M2 | A whole lesson node: tap along through a multi-line glyph story (`stories.v1.json`) — never quizzed |
+| Hidden Glyph | 1 | M2 | I-Spy search scene: find the 2 hidden copies of the named word's picture among scattered, rotated glyphs |
+| Feed the Guide | 1 | M2 | "Fern wants the hat!" — give the hungry guide what it asks for (tap or drag) |
+| Build a Sentence | 1–4 | M2 | Hear a sentence, arrange glyph cards to build it (pictograph rows early, real phrases later) |
 | Sound Families | 3 | M2 | Match by rhyme or shared first sound (teaches stops by contrast) |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 

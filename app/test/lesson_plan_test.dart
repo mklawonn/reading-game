@@ -9,6 +9,7 @@ CurriculumLevel _level({
   List<String> introduce = const [],
   List<String> games = const ['find_the_character'],
   int lessons = 3,
+  bool story = false,
 }) =>
     CurriculumLevel(
         id: 1,
@@ -17,7 +18,8 @@ CurriculumLevel _level({
         introduce: introduce,
         games: games,
         xpToAdvance: 50,
-        lessons: lessons);
+        lessons: lessons,
+        story: story);
 
 void main() {
   test('meet lesson: each new symbol is taught then drilled in an escalating block', () {
@@ -121,6 +123,38 @@ void main() {
     for (var i = 1; i < ids.length; i++) {
       expect(ids[i], isNot(ids[i - 1]), reason: 'repeat at $i in $ids');
     }
+  });
+
+  test('a story level devotes its second-to-last node entirely to Story Time', () {
+    final level = _level(
+        introduce: ['cat'],
+        games: ['listen_and_pick', 'find_the_character'],
+        lessons: 4,
+        story: true);
+    expect(
+        LessonPlan.themeFor(
+            level: level, seenIntros: const {'cat'}, lessonIndex: 2),
+        LessonTheme.story);
+    final steps = LessonPlan.build(
+      level: level,
+      seenIntros: const {'cat'},
+      lessonIndex: 2,
+      random: Random(5),
+    );
+    expect(steps, hasLength(1));
+    expect(steps.single,
+        isA<ExerciseStep>().having((s) => s.gameId, 'game', 'story_time'));
+  });
+
+  test('the four themes land on the right nodes of a 4-lesson level', () {
+    final level = _level(
+        introduce: ['cat'], games: ['listen_and_pick'], lessons: 4, story: true);
+    LessonTheme at(int i, {bool met = true}) => LessonPlan.themeFor(
+        level: level, seenIntros: met ? const {'cat'} : const {}, lessonIndex: i);
+    expect(at(0, met: false), LessonTheme.meet);
+    expect(at(1), LessonTheme.sounds);
+    expect(at(2), LessonTheme.story);
+    expect(at(3), LessonTheme.reading);
   });
 
   test('a single-game level still fills a whole (short) lesson', () {

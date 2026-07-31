@@ -17,19 +17,34 @@ syllabary curriculum ([`curriculum.md`](curriculum.md)); this document covers th
 | Build-a-Word shows the printed target word | Children letter-shape-match instead of blending by sound |
 | A "next" tap after every round | Halves pace; small children stall |
 
+## The three tiers
+
+```
+worlds (units)      🏡 ─ 🌾 ─ 🏘️ ─ 🛏️ ─ 🌼 ─ ⛅ ─ 🌈      emoji landmarks
+  └ rooms (levels)    each world = 2–4 sub-levels, one core glyph set each
+      └ lesson nodes    each room = 3–4 bite-sized themed lessons: 👋 👂 📖 📚
+```
+
+The Duolingo-ABC building→room→node organization, in this app's emoji imagery.
+A **world** groups a themed glyph set (`units` in `curriculum.v1.json`) and ends
+in a **review room** (`introduce: []` — party badge 🎈, no new material). A
+**room** = a `CurriculumLevel`: a small core set of glyphs and its lesson nodes.
+The pace is deliberately unhurried: four nodes per teaching room, three per
+review room, so each symbol is met, heard, storied, and read before moving on.
+
 ## The loop
 
 ```
-Home (level path) ─ Play ─▶ Lesson (≈8 steps) ─▶ Celebration (1–3 stars) ─▶ Home
-                              │                       │
-                              ├ Meet-symbol intros    └ after final lesson of the
-                              ├ mixed single-round      level: level-up overlay
-                              └ exercises (auto-advance)
+Home (worlds→rooms→nodes) ─ Play ─▶ Lesson (1–9 steps) ─▶ Celebration ─▶ Home
+                                      │                       │
+                                      ├ Meet-symbol intros    └ after a room's
+                                      ├ themed single-round     last node:
+                                      └ exercises               level-up overlay
 ```
 
-* A **level** = `lessons` (2–3) short lessons; finishing all of them levels up.
-  Progress is *lessons completed*, not raw XP (XP remains underneath for the
-  decoupled rewards layer — achievements, streaks).
+* A **level (room)** = `lessons` (3–4) short lessons; finishing all of them
+  levels up. Progress is *lessons completed*, not raw XP (XP remains underneath
+  for the decoupled rewards layer — achievements, streaks).
 * A **lesson** = an ordered plan of steps built by [`LessonPlan`](../app/lib/learning/lesson_plan.dart).
   Every lesson carries one **theme** — a coherent focus, not a random game salad:
   * **Meet & drill** (while the level has unmet symbols): each new symbol gets its
@@ -40,9 +55,15 @@ Home (level path) ─ Play ─▶ Lesson (≈8 steps) ─▶ Celebration (1–3 
     `picture_to_word`). Print exposure always follows sound ownership, and
     retention drilling happens *now*, not three exercises later. (This also fixes
     the working-set-cap starvation of unseen items.)
-  * **Sounds** (middle lessons): listening/matching games only.
+  * **Sounds** (early-middle lessons): listening/matching games only.
+  * **Story Time** (the second-to-last node, wherever `stories.v1.json` has an
+    unlocked tale): the whole node is one tap-along story — the child taps each
+    token left-to-right, hears every one, and each line is read back fluently.
+    Stories may reach beyond the taught pool; nothing is quizzed.
   * **Reading** (the level's closing lesson): print-direction games only, opening
-    with the level's new symbols for retention.
+    with the level's new symbols for retention. Includes **Build a Sentence** and
+    the blending games — pictograph compounds (sunhat, pigpen, bedbug, keyring,
+    handball) put productive combining in reach from World 2, not the endgame.
   * Within a theme, slots are filled from shuffled "bags" so types vary and never
     repeat back-to-back; an exercise answered wrong is **re-queued** once near the
     end ("let's try that one again"), capped so a lesson always ends.

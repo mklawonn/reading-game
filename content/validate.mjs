@@ -199,7 +199,8 @@ if (existsSync(curriculumPath)) {
   }
   const KNOWN_GAMES = new Set([
     'listen_and_pick', 'find_the_character', 'sound_match', 'families', 'build_a_word', 'fill_blank',
-    'picture_to_word', 'symbol_hunt', 'echo_read', 'blend_reveal']);
+    'picture_to_word', 'symbol_hunt', 'echo_read', 'blend_reveal',
+    'story_time', 'hidden_glyph', 'feed_the_guide', 'build_a_sentence']);
   const introduced = new Set();
   for (const lv of cur.levels ?? []) {
     for (const id of lv.introduce ?? []) {
@@ -211,12 +212,68 @@ if (existsSync(curriculumPath)) {
       if (!KNOWN_GAMES.has(g)) err(`curriculum L${lv.id}: unknown game "${g}"`);
     }
   }
+  // Units must partition their levels: every referenced level exists, none twice.
+  const inUnit = new Set();
+  const levelIds = new Set((cur.levels ?? []).map((l) => l.id));
+  for (const u of cur.units ?? []) {
+    for (const id of u.levels ?? []) {
+      if (!levelIds.has(id)) err(`curriculum unit ${u.id}: level ${id} does not exist`);
+      if (inUnit.has(id)) err(`curriculum unit ${u.id}: level ${id} in two units`);
+      inUnit.add(id);
+    }
+  }
+  if ((cur.units ?? []).length > 0) {
+    for (const id of levelIds) {
+      if (!inUnit.has(id)) err(`curriculum: level ${id} belongs to no unit`);
+    }
+  }
+  // story:true requires an actually-unlocked story at that level.
+  const storiesSibling = join(dirname(bankPath), 'stories.v1.json');
+  if (existsSync(storiesSibling)) {
+    try {
+      const st = JSON.parse(readFileSync(storiesSibling, 'utf8'));
+      const unlocks = (st.stories ?? []).map((s) => s.unlock_level ?? 1);
+      for (const lv of cur.levels ?? []) {
+        if (lv.story && !unlocks.some((u) => u <= lv.id)) {
+          err(`curriculum L${lv.id}: story:true but no story unlocks by level ${lv.id}`);
+        }
+      }
+    } catch { /* parse errors already reported by the stories section */ }
+  }
   for (const e of elements) {
     if (e.picturable && !introduced.has(e.id)) {
       warn(`curriculum: pictograph "${e.id}" is never introduced`);
     }
   }
   console.log(`Curriculum v${cur.version ?? '?'}: ${(cur.levels ?? []).length} levels, ${introduced.size} symbols introduced`);
+}
+
+// ── stories (optional sibling stories.v1.json) ──────────────────────────────
+const storiesPath = join(dirname(bankPath), 'stories.v1.json');
+if (existsSync(storiesPath)) {
+  let st = { stories: [] };
+  try {
+    st = JSON.parse(readFileSync(storiesPath, 'utf8'));
+  } catch (e) {
+    err(`stories: could not parse ${storiesPath}: ${e.message}`);
+  }
+  const seen = new Set();
+  for (const s of st.stories ?? []) {
+    if (seen.has(s.id)) err(`stories ${s.id}: duplicate id`);
+    seen.add(s.id);
+    if (!Number.isInteger(s.unlock_level) || s.unlock_level < 1) {
+      err(`stories ${s.id}: unlock_level must be a positive integer`);
+    }
+    if (!Array.isArray(s.lines) || s.lines.length === 0) {
+      err(`stories ${s.id}: needs at least one line`);
+    }
+    for (const line of s.lines ?? []) {
+      for (const id of line) {
+        if (!elementIds.has(id)) err(`stories ${s.id}: token "${id}" is not an element`);
+      }
+    }
+  }
+  console.log(`Stories v${st.version ?? '?'}: ${(st.stories ?? []).length} stories`);
 }
 
 // ── report ──────────────────────────────────────────────────────────────────

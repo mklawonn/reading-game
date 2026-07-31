@@ -13,17 +13,21 @@ import '../../progress/progress_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../blend_reveal/blend_reveal_page.dart';
+import '../build_a_sentence/build_a_sentence_page.dart';
 import '../build_a_word/build_a_word_page.dart';
 import '../common/guide_character.dart';
 import '../echo_read/echo_read_page.dart';
 import '../families/families_page.dart';
+import '../feed_the_guide/feed_the_guide_page.dart';
 import '../fill_blank/fill_blank_page.dart';
 import '../find_the_character/find_the_character_page.dart';
+import '../hidden_glyph/hidden_glyph_page.dart';
 import '../home/introduce_symbol_screen.dart';
 import '../home/level_up_overlay.dart';
 import '../listen_and_pick/listen_and_pick_page.dart';
 import '../picture_to_word/picture_to_word_page.dart';
 import '../sound_match/sound_match_page.dart';
+import '../story_time/story_time_page.dart';
 import '../symbol_hunt/symbol_hunt_page.dart';
 import 'celebration.dart';
 
@@ -247,6 +251,14 @@ class _LessonScreenState extends State<LessonScreen> {
             return EchoReadPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, stage: stage, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
           case 'blend_reveal':
             return BlendRevealPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
+          case 'story_time':
+            return StoryTimePage(key: key, contentService: cs, audioService: audio, level: _level, stage: stage, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
+          case 'hidden_glyph':
+            return HiddenGlyphPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
+          case 'feed_the_guide':
+            return FeedTheGuidePage(key: key, contentService: cs, audioService: audio, guide: _guide, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
+          case 'build_a_sentence':
+            return BuildASentencePage(key: key, contentService: cs, audioService: audio, stage: stage, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
           case 'find_the_character':
           default:
             return FindTheCharacterPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
