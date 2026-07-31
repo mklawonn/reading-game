@@ -100,7 +100,10 @@ class _WorldSceneryState extends State<WorldScenery>
             animation: _drift,
             builder: (context, _) => CustomPaint(
               painter: _ParticlePainter(
-                t: _drift.value,
+                // Quantized to ~15 fps: the drift is slow enough that extra
+                // frames are invisible, and shouldRepaint then skips 3 of
+                // every 4 rasterizations — fans and batteries stay quiet.
+                t: (_drift.value * 540).floorToDouble() / 540,
                 emoji: theme.particles,
                 seed: widget.unitId,
               ),
