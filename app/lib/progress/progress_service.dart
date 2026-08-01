@@ -138,6 +138,30 @@ class ProgressService extends ChangeNotifier implements MasteryView {
       _curriculumLevel >= _schedule.length &&
       _lessonsIntoLevel >= lessonsForThisLevel;
 
+  /// Wipes this profile's progress back to a fresh start (parent-facing
+  /// "start over": level, lessons, XP, mastery, streaks, achievements, met
+  /// symbols — everything).
+  Future<void> reset() async {
+    _xp = 0;
+    _curriculumLevel = 1;
+    _xpIntoLevel = 0;
+    _lessonsIntoLevel = 0;
+    _seenIntros.clear();
+    _justLeveledUp.clear();
+    _mastery.clear();
+    _skillCorrect.clear();
+    _totalCorrect = 0;
+    _totalAnswered = 0;
+    _run = 0;
+    _bestRun = 0;
+    _dayStreak = 0;
+    _lastDay = null;
+    _unlocked.clear();
+    _justUnlocked.clear();
+    notifyListeners();
+    await flush();
+  }
+
   /// Marks one lesson finished. Levels up (queuing the celebration) once the
   /// level's lesson count is met; at the final level the bar just caps full.
   void completeLesson() {

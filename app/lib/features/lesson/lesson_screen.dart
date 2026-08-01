@@ -37,6 +37,11 @@ import 'celebration.dart';
 /// starred celebration at the end (see docs/lessons.md). Steps auto-advance;
 /// missed exercises are re-queued once near the end; leaving early keeps all
 /// recorded progress — the lesson simply doesn't count.
+///
+/// By default it plays the child's *next* lesson. Passing [levelOverride] /
+/// [lessonIndexOverride] plays a specific node instead — a **replay** when it
+/// isn't the next one: mastery practice still records, the celebration still
+/// fires, but the level ladder doesn't move.
 class LessonScreen extends StatefulWidget {
   const LessonScreen({
     super.key,
@@ -45,6 +50,8 @@ class LessonScreen extends StatefulWidget {
     required this.schedule,
     required this.contentService,
     required this.audioService,
+    this.levelOverride,
+    this.lessonIndexOverride,
     this.random,
   });
 
@@ -53,6 +60,13 @@ class LessonScreen extends StatefulWidget {
   final CurriculumSchedule schedule;
   final ContentService contentService;
   final AudioService audioService;
+
+  /// Play this level's lesson instead of the current one (replaying a room).
+  final int? levelOverride;
+
+  /// Play this lesson node instead of the next one (replaying a node).
+  final int? lessonIndexOverride;
+
   final Random? random;
 
   @override
@@ -78,21 +92,37 @@ class _LessonScreenState extends State<LessonScreen> {
   GuideMood _mood = GuideMood.idle;
   Timer? _moodTimer;
 
+  /// True when this run is a revisit of an already-completed node — it must
+  /// never move the level ladder.
+  late final bool _replay;
+
   @override
   void initState() {
     super.initState();
-    _level = widget.progress.level;
+    final p = widget.progress;
+    _level = widget.levelOverride ?? p.level;
+    final lessonIndex = widget.lessonIndexOverride ??
+        (_level == p.level ? p.lessonsIntoLevel : 0);
+    _replay = _level < p.level ||
+        (_level == p.level && lessonIndex < p.lessonsIntoLevel);
     _guide = guideForLevel(_level);
-    _sampler = ItemSampler(widget.progress);
+    _sampler = ItemSampler(p);
+    // Replaying a room's FIRST node re-teaches: treat its symbols as unmet
+    // again so the Meet cards and drill blocks come back. Later nodes keep
+    // their own themes (sounds/story/reading).
+    final seen = _replay && lessonIndex == 0
+        ? p.seenIntros
+            .difference(widget.schedule.levelAt(_level).introduce.toSet())
+        : p.seenIntros;
     _steps = List.of(LessonPlan.build(
       level: widget.schedule.levelAt(_level),
-      seenIntros: widget.progress.seenIntros,
-      lessonIndex: widget.progress.lessonsIntoLevel,
+      seenIntros: seen,
+      lessonIndex: lessonIndex,
       random: _random,
     ));
     // Drain any stale level-up queue so a previous flow can never replay its
     // celebrations inside (or after) this lesson.
-    widget.progress.takeJustLeveledUp();
+    p.takeJustLeveledUp();
   }
 
   @override
@@ -157,7 +187,8 @@ class _LessonScreenState extends State<LessonScreen> {
   int get _stars => _wrongTotal == 0 ? 3 : (_wrongTotal <= 2 ? 2 : 1);
 
   Future<void> _finishLesson() async {
-    widget.progress.completeLesson();
+    // Replays celebrate but never move the ladder.
+    if (!_replay) widget.progress.completeLesson();
     await widget.progress.flush();
     if (!mounted) return;
     // Let the child SEE the bar hit the end — the finish line paying off is

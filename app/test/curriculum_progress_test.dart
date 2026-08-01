@@ -79,6 +79,23 @@ void main() {
     expect(p4.lessonsIntoLevel, 1);
   });
 
+  test('reset wipes everything back to a fresh start', () async {
+    final p = ProgressService(bank: _bank(), schedule: _schedule());
+    p.markIntroSeen('cat');
+    p.record(_correct());
+    p.completeLesson();
+    p.completeLesson(); // → level 2
+    expect(p.level, 2);
+
+    await p.reset();
+    expect(p.level, 1);
+    expect(p.lessonsIntoLevel, 0);
+    expect(p.xp, 0);
+    expect(p.hasSeenIntro('cat'), isFalse);
+    expect(p.masteredCount, 0);
+    expect(p.totalAnswered, 0);
+  });
+
   test('without a schedule, level falls back to the XP curve', () {
     final p = ProgressService(bank: _bank()); // no schedule
     p.loadJson({'xp': 320});

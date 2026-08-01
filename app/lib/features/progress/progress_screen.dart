@@ -51,11 +51,53 @@ class ProgressScreen extends StatelessWidget {
                     _Badge(achievement: a, unlocked: progress.isUnlocked(a.id)),
                 ],
               ),
+              const SizedBox(height: 32),
+              // Parent-facing escape hatch: wipe this player back to Level 1.
+              // Deliberately wordy and double-confirmed — a child mashing
+              // around in here must not be able to erase themselves.
+              Center(
+                child: OutlinedButton.icon(
+                  key: const Key('progress-reset'),
+                  icon: const Icon(Icons.restart_alt),
+                  label: const Text('Start over (erases all progress)'),
+                  onPressed: () => _confirmReset(context),
+                ),
+              ),
             ],
           );
         },
       ),
     );
+  }
+
+  Future<void> _confirmReset(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Start over?'),
+        content: const Text(
+            'This erases ALL of this player\'s progress — levels, stars, and '
+            'mastered words — and cannot be undone. (Grown-ups only!)'),
+        actions: [
+          TextButton(
+            key: const Key('reset-cancel'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep my progress'),
+          ),
+          TextButton(
+            key: const Key('reset-confirm'),
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error),
+            child: const Text('Erase everything'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await progress.reset();
+      if (context.mounted) Navigator.of(context).pop(); // back to the journey
+    }
   }
 }
 

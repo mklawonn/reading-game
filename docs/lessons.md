@@ -32,6 +32,20 @@ in a **review room** (`introduce: []` — party badge 🎈, no new material). A
 The pace is deliberately unhurried: four nodes per teaching room, three per
 review room, so each symbol is met, heard, storied, and read before moving on.
 
+**One screen per tier.** The home screen shows the worlds as big arched
+**gateways**; walking through a gate switches to that world's rooms (arched
+doors, on that world's own scenery); a door opens onto the room's lesson-node
+path. Each transition is a gentle fade-and-grow (`pushImmersive`) so entering
+somewhere feels like arriving. The big Play button on every screen skips the
+walking and jumps straight into the next lesson — exploration is optional,
+progress is one tap.
+
+**Replay & reset.** Beaten rooms and nodes replay freely (mastery practice
+records, celebrations fire, the level ladder never moves — `LessonScreen`'s
+`levelOverride`/`lessonIndexOverride`); replaying a room's first node brings
+its Meet cards back. The parent-facing **Start over** on the progress screen
+(double-confirmed) wipes a profile to Level 1.
+
 ## The loop
 
 ```
