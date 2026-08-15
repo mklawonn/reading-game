@@ -69,6 +69,9 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     _focused = _currentIndex;
     _pages = PageController(viewportFraction: 0.72, initialPage: _focused);
     _pages.addListener(_onPage);
+    // Any progress change that moves the current world (level-ups, but also
+    // resets and replays) drives the street back to where the child now is.
+    widget.progress.addListener(_syncStreet);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final name = widget.profile?.name;
       widget.audioService.speak(
@@ -81,9 +84,21 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
 
   @override
   void dispose() {
+    widget.progress.removeListener(_syncStreet);
     _greetTimer?.cancel();
     _pages.dispose();
     super.dispose();
+  }
+
+  void _syncStreet() {
+    if (!mounted || !_pages.hasClients) return;
+    if (_currentIndex != _focused) {
+      _pages.animateToPage(
+        _currentIndex,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
+      );
+    }
   }
 
   /// Narrate arriving in front of a building as the page settles.
