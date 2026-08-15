@@ -8,6 +8,7 @@ import '../../profile/profile.dart';
 import '../../progress/progress_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
+import '../common/guide_character.dart';
 import '../lesson/lesson_screen.dart';
 import '../profile/avatars.dart';
 import '../progress/progress_screen.dart';
@@ -15,11 +16,11 @@ import 'journey_ui.dart';
 import 'rooms_screen.dart';
 import 'world_scenery.dart';
 
-/// The journey's front door: every world as a big **gateway**. Walking
-/// through a gate switches to that world's rooms (its own scenery), a room
-/// opens onto its lesson path — one screen per tier, so each choice gets the
-/// whole stage (see docs/lessons.md). The big Play button skips the walking
-/// and jumps straight into the next lesson.
+/// The journey's front door, ABC-style: one continuous **street** of world
+/// buildings you page through. The current world stands in color under its
+/// own sky (guide hovering beside it); locked worlds wait in greyscale down
+/// the road. Tapping a building walks inside (its rooms); the big Play button
+/// skips straight to the next lesson.
 class GuidedHomeScreen extends StatefulWidget {
   const GuidedHomeScreen({
     super.key,
@@ -45,14 +46,29 @@ class GuidedHomeScreen extends StatefulWidget {
 }
 
 class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
+  static const double _streetHeight = 92;
+
   bool _busy = false;
   Timer? _greetTimer;
+  late PageController _pages;
+  late int _focused; // unit LIST INDEX currently centered
+  late List<CurriculumUnit> _units;
+
+  int get _currentIndex {
+    final current = widget.schedule.unitFor(widget.progress.level);
+    final at = _units.indexWhere((u) => u.id == current.id);
+    return at < 0 ? 0 : at;
+  }
 
   @override
   void initState() {
     super.initState();
-    // Never strand a non-reader on a silent screen: greet by name and point
-    // at the one thing to do.
+    _units = widget.schedule.units.isEmpty
+        ? [widget.schedule.unitFor(widget.progress.level)]
+        : widget.schedule.units;
+    _focused = _currentIndex;
+    _pages = PageController(viewportFraction: 0.72, initialPage: _focused);
+    _pages.addListener(_onPage);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final name = widget.profile?.name;
       widget.audioService.speak(
@@ -66,7 +82,22 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
   @override
   void dispose() {
     _greetTimer?.cancel();
+    _pages.dispose();
     super.dispose();
+  }
+
+  /// Narrate arriving in front of a building as the page settles.
+  void _onPage() {
+    final page = _pages.hasClients ? _pages.page : null;
+    if (page == null) return;
+    final settled = page.round();
+    if ((page - settled).abs() > 0.02 || settled == _focused) return;
+    _focused = settled;
+    final unit = _units[settled];
+    final locked = unit.levels.first > widget.progress.level;
+    widget.audioService
+        .speak(locked ? '${unit.title}. Locked!' : '${unit.title}!');
+    setState(() {});
   }
 
   Future<void> _openLesson() async {
@@ -86,9 +117,13 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     );
     _busy = false;
     if (!mounted) return;
-    setState(() {}); // reflect any level-up
-    // Re-orient after the lesson — delayed so a goodbye or level-up line
-    // finishes ringing first.
+    setState(() {});
+    // A level-up may have moved us down the street — drive there.
+    if (_pages.hasClients && _currentIndex != _focused) {
+      _pages.animateToPage(_currentIndex,
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeInOutCubic);
+    }
     _greetTimer = Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
       final p = widget.progress;
@@ -117,6 +152,12 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     );
     _busy = false;
     if (mounted) setState(() {});
+  }
+
+  double _unitFraction(CurriculumUnit u, ProgressService p) {
+    final done = u.levels.where((l) => l < p.level).length;
+    final inCurrent = u.levels.contains(p.level) ? p.levelFraction : 0.0;
+    return ((done + inCurrent) / u.levels.length).clamp(0.0, 1.0);
   }
 
   @override
@@ -154,57 +195,91 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
         listenable: widget.progress,
         builder: (context, _) {
           final p = widget.progress;
-          final currentUnit = widget.schedule.unitFor(p.level);
-          final units = widget.schedule.units.isEmpty
-              ? [currentUnit]
-              : widget.schedule.units;
+          final focusedUnit = _units[_focused.clamp(0, _units.length - 1)];
+          final focusedLocked = focusedUnit.levels.first > p.level;
+          final theme = worldThemeFor(focusedUnit.id);
           return Stack(
             fit: StackFit.expand,
             children: [
-              // The stage is always the world the child lives in right now.
-              WorldScenery(unitId: currentUnit.id),
-              SafeArea(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 16,
-                          runSpacing: 18,
-                          children: [
-                            for (final u in units)
-                              _WorldGate(
-                                key: Key('world-${u.id}'),
-                                unit: u,
-                                state: u.levels.every((l) => l < p.level)
-                                    ? _GateState.done
-                                    : u.id == currentUnit.id
-                                        ? _GateState.current
-                                        : _GateState.locked,
-                                fraction: u.id == currentUnit.id
-                                    ? _unitFraction(u, p)
-                                    : null,
-                                onTap: () {
-                                  if (u.levels.first <= p.level) {
-                                    _enterWorld(u);
-                                  } else {
-                                    widget.audioService.speak(
-                                        'Locked! Keep playing to get to ${u.title}!');
-                                  }
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    BigPlayButton(onPressed: _openLesson),
-                    const SizedBox(height: 22),
-                  ],
+              // The sky follows whichever building you're in front of —
+              // washed grey when it's still locked.
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      for (final c in theme.sky)
+                        focusedLocked
+                            ? Color.lerp(c, const Color(0xFFB9BEC6), 0.55)!
+                            : c,
+                    ],
+                  ),
+                ),
+              ),
+              // Distant skyline + clouds, sliding slower than the street.
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _ParallaxBackdropPainter(
+                    pages: _pages,
+                    fallbackPage: _focused.toDouble(),
+                    streetHeight: _streetHeight,
+                  ),
+                ),
+              ),
+              // The street itself.
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: _streetHeight,
+                child: const _Street(),
+              ),
+              // The buildings.
+              Positioned.fill(
+                bottom: _streetHeight - 10,
+                child: PageView.builder(
+                  controller: _pages,
+                  itemCount: _units.length,
+                  itemBuilder: (context, i) {
+                    final unit = _units[i];
+                    final locked = unit.levels.first > p.level;
+                    final beaten = unit.levels.every((l) => l < p.level) ||
+                        (p.pathComplete && unit.levels.contains(p.level));
+                    final isCurrentWorld = i == _currentIndex;
+                    return _BuildingPage(
+                      key: Key('world-${unit.id}'),
+                      unit: unit,
+                      locked: locked,
+                      beaten: beaten,
+                      showGuide: isCurrentWorld,
+                      guide: guideForLevel(p.level),
+                      fraction: unit.levels.contains(p.level)
+                          ? _unitFraction(unit, p)
+                          : null,
+                      onTap: () {
+                        if (locked) {
+                          widget.audioService.speak(
+                              'Locked! Keep playing to get to ${unit.title}!');
+                        } else {
+                          _enterWorld(unit);
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+              if (p.pathComplete)
+                const Align(
+                  alignment: Alignment(0, -0.85),
+                  child: Text('🏆', style: TextStyle(fontSize: 52)),
+                ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: BigPlayButton(onPressed: _openLesson),
                 ),
               ),
             ],
@@ -213,103 +288,174 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
       ),
     );
   }
-
-  double _unitFraction(CurriculumUnit u, ProgressService p) {
-    final done = u.levels.where((l) => l < p.level).length;
-    final inCurrent =
-        u.levels.contains(p.level) ? p.levelFraction : 0.0;
-    return ((done + inCurrent) / u.levels.length).clamp(0.0, 1.0);
-  }
 }
 
-enum _GateState { done, current, locked }
-
-/// A world's gateway: a tall arch big enough to feel like a place you enter,
-/// wearing the world's landmark and (for the current world) a progress ring.
-class _WorldGate extends StatelessWidget {
-  const _WorldGate({
+/// One building on the street: hero art standing on the ground, its name on a
+/// chip, greyscale + padlock while locked, the guide hovering beside the
+/// current one.
+class _BuildingPage extends StatelessWidget {
+  const _BuildingPage({
     super.key,
     required this.unit,
-    required this.state,
+    required this.locked,
+    required this.beaten,
+    required this.showGuide,
+    required this.guide,
     required this.onTap,
     this.fraction,
   });
 
   final CurriculumUnit unit;
-  final _GateState state;
+  final bool locked;
+  final bool beaten;
+  final bool showGuide;
+  final Guide guide;
   final double? fraction;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final current = state == _GateState.current;
-    final w = current ? 132.0 : 112.0;
-    final h = current ? 158.0 : 136.0;
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: w,
-                height: h,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: state == _GateState.locked
-                      ? scheme.surfaceContainerHighest.withValues(alpha: 0.9)
-                      : scheme.primaryContainer.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(w / 2),
-                      bottom: const Radius.circular(16)),
-                  border: current
-                      ? Border.all(color: scheme.primary, width: 4)
-                      : Border.all(color: scheme.outlineVariant, width: 2),
+          Expanded(
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Positioned.fill(
+                  top: 24,
+                  child: LockedGrey(
+                    locked: locked,
+                    child: Image.asset(
+                      'assets/images/worlds/building_${unit.id}.png',
+                      fit: BoxFit.contain,
+                      alignment: Alignment.bottomCenter,
+                      errorBuilder: (context, error, stack) => Center(
+                        child: Text(unit.emoji,
+                            style: const TextStyle(fontSize: 90)),
+                      ),
+                    ),
+                  ),
                 ),
-                child: Opacity(
-                  opacity: state == _GateState.locked ? 0.45 : 1,
-                  child: Text(unit.emoji,
-                      style: TextStyle(fontSize: current ? 56 : 46)),
-                ),
-              ),
-              if (current && fraction != null)
-                Positioned(
-                  bottom: 8,
-                  child: SizedBox(
-                    width: w * 0.62,
+                if (showGuide)
+                  Align(
+                    alignment: const Alignment(0.9, -0.72),
+                    child: GuideCharacter(guide: guide, size: 44),
+                  ),
+                if (locked)
+                  Align(
+                    alignment: const Alignment(0, -0.55),
+                    child: Icon(Icons.lock,
+                        size: 34,
+                        color: Colors.black.withValues(alpha: 0.35)),
+                  ),
+                if (beaten)
+                  const Align(
+                    alignment: Alignment(0.85, -0.9),
+                    child:
+                        Icon(Icons.star, color: Colors.amber, size: 34),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          SceneryChip(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${unit.emoji}  ${unit.title}',
+                    style: Theme.of(context).textTheme.titleMedium),
+                if (fraction != null) ...[
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    width: 110,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
                           value: fraction, minHeight: 7),
                     ),
                   ),
-                ),
-              if (state == _GateState.done)
-                const Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Icon(Icons.star, color: Colors.amber, size: 30)),
-              if (state == _GateState.locked)
-                Positioned(
-                    right: -4,
-                    top: -4,
-                    child:
-                        Icon(Icons.lock, color: scheme.outline, size: 22)),
-            ],
+                ],
+              ],
+            ),
           ),
-          const SizedBox(height: 6),
-          SceneryChip(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            child: Text(unit.title,
-                style: Theme.of(context).textTheme.labelLarge),
-          ),
+          // Clear the floating Play button so the chip is never hidden.
+          const SizedBox(height: 86),
         ],
       ),
     );
   }
+}
+
+/// The continuous asphalt + sidewalk strip the whole street stands on.
+class _Street extends StatelessWidget {
+  const _Street();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(height: 12, color: const Color(0xFFCFCFD8)), // curb
+        Expanded(child: Container(color: const Color(0xFF565661))),
+      ],
+    );
+  }
+}
+
+/// Soft clouds and a distant skyline that slide at a fraction of the page
+/// speed — the parallax that makes the street feel deep.
+class _ParallaxBackdropPainter extends CustomPainter {
+  _ParallaxBackdropPainter({
+    required this.pages,
+    required this.fallbackPage,
+    required this.streetHeight,
+  }) : super(repaint: pages);
+
+  final PageController pages;
+  final double fallbackPage;
+  final double streetHeight;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final page = pages.hasClients ? (pages.page ?? fallbackPage) : fallbackPage;
+    final white = Paint()..color = Colors.white.withValues(alpha: 0.5);
+    final far = Paint()..color = Colors.white.withValues(alpha: 0.28);
+
+    // Distant rooftops: one repeating silhouette band, kept behind buildings.
+    final skyline = Paint()..color = Colors.white.withValues(alpha: 0.22);
+    final baseY = size.height - streetHeight - 8;
+    final shift = -page * size.width * 0.18;
+    for (var x = -1; x < 5; x++) {
+      final ox = shift % (size.width * 0.9) + x * size.width * 0.45;
+      canvas.drawRect(
+          Rect.fromLTWH(ox, baseY - 130, size.width * 0.16, 130), skyline);
+      canvas.drawRect(
+          Rect.fromLTWH(ox + size.width * 0.19, baseY - 90,
+              size.width * 0.13, 90),
+          skyline);
+    }
+    // Two cloud layers at different parallax rates.
+    for (final (rate, y, r, paint) in [
+      (0.10, size.height * 0.16, 34.0, far),
+      (0.26, size.height * 0.30, 26.0, white),
+    ]) {
+      final ox = -page * size.width * rate;
+      for (var i = 0; i < 4; i++) {
+        final cx =
+            (ox + i * size.width * 0.55) % (size.width * 1.4) - 60;
+        canvas.drawCircle(Offset(cx, y), r, paint);
+        canvas.drawCircle(Offset(cx + r * 1.1, y + 6), r * 0.75, paint);
+        canvas.drawCircle(Offset(cx - r * 1.0, y + 8), r * 0.7, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ParallaxBackdropPainter old) =>
+      old.pages != pages || old.streetHeight != streetHeight;
 }

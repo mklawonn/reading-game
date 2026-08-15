@@ -104,13 +104,21 @@ void main() {
     await tester.pumpWidget(_home(progress, audio));
     await tester.pumpAndSettle();
 
-    // A locked world answers aloud instead of opening.
-    await tester.tap(find.byKey(const Key('world-2')));
+    // Stroll down the street to the locked world: arriving narrates the
+    // lock, and tapping its greyscale building refuses aloud.
+    await tester.drag(
+        find.byKey(const Key('world-1')), const Offset(-400, 0));
     await tester.pumpAndSettle();
     expect(audio.spoken.last, contains('Locked'));
+    await tester.tap(find.byKey(const Key('world-2')));
+    await tester.pumpAndSettle();
+    expect(audio.spoken.last, contains('Keep playing'));
     expect(find.byKey(const Key('room-3')), findsNothing);
 
-    // The current world's gate opens its rooms.
+    // Stroll back; the current world's building opens its rooms.
+    await tester.drag(
+        find.byKey(const Key('world-2')), const Offset(400, 0));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('world-1')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('room-1')), findsOneWidget);

@@ -10,10 +10,10 @@ import '../lesson/lesson_screen.dart';
 import 'journey_ui.dart';
 import 'world_scenery.dart';
 
-/// Tier 3 of the journey: one room's lesson nodes on their own focused
-/// screen. The next node glows and plays; completed nodes (and every node of
-/// an already-beaten room) replay freely — replays practice and celebrate but
-/// never move the level ladder.
+/// Tier 3 of the journey: one room's lesson nodes climbing the interior wall
+/// bottom-up on a dotted trail — completed nodes turn to gold coins
+/// (replayable), the next one glows with its theme, later ones wait dark.
+/// Replays practice and celebrate but never move the level ladder.
 class LessonPathScreen extends StatefulWidget {
   const LessonPathScreen({
     super.key,
@@ -84,13 +84,13 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final unit = widget.schedule.unitFor(widget.levelId);
+    final accent = worldThemeFor(unit.id).sky.first;
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          WorldScenery(unitId: unit.id),
+          InteriorBackground(tint: accent),
           SafeArea(
             child: ListenableBuilder(
               listenable: widget.progress,
@@ -107,109 +107,74 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
                       trailing: GuideCharacter(
                           guide: guideForLevel(widget.levelId), size: 40),
                     ),
-                    const Spacer(),
-                    // The nodes, big and focused — this screen is about
-                    // exactly one room.
-                    Wrap(
-                      key: const Key('path-nodes'),
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 6,
-                      runSpacing: 14,
-                      children: [
-                        for (var i = 0; i < level.lessons; i++) ...[
-                          _PathNode(
-                            key: Key('path-node-$i'),
-                            emoji:
-                                kThemeEmoji[nodeThemeFor(p, level, i)] ?? '⭐',
-                            state: i < done
-                                ? _NodeState.done
-                                : (widget.levelId == p.level &&
-                                        i == p.lessonsIntoLevel)
-                                    ? _NodeState.current
-                                    : _NodeState.locked,
-                            onTap: () => _onTapNode(i),
-                          ),
-                          if (i != level.lessons - 1)
-                            Container(
-                              width: 26,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: i < done
-                                    ? scheme.primary
-                                    : scheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(3),
+                    Expanded(
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12),
+                        child: WindingPath(
+                          count: level.lessons,
+                          doneUntil: done,
+                          nodeSize: 88,
+                          nodeBuilder: (i) {
+                            final isDone = i < done;
+                            final isCurrent = widget.levelId == p.level &&
+                                i == p.lessonsIntoLevel;
+                            return RaisedNode(
+                              key: Key('path-node-$i'),
+                              size: 88,
+                              ring: isCurrent,
+                              color: isDone
+                                  ? Colors.amber
+                                  : isCurrent
+                                      ? Color.lerp(
+                                          accent, Colors.white, 0.25)!
+                                      : const Color(0xFF473A31),
+                              onTap: () => _onTapNode(i),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Opacity(
+                                    opacity:
+                                        isDone || isCurrent ? 1 : 0.5,
+                                    child: Text(
+                                      kThemeEmoji[nodeThemeFor(
+                                              p, level, i)] ??
+                                          '⭐',
+                                      style: TextStyle(
+                                          fontSize:
+                                              isCurrent ? 38 : 32),
+                                    ),
+                                  ),
+                                  if (isDone)
+                                    const Align(
+                                      alignment: Alignment(0.9, 0.9),
+                                      child: Icon(
+                                          Icons
+                                              .replay_circle_filled_rounded,
+                                          color: Colors.white,
+                                          size: 24),
+                                    ),
+                                ],
                               ),
-                            ),
-                        ],
-                      ],
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 30),
-                    BigPlayButton(
-                      keyName: 'path-play',
-                      onPressed: () => _play(
-                          nodeIndex:
-                              widget.levelId == p.level ? null : 0),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: BigPlayButton(
+                        keyName: 'path-play',
+                        onPressed: () => _play(
+                            nodeIndex:
+                                widget.levelId == p.level ? null : 0),
+                      ),
                     ),
-                    const Spacer(),
                   ],
                 );
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-enum _NodeState { done, current, locked }
-
-class _PathNode extends StatelessWidget {
-  const _PathNode(
-      {super.key, required this.emoji, required this.state, required this.onTap});
-
-  final String emoji;
-  final _NodeState state;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final current = state == _NodeState.current;
-    final size = current ? 78.0 : 64.0;
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: size,
-            height: size,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: state == _NodeState.done
-                  ? scheme.primary
-                  : current
-                      ? scheme.primaryContainer
-                      : scheme.surfaceContainerHighest.withValues(alpha: 0.9),
-              border:
-                  current ? Border.all(color: scheme.primary, width: 4) : null,
-            ),
-            child: Opacity(
-              opacity: state == _NodeState.locked ? 0.45 : 1,
-              child:
-                  Text(emoji, style: TextStyle(fontSize: current ? 34 : 28)),
-            ),
-          ),
-          if (state == _NodeState.done)
-            Positioned(
-              right: -2,
-              bottom: -2,
-              child: Icon(Icons.replay_circle_filled_rounded,
-                  color: Colors.green.shade600, size: 24),
-            ),
         ],
       ),
     );
