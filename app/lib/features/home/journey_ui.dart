@@ -257,11 +257,22 @@ class WindingPath extends StatelessWidget {
             ),
           if (marker != null && markerIndex != null && count > 0)
             () {
-              final t = markerIndex!.clamp(0.0, (count - 1).toDouble());
-              final lo = points[t.floor()];
-              final hi = points[t.ceil()];
-              final pos = Offset.lerp(lo, hi, t - t.floor())!;
-              // Hop: rise mid-stride between two nodes.
+              // Indices up to `count` are meaningful: past the last node the
+              // marker extrapolates along the final segment and walks off the
+              // top — the "room finished, on we go" exit.
+              final t = markerIndex!.clamp(0.0, count.toDouble());
+              final Offset pos;
+              if (t <= count - 1 || count == 1) {
+                final lo = points[t.floor().clamp(0, count - 1)];
+                final hi = points[t.ceil().clamp(0, count - 1)];
+                final frac = t - t.floor();
+                pos = Offset.lerp(lo, hi, frac.clamp(0.0, 1.0))!;
+              } else {
+                final last = points[count - 1];
+                final prev = count >= 2 ? points[count - 2] : last + const Offset(0, 80);
+                pos = last + (last - prev) * (t - (count - 1));
+              }
+              // Hop: rise mid-stride between two stops.
               final hop = sin((t - t.floor()) * pi) * 26;
               return Positioned(
                 left: pos.dx - 22,

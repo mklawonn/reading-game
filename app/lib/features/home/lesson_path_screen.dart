@@ -105,28 +105,35 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
     final after = _doneCount();
     final roomFinished = wasCurrent && p.level > widget.levelId;
     if (after > before || roomFinished) {
-      // The payoff the whole flow exists for: the marker hops forward.
-      setState(() {
-        _markerFrom = before.toDouble();
-        _markerTo = roomFinished
-            ? (_level.lessons - 1).toDouble()
-            : after.toDouble();
-        _roomJustFinished = roomFinished;
-      });
+      _roomJustFinished = roomFinished;
       if (roomFinished) {
         widget.audioService.speak(
           '${_level.title} — all done! On to the next one!',
         );
-        _closeTimer = Timer(const Duration(milliseconds: 2300), () {
+        _closeTimer = Timer(const Duration(milliseconds: 2700), () {
           if (mounted) Navigator.of(context).maybePop();
         });
       }
+      // Let the pop transition finish first, THEN hop in full view. A
+      // finished room hops past the last node and off the top ("on we go");
+      // a finished lesson hops to the next glowing node.
+      Timer(const Duration(milliseconds: 450), () {
+        if (!mounted) return;
+        setState(() {
+          _markerFrom = before.toDouble();
+          _markerTo = roomFinished
+              ? _level.lessons.toDouble()
+              : after.toDouble();
+        });
+      });
+      setState(() {});
     } else if (widget.autoPlay) {
       // Play-button route with nothing gained (left early): step back out.
       Navigator.of(context).maybePop();
       return;
+    } else {
+      setState(() {});
     }
-    setState(() {});
   }
 
   void _onTapNode(int i) {

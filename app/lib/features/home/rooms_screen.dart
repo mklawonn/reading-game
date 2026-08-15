@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../learning/curriculum_engine.dart';
@@ -58,17 +60,20 @@ class _RoomsScreenState extends State<RoomsScreen> {
     );
   }
 
-  /// After any lesson trip, walk the marker if the current room moved.
+  /// After any lesson trip, walk the marker if the current room moved —
+  /// delayed a beat so the hop plays after the pop transition, in full view.
   void _afterReturn() {
     if (!mounted) return;
+    setState(() {});
     final now = _roomIndex().toDouble();
     if (now != _markerTo) {
-      setState(() {
-        _markerFrom = _markerTo;
-        _markerTo = now;
+      Timer(const Duration(milliseconds: 450), () {
+        if (!mounted) return;
+        setState(() {
+          _markerFrom = _markerTo;
+          _markerTo = now;
+        });
       });
-    } else {
-      setState(() {});
     }
   }
 

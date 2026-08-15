@@ -132,7 +132,7 @@ void main() {
 
     // …then the lesson path shows the marker's hop and the room-finished
     // beat before walking itself back out to the street.
-    await tester.pump(const Duration(milliseconds: 2400));
+    await tester.pump(const Duration(milliseconds: 2900));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('home-play')), findsOneWidget);
     expect(progress.level, 2);
