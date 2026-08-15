@@ -30,6 +30,10 @@ const Map<String, String> kPictographEmoji = {
   'boy': '👦',
   'wind': '💨',
   'i': '👁️',
+  'fish': '🐟',
+  'house': '🏠',
+  'tree': '🌳',
+  'star': '⭐',
 };
 
 /// Pictographs a young child can't reliably tell apart at emoji fidelity
@@ -41,6 +45,7 @@ const List<Set<String>> kConfusablePictographs = [
   {'dog', 'pup'},
   {'man', 'boy'},
   {'can', 'pot'},
+  {'sun', 'star'}, // both radiant and yellow at emoji size
 ];
 
 /// Whether two element ids are visually confusable ([kConfusablePictographs]).

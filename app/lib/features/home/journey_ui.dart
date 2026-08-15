@@ -202,6 +202,8 @@ class WindingPath extends StatelessWidget {
     required this.doneUntil,
     required this.nodeSize,
     required this.nodeBuilder,
+    this.marker,
+    this.markerIndex,
   });
 
   final int count;
@@ -210,6 +212,12 @@ class WindingPath extends StatelessWidget {
   final int doneUntil;
   final double nodeSize;
   final Widget Function(int index) nodeBuilder;
+
+  /// An optional "you are here" figure standing on the trail (the guide).
+  /// [markerIndex] may be fractional — the marker walks between nodes when
+  /// it animates (Duolingo's post-lesson hop).
+  final Widget? marker;
+  final double? markerIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -247,6 +255,20 @@ class WindingPath extends StatelessWidget {
               top: points[i].dy - box / 2,
               child: nodeBuilder(i),
             ),
+          if (marker != null && markerIndex != null && count > 0)
+            () {
+              final t = markerIndex!.clamp(0.0, (count - 1).toDouble());
+              final lo = points[t.floor()];
+              final hi = points[t.ceil()];
+              final pos = Offset.lerp(lo, hi, t - t.floor())!;
+              // Hop: rise mid-stride between two nodes.
+              final hop = sin((t - t.floor()) * pi) * 26;
+              return Positioned(
+                left: pos.dx - 22,
+                top: pos.dy - nodeSize / 2 - 46 - hop,
+                child: IgnorePointer(child: marker!),
+              );
+            }(),
         ],
       );
     });

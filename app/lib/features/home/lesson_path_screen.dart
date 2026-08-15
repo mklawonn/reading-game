@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../learning/curriculum_engine.dart';
@@ -23,6 +25,7 @@ class LessonPathScreen extends StatefulWidget {
     required this.schedule,
     required this.contentService,
     required this.audioService,
+    this.autoPlay = false,
   });
 
   final int levelId;
@@ -32,28 +35,59 @@ class LessonPathScreen extends StatefulWidget {
   final ContentService contentService;
   final AudioService audioService;
 
+  /// Launch the next lesson immediately (the Play-button route): the child
+  /// still lands back HERE afterwards, so the marker's forward hop is always
+  /// seen. Leaving that lesson without progress pops straight back through.
+  final bool autoPlay;
+
   @override
   State<LessonPathScreen> createState() => _LessonPathScreenState();
 }
 
 class _LessonPathScreenState extends State<LessonPathScreen> {
   bool _busy = false;
+  double _markerFrom = 0;
+  double _markerTo = 0;
+  Timer? _closeTimer;
+  bool _roomJustFinished = false;
 
   CurriculumLevel get _level => widget.schedule.levelAt(widget.levelId);
+
+  int _doneCount() {
+    final p = widget.progress;
+    return widget.levelId < p.level
+        ? _level.lessons
+        : (widget.levelId == p.level ? p.lessonsIntoLevel : 0);
+  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        widget.audioService.speak('${_level.title}! Tap a circle to play!'));
+    _markerFrom = _markerTo = _doneCount().toDouble();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.autoPlay) {
+        _play();
+      } else {
+        widget.audioService.speak('${_level.title}! Tap a circle to play!');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _closeTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _play({int? nodeIndex}) async {
     if (_busy) return;
     _busy = true;
     final p = widget.progress;
-    final isCurrentNext = widget.levelId == p.level &&
+    final isCurrentNext =
+        widget.levelId == p.level &&
         (nodeIndex == null || nodeIndex == p.lessonsIntoLevel);
+    final wasCurrent = widget.levelId == p.level;
+    final before = _doneCount();
     await pushImmersive(
       context,
       LessonScreen(
@@ -67,7 +101,32 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
       ),
     );
     _busy = false;
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    final after = _doneCount();
+    final roomFinished = wasCurrent && p.level > widget.levelId;
+    if (after > before || roomFinished) {
+      // The payoff the whole flow exists for: the marker hops forward.
+      setState(() {
+        _markerFrom = before.toDouble();
+        _markerTo = roomFinished
+            ? (_level.lessons - 1).toDouble()
+            : after.toDouble();
+        _roomJustFinished = roomFinished;
+      });
+      if (roomFinished) {
+        widget.audioService.speak(
+          '${_level.title} — all done! On to the next one!',
+        );
+        _closeTimer = Timer(const Duration(milliseconds: 2300), () {
+          if (mounted) Navigator.of(context).maybePop();
+        });
+      }
+    } else if (widget.autoPlay) {
+      // Play-button route with nothing gained (left early): step back out.
+      Navigator.of(context).maybePop();
+      return;
+    }
+    setState(() {});
   }
 
   void _onTapNode(int i) {
@@ -77,8 +136,9 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
     if (!isCurrent || i <= p.lessonsIntoLevel) {
       _play(nodeIndex: i);
     } else {
-      widget.audioService
-          .speak(kThemeLine[nodeThemeFor(p, _level, i)] ?? 'Soon!');
+      widget.audioService.speak(
+        kThemeLine[nodeThemeFor(p, _level, i)] ?? 'Soon!',
+      );
     }
   }
 
@@ -105,59 +165,81 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
                     JourneyHeader(
                       title: '${levelBadge(level)}  ${level.title}',
                       trailing: GuideCharacter(
-                          guide: guideForLevel(widget.levelId), size: 40),
+                        guide: guideForLevel(widget.levelId),
+                        size: 40,
+                      ),
                     ),
                     Expanded(
                       child: Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12),
-                        child: WindingPath(
-                          count: level.lessons,
-                          doneUntil: done,
-                          nodeSize: 88,
-                          nodeBuilder: (i) {
-                            final isDone = i < done;
-                            final isCurrent = widget.levelId == p.level &&
-                                i == p.lessonsIntoLevel;
-                            return RaisedNode(
-                              key: Key('path-node-$i'),
-                              size: 88,
-                              ring: isCurrent,
-                              color: isDone
-                                  ? Colors.amber
-                                  : isCurrent
-                                      ? Color.lerp(
-                                          accent, Colors.white, 0.25)!
-                                      : const Color(0xFF473A31),
-                              onTap: () => _onTapNode(i),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Opacity(
-                                    opacity:
-                                        isDone || isCurrent ? 1 : 0.5,
-                                    child: Text(
-                                      kThemeEmoji[nodeThemeFor(
-                                              p, level, i)] ??
-                                          '⭐',
-                                      style: TextStyle(
-                                          fontSize:
-                                              isCurrent ? 38 : 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: TweenAnimationBuilder<double>(
+                          key: ValueKey('marker-$_markerFrom-$_markerTo'),
+                          tween: Tween(begin: _markerFrom, end: _markerTo),
+                          duration: const Duration(milliseconds: 1100),
+                          curve: Curves.easeInOutCubic,
+                          builder: (context, markerAt, _) => WindingPath(
+                            count: level.lessons,
+                            doneUntil: done,
+                            nodeSize: 88,
+                            marker:
+                                (widget.levelId == p.level || _roomJustFinished)
+                                ? GuideCharacter(
+                                    guide: guideForLevel(widget.levelId),
+                                    mood:
+                                        markerAt != _markerTo ||
+                                            _roomJustFinished
+                                        ? GuideMood.happy
+                                        : GuideMood.idle,
+                                    size: 40,
+                                  )
+                                : null,
+                            markerIndex: markerAt,
+                            nodeBuilder: (i) {
+                              final isDone = i < done;
+                              final isCurrent =
+                                  widget.levelId == p.level &&
+                                  i == p.lessonsIntoLevel;
+                              return RaisedNode(
+                                key: Key('path-node-$i'),
+                                size: 88,
+                                ring: isCurrent,
+                                color: isDone
+                                    ? Colors.amber
+                                    : isCurrent
+                                    ? Color.lerp(accent, Colors.white, 0.25)!
+                                    : const Color(0xFF473A31),
+                                onTap: () => _onTapNode(i),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Opacity(
+                                      opacity: isDone || isCurrent ? 1 : 0.5,
+                                      child: Text(
+                                        kThemeEmoji[nodeThemeFor(
+                                              p,
+                                              level,
+                                              i,
+                                            )] ??
+                                            '⭐',
+                                        style: TextStyle(
+                                          fontSize: isCurrent ? 38 : 32,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  if (isDone)
-                                    const Align(
-                                      alignment: Alignment(0.9, 0.9),
-                                      child: Icon(
-                                          Icons
-                                              .replay_circle_filled_rounded,
+                                    if (isDone)
+                                      const Align(
+                                        alignment: Alignment(0.9, 0.9),
+                                        child: Icon(
+                                          Icons.replay_circle_filled_rounded,
                                           color: Colors.white,
-                                          size: 24),
-                                    ),
-                                ],
-                              ),
-                            );
-                          },
+                                          size: 24,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -166,8 +248,8 @@ class _LessonPathScreenState extends State<LessonPathScreen> {
                       child: BigPlayButton(
                         keyName: 'path-play',
                         onPressed: () => _play(
-                            nodeIndex:
-                                widget.levelId == p.level ? null : 0),
+                          nodeIndex: widget.levelId == p.level ? null : 0,
+                        ),
                       ),
                     ),
                   ],

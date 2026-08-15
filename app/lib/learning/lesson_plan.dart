@@ -49,6 +49,7 @@ class LessonPlan {
   static const Set<String> readingGames = {
     'find_the_character', 'picture_to_word', 'echo_read',
     'fill_blank', 'build_a_word', 'blend_reveal', 'build_a_sentence',
+    'rebus_quest',
   };
 
   /// The escalating drill block for a just-met symbol, in teaching order:

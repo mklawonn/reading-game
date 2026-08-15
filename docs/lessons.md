@@ -79,9 +79,25 @@ Home (worlds→rooms→nodes) ─ Play ─▶ Lesson (1–9 steps) ─▶ Celebr
     token left-to-right, hears every one, and each line is read back fluently.
     Stories may reach beyond the taught pool; nothing is quizzed.
   * **Reading** (the level's closing lesson): print-direction games only, opening
-    with the level's new symbols for retention. Includes **Build a Sentence** and
-    the blending games — pictograph compounds (sunhat, pigpen, bedbug, keyring,
-    handball) put productive combining in reach from World 2, not the endgame.
+    with the level's new symbols for retention. Includes **Build a Sentence**,
+    the blending games, and **Rebus Quest** (from World 1's review room):
+    pictograph compounds (catfish, doghouse, sunhat, treehouse, starfish,
+    pigpen, bedbug, keyring, handball) put productive combining in reach in
+    **World 1** — fish/house and tree/star were added to the early vocabulary
+    precisely to fuel compounds and picture-first stories without touching the
+    meet→drill cadence (each still gets its own teaching room).
+* **The marker moves.** Every lesson runs *through* its path screen: on
+  finishing, the guide visibly hops to the next node; finishing a room plays a
+  send-off beat and walks back out, where the rooms marker (and the street)
+  advance in turn. Replays keep their gold "been here" badges, so where you've
+  been and where you're going are always both on screen.
+* **Rebus commands & fuller sentences — the gate.** Rebus Quest's six-token
+  commands start at World 1's review (≈10 pictographs known; the function
+  glyphs see/the/in are heard on tap, not required reading). Full free-phrase
+  reading (Fill-the-Blank, long Echo Read phrases) still waits for Word Magic,
+  when those glyphs are formally taught. Stories bridge the two: the new
+  all-picture tales (unlocks 1/3/7) are readable cover-to-cover by a
+  pre-reader, while later tales mix in glyph words.
   * Within a theme, slots are filled from shuffled "bags" so types vary and never
     repeat back-to-back; an exercise answered wrong is **re-queued** once near the
     end ("let's try that one again"), capped so a lesson always ends.

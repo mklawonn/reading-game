@@ -1330,6 +1330,134 @@
       },
       "decomposition_cost": 1,
       "notes": "-ing suffix; go+ing = going; rhymes with ring."
+    },
+    {
+      "id": "fish",
+      "type": "pictograph",
+      "syllable": "fish",
+      "sound_ipa": "fɪʃ",
+      "picturable": true,
+      "image_ref": "fish.png",
+      "audio_ref": "fish.mp3",
+      "continuant": true,
+      "rhyme_group": "ish",
+      "introduced_stage": 1,
+      "frequency": {
+        "dolch_tier": "noun",
+        "fry_rank": null
+      },
+      "decomposition_cost": 1,
+      "notes": "Early compound fuel (catfish, starfish); introduces sh.",
+      "graphemes": [
+        {
+          "g": "f",
+          "p": "f"
+        },
+        {
+          "g": "i",
+          "p": "ɪ"
+        },
+        {
+          "g": "sh",
+          "p": "ʃ"
+        }
+      ]
+    },
+    {
+      "id": "house",
+      "type": "pictograph",
+      "syllable": "house",
+      "sound_ipa": "haʊs",
+      "picturable": true,
+      "image_ref": "house.png",
+      "audio_ref": "house.mp3",
+      "continuant": true,
+      "rhyme_group": "ouse",
+      "introduced_stage": 1,
+      "frequency": {
+        "dolch_tier": "noun",
+        "fry_rank": null
+      },
+      "decomposition_cost": 1,
+      "notes": "Early compound fuel (doghouse, treehouse).",
+      "graphemes": [
+        {
+          "g": "h",
+          "p": "h"
+        },
+        {
+          "g": "ou",
+          "p": "aʊ"
+        },
+        {
+          "g": "se",
+          "p": "s"
+        }
+      ]
+    },
+    {
+      "id": "tree",
+      "type": "pictograph",
+      "syllable": "tree",
+      "sound_ipa": "triː",
+      "picturable": true,
+      "image_ref": "tree.png",
+      "audio_ref": "tree.mp3",
+      "continuant": false,
+      "rhyme_group": "ee",
+      "introduced_stage": 1,
+      "frequency": {
+        "dolch_tier": "noun",
+        "fry_rank": null
+      },
+      "decomposition_cost": 1,
+      "notes": "Joins the -ee family (bee, key, see); compound fuel (treehouse).",
+      "graphemes": [
+        {
+          "g": "t",
+          "p": "t"
+        },
+        {
+          "g": "r",
+          "p": "r"
+        },
+        {
+          "g": "ee",
+          "p": "iː"
+        }
+      ]
+    },
+    {
+      "id": "star",
+      "type": "pictograph",
+      "syllable": "star",
+      "sound_ipa": "stɑː",
+      "picturable": true,
+      "image_ref": "star.png",
+      "audio_ref": "star.mp3",
+      "continuant": true,
+      "rhyme_group": "ar",
+      "introduced_stage": 1,
+      "frequency": {
+        "dolch_tier": "noun",
+        "fry_rank": null
+      },
+      "decomposition_cost": 1,
+      "notes": "Introduces ar; compound fuel (starfish).",
+      "graphemes": [
+        {
+          "g": "s",
+          "p": "s"
+        },
+        {
+          "g": "t",
+          "p": "t"
+        },
+        {
+          "g": "ar",
+          "p": "ɑː"
+        }
+      ]
     }
   ],
   "words": [
@@ -3192,6 +3320,98 @@
       "spelling_variants": [],
       "is_test_blend": false,
       "inclusion_rationale": "Pictograph compound: hand+ball."
+    },
+    {
+      "id": "catfish",
+      "text": "catfish",
+      "segmentation": [
+        "cat",
+        "fish"
+      ],
+      "picturable": false,
+      "image_ref": null,
+      "audio_ref": "word_catfish.mp3",
+      "story_tags": [
+        "object"
+      ],
+      "utility_score": 1,
+      "frequency": {
+        "dolch_tier": null,
+        "fry_rank": null
+      },
+      "alt_segmentation": [],
+      "spelling_variants": [],
+      "is_test_blend": false,
+      "inclusion_rationale": "Pictograph compound available in World 1."
+    },
+    {
+      "id": "doghouse",
+      "text": "doghouse",
+      "segmentation": [
+        "dog",
+        "house"
+      ],
+      "picturable": false,
+      "image_ref": null,
+      "audio_ref": "word_doghouse.mp3",
+      "story_tags": [
+        "object"
+      ],
+      "utility_score": 1,
+      "frequency": {
+        "dolch_tier": null,
+        "fry_rank": null
+      },
+      "alt_segmentation": [],
+      "spelling_variants": [],
+      "is_test_blend": false,
+      "inclusion_rationale": "Pictograph compound available in World 1."
+    },
+    {
+      "id": "treehouse",
+      "text": "treehouse",
+      "segmentation": [
+        "tree",
+        "house"
+      ],
+      "picturable": false,
+      "image_ref": null,
+      "audio_ref": "word_treehouse.mp3",
+      "story_tags": [
+        "object"
+      ],
+      "utility_score": 1,
+      "frequency": {
+        "dolch_tier": null,
+        "fry_rank": null
+      },
+      "alt_segmentation": [],
+      "spelling_variants": [],
+      "is_test_blend": false,
+      "inclusion_rationale": "Pictograph compound: tree+house (World 2)."
+    },
+    {
+      "id": "starfish",
+      "text": "starfish",
+      "segmentation": [
+        "star",
+        "fish"
+      ],
+      "picturable": false,
+      "image_ref": null,
+      "audio_ref": "word_starfish.mp3",
+      "story_tags": [
+        "object"
+      ],
+      "utility_score": 1,
+      "frequency": {
+        "dolch_tier": null,
+        "fry_rank": null
+      },
+      "alt_segmentation": [],
+      "spelling_variants": [],
+      "is_test_blend": false,
+      "inclusion_rationale": "Pictograph compound: star+fish (World 2)."
     }
   ]
 }

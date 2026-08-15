@@ -27,6 +27,7 @@ import '../home/level_up_overlay.dart';
 import '../home/world_scenery.dart';
 import '../listen_and_pick/listen_and_pick_page.dart';
 import '../picture_to_word/picture_to_word_page.dart';
+import '../rebus_quest/rebus_quest_page.dart';
 import '../sound_match/sound_match_page.dart';
 import '../story_time/story_time_page.dart';
 import '../symbol_hunt/symbol_hunt_page.dart';
@@ -298,6 +299,8 @@ class _LessonScreenState extends State<LessonScreen> {
             return FeedTheGuidePage(key: key, contentService: cs, audioService: audio, guide: _guide, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
           case 'build_a_sentence':
             return BuildASentencePage(key: key, contentService: cs, audioService: audio, stage: stage, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
+          case 'rebus_quest':
+            return RebusQuestPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);
           case 'find_the_character':
           default:
             return FindTheCharacterPage(key: key, contentService: cs, audioService: audio, sampler: _sampler, allowedIds: allowed, embedded: true, onEvent: _onEvent, singleRound: true, focusId: focusId, onRoundComplete: done);

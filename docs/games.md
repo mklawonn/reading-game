@@ -26,6 +26,7 @@ lesson loop — see [`lessons.md`](lessons.md).
 | Hidden Glyph | 1 | M2 | I-Spy search scene: find the 2 hidden copies of the named word's picture among scattered, rotated glyphs |
 | Feed the Guide | 1 | M2 | "Fern wants the hat!" — give the hungry guide what it asks for (tap or drag) |
 | Build a Sentence | 1–4 | M2 | Hear a sentence, arrange glyph cards to build it (pictograph rows early, real phrases later) |
+| Rebus Quest | 1–2 | M2 | A pictographic sentence IS the instruction ("see the cat in the house") — read it, then find who hides where in the scene. Never narrated (that would give the answer); the paper's Table-2 commands as play |
 | Sound Families | 3 | M2 | Match by rhyme or shared first sound (teaches stops by contrast) |
 | Free Read | 4 | later | Read leveled stories assembled from the bank |
 

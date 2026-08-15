@@ -2,37 +2,237 @@
   "version": "1",
   "notes": "The 27 phonemes used by the Stage-1 vocabulary (derived from the elements' graphemes). Each carries: IPA; whether it is a stop (cannot be voiced in isolation — see docs/curriculum.md, 'the sound layer'); voicing (for the voiced/voiceless twin-pairs lesson); a kid-facing class (pop = stops, stretchy = everything else); and an `anchor` (a picturable element id where the sound is salient, for keyword teaching: '/k/ as in key'). The cluster /ks/ (letter x) is k+s, not listed here.",
   "phonemes": [
-    { "ipa": "p", "kind": "stop", "stop": true, "voiced": false, "klass": "pop", "anchor": "pen" },
-    { "ipa": "b", "kind": "stop", "stop": true, "voiced": true, "klass": "pop", "anchor": "ball" },
-    { "ipa": "t", "kind": "stop", "stop": true, "voiced": false, "klass": "pop", "anchor": "pot" },
-    { "ipa": "d", "kind": "stop", "stop": true, "voiced": true, "klass": "pop", "anchor": "dog" },
-    { "ipa": "k", "kind": "stop", "stop": true, "voiced": false, "klass": "pop", "anchor": "key" },
-    { "ipa": "ɡ", "kind": "stop", "stop": true, "voiced": true, "klass": "pop", "anchor": "bug" },
-
-    { "ipa": "f", "kind": "fricative", "stop": false, "voiced": false, "klass": "stretchy", "anchor": "fox" },
-    { "ipa": "s", "kind": "fricative", "stop": false, "voiced": false, "klass": "stretchy", "anchor": "sun" },
-    { "ipa": "h", "kind": "fricative", "stop": false, "voiced": false, "klass": "stretchy", "anchor": "hat" },
-
-    { "ipa": "m", "kind": "nasal", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "man" },
-    { "ipa": "n", "kind": "nasal", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "net" },
-    { "ipa": "ŋ", "kind": "nasal", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "ring" },
-
-    { "ipa": "l", "kind": "approximant", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "ball" },
-    { "ipa": "r", "kind": "approximant", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "rain" },
-    { "ipa": "w", "kind": "approximant", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "wind" },
-
-    { "ipa": "æ", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "cat" },
-    { "ipa": "ɛ", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "bed" },
-    { "ipa": "ɪ", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "pig" },
-    { "ipa": "ɒ", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "dog" },
-    { "ipa": "ʌ", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "bug" },
-    { "ipa": "iː", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "bee" },
-    { "ipa": "ɔː", "kind": "vowel", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "ball" },
-
-    { "ipa": "eɪ", "kind": "diphthong", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "rain" },
-    { "ipa": "oʊ", "kind": "diphthong", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "snow" },
-    { "ipa": "aʊ", "kind": "diphthong", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "cow" },
-    { "ipa": "aɪ", "kind": "diphthong", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "i" },
-    { "ipa": "ɔɪ", "kind": "diphthong", "stop": false, "voiced": true, "klass": "stretchy", "anchor": "boy" }
+    {
+      "ipa": "p",
+      "kind": "stop",
+      "stop": true,
+      "voiced": false,
+      "klass": "pop",
+      "anchor": "pen"
+    },
+    {
+      "ipa": "b",
+      "kind": "stop",
+      "stop": true,
+      "voiced": true,
+      "klass": "pop",
+      "anchor": "ball"
+    },
+    {
+      "ipa": "t",
+      "kind": "stop",
+      "stop": true,
+      "voiced": false,
+      "klass": "pop",
+      "anchor": "pot"
+    },
+    {
+      "ipa": "d",
+      "kind": "stop",
+      "stop": true,
+      "voiced": true,
+      "klass": "pop",
+      "anchor": "dog"
+    },
+    {
+      "ipa": "k",
+      "kind": "stop",
+      "stop": true,
+      "voiced": false,
+      "klass": "pop",
+      "anchor": "key"
+    },
+    {
+      "ipa": "ɡ",
+      "kind": "stop",
+      "stop": true,
+      "voiced": true,
+      "klass": "pop",
+      "anchor": "bug"
+    },
+    {
+      "ipa": "f",
+      "kind": "fricative",
+      "stop": false,
+      "voiced": false,
+      "klass": "stretchy",
+      "anchor": "fox"
+    },
+    {
+      "ipa": "s",
+      "kind": "fricative",
+      "stop": false,
+      "voiced": false,
+      "klass": "stretchy",
+      "anchor": "sun"
+    },
+    {
+      "ipa": "h",
+      "kind": "fricative",
+      "stop": false,
+      "voiced": false,
+      "klass": "stretchy",
+      "anchor": "hat"
+    },
+    {
+      "ipa": "m",
+      "kind": "nasal",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "man"
+    },
+    {
+      "ipa": "n",
+      "kind": "nasal",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "net"
+    },
+    {
+      "ipa": "ŋ",
+      "kind": "nasal",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "ring"
+    },
+    {
+      "ipa": "l",
+      "kind": "approximant",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "ball"
+    },
+    {
+      "ipa": "r",
+      "kind": "approximant",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "rain"
+    },
+    {
+      "ipa": "w",
+      "kind": "approximant",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "wind"
+    },
+    {
+      "ipa": "æ",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "cat"
+    },
+    {
+      "ipa": "ɛ",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "bed"
+    },
+    {
+      "ipa": "ɪ",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "pig"
+    },
+    {
+      "ipa": "ɒ",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "dog"
+    },
+    {
+      "ipa": "ʌ",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "bug"
+    },
+    {
+      "ipa": "iː",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "bee"
+    },
+    {
+      "ipa": "ɔː",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "ball"
+    },
+    {
+      "ipa": "eɪ",
+      "kind": "diphthong",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "rain"
+    },
+    {
+      "ipa": "oʊ",
+      "kind": "diphthong",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "snow"
+    },
+    {
+      "ipa": "aʊ",
+      "kind": "diphthong",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "cow"
+    },
+    {
+      "ipa": "aɪ",
+      "kind": "diphthong",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "i"
+    },
+    {
+      "ipa": "ɔɪ",
+      "kind": "diphthong",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "boy"
+    },
+    {
+      "ipa": "ʃ",
+      "kind": "fricative",
+      "stop": false,
+      "voiced": false,
+      "klass": "stretchy",
+      "anchor": "fish"
+    },
+    {
+      "ipa": "ɑː",
+      "kind": "vowel",
+      "stop": false,
+      "voiced": true,
+      "klass": "stretchy",
+      "anchor": "star"
+    }
   ]
 }

@@ -200,7 +200,7 @@ if (existsSync(curriculumPath)) {
   const KNOWN_GAMES = new Set([
     'listen_and_pick', 'find_the_character', 'sound_match', 'families', 'build_a_word', 'fill_blank',
     'picture_to_word', 'symbol_hunt', 'echo_read', 'blend_reveal',
-    'story_time', 'hidden_glyph', 'feed_the_guide', 'build_a_sentence']);
+    'story_time', 'hidden_glyph', 'feed_the_guide', 'build_a_sentence', 'rebus_quest']);
   const introduced = new Set();
   for (const lv of cur.levels ?? []) {
     for (const id of lv.introduce ?? []) {

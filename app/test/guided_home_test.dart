@@ -125,9 +125,14 @@ void main() {
     await tester.tap(find.byKey(const Key('celebrate-continue')));
     await tester.pumpAndSettle();
 
-    // One lesson beats level 1 → the level-up overlay, then home.
+    // One lesson beats level 1 → the level-up overlay…
     expect(find.byKey(const Key('levelup-continue')), findsOneWidget);
     await tester.tap(find.byKey(const Key('levelup-continue')));
+    await tester.pumpAndSettle();
+
+    // …then the lesson path shows the marker's hop and the room-finished
+    // beat before walking itself back out to the street.
+    await tester.pump(const Duration(milliseconds: 2400));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('home-play')), findsOneWidget);
     expect(progress.level, 2);

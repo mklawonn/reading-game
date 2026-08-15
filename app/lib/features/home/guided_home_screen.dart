@@ -9,10 +9,10 @@ import '../../progress/progress_service.dart';
 import '../../services/audio_service.dart';
 import '../../services/content_service.dart';
 import '../common/guide_character.dart';
-import '../lesson/lesson_screen.dart';
 import '../profile/avatars.dart';
 import '../progress/progress_screen.dart';
 import 'journey_ui.dart';
+import 'lesson_path_screen.dart';
 import 'rooms_screen.dart';
 import 'world_scenery.dart';
 
@@ -95,8 +95,9 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     _focused = settled;
     final unit = _units[settled];
     final locked = unit.levels.first > widget.progress.level;
-    widget.audioService
-        .speak(locked ? '${unit.title}. Locked!' : '${unit.title}!');
+    widget.audioService.speak(
+      locked ? '${unit.title}. Locked!' : '${unit.title}!',
+    );
     setState(() {});
   }
 
@@ -104,15 +105,18 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     if (_busy) return;
     _busy = true;
     _greetTimer?.cancel();
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => LessonScreen(
-          progress: widget.progress,
-          engine: widget.engine,
-          schedule: widget.schedule,
-          contentService: widget.contentService,
-          audioService: widget.audioService,
-        ),
+    // Route through the lesson path so finishing always shows the marker's
+    // forward hop before returning to the street.
+    await pushImmersive(
+      context,
+      LessonPathScreen(
+        levelId: widget.progress.level,
+        autoPlay: true,
+        progress: widget.progress,
+        engine: widget.engine,
+        schedule: widget.schedule,
+        contentService: widget.contentService,
+        audioService: widget.audioService,
       ),
     );
     _busy = false;
@@ -120,9 +124,11 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
     setState(() {});
     // A level-up may have moved us down the street — drive there.
     if (_pages.hasClients && _currentIndex != _focused) {
-      _pages.animateToPage(_currentIndex,
-          duration: const Duration(milliseconds: 700),
-          curve: Curves.easeInOutCubic);
+      _pages.animateToPage(
+        _currentIndex,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
+      );
     }
     _greetTimer = Timer(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
@@ -245,7 +251,8 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
                   itemBuilder: (context, i) {
                     final unit = _units[i];
                     final locked = unit.levels.first > p.level;
-                    final beaten = unit.levels.every((l) => l < p.level) ||
+                    final beaten =
+                        unit.levels.every((l) => l < p.level) ||
                         (p.pathComplete && unit.levels.contains(p.level));
                     final isCurrentWorld = i == _currentIndex;
                     return _BuildingPage(
@@ -261,7 +268,8 @@ class _GuidedHomeScreenState extends State<GuidedHomeScreen> {
                       onTap: () {
                         if (locked) {
                           widget.audioService.speak(
-                              'Locked! Keep playing to get to ${unit.title}!');
+                            'Locked! Keep playing to get to ${unit.title}!',
+                          );
                         } else {
                           _enterWorld(unit);
                         }
@@ -334,8 +342,10 @@ class _BuildingPage extends StatelessWidget {
                       fit: BoxFit.contain,
                       alignment: Alignment.bottomCenter,
                       errorBuilder: (context, error, stack) => Center(
-                        child: Text(unit.emoji,
-                            style: const TextStyle(fontSize: 90)),
+                        child: Text(
+                          unit.emoji,
+                          style: const TextStyle(fontSize: 90),
+                        ),
                       ),
                     ),
                   ),
@@ -348,28 +358,30 @@ class _BuildingPage extends StatelessWidget {
                 if (locked)
                   Align(
                     alignment: const Alignment(0, -0.55),
-                    child: Icon(Icons.lock,
-                        size: 34,
-                        color: Colors.black.withValues(alpha: 0.35)),
+                    child: Icon(
+                      Icons.lock,
+                      size: 34,
+                      color: Colors.black.withValues(alpha: 0.35),
+                    ),
                   ),
                 if (beaten)
                   const Align(
                     alignment: Alignment(0.85, -0.9),
-                    child:
-                        Icon(Icons.star, color: Colors.amber, size: 34),
+                    child: Icon(Icons.star, color: Colors.amber, size: 34),
                   ),
               ],
             ),
           ),
           const SizedBox(height: 4),
           SceneryChip(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('${unit.emoji}  ${unit.title}',
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  '${unit.emoji}  ${unit.title}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 if (fraction != null) ...[
                   const SizedBox(height: 4),
                   SizedBox(
@@ -377,7 +389,9 @@ class _BuildingPage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                          value: fraction, minHeight: 7),
+                        value: fraction,
+                        minHeight: 7,
+                      ),
                     ),
                   ),
                 ],
@@ -433,11 +447,18 @@ class _ParallaxBackdropPainter extends CustomPainter {
     for (var x = -1; x < 5; x++) {
       final ox = shift % (size.width * 0.9) + x * size.width * 0.45;
       canvas.drawRect(
-          Rect.fromLTWH(ox, baseY - 130, size.width * 0.16, 130), skyline);
+        Rect.fromLTWH(ox, baseY - 130, size.width * 0.16, 130),
+        skyline,
+      );
       canvas.drawRect(
-          Rect.fromLTWH(ox + size.width * 0.19, baseY - 90,
-              size.width * 0.13, 90),
-          skyline);
+        Rect.fromLTWH(
+          ox + size.width * 0.19,
+          baseY - 90,
+          size.width * 0.13,
+          90,
+        ),
+        skyline,
+      );
     }
     // Two cloud layers at different parallax rates.
     for (final (rate, y, r, paint) in [
@@ -446,8 +467,7 @@ class _ParallaxBackdropPainter extends CustomPainter {
     ]) {
       final ox = -page * size.width * rate;
       for (var i = 0; i < 4; i++) {
-        final cx =
-            (ox + i * size.width * 0.55) % (size.width * 1.4) - 60;
+        final cx = (ox + i * size.width * 0.55) % (size.width * 1.4) - 60;
         canvas.drawCircle(Offset(cx, y), r, paint);
         canvas.drawCircle(Offset(cx + r * 1.1, y + 6), r * 0.75, paint);
         canvas.drawCircle(Offset(cx - r * 1.0, y + 8), r * 0.7, paint);

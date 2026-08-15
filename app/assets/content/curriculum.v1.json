@@ -1,38 +1,595 @@
 {
-  "version": "3",
+  "version": "4",
   "notes": "The guided curriculum schedule — editable independently of the app. Three tiers (docs/lessons.md): `units` are themed worlds (emoji landmarks on the home strip); each unit's `levels` are its sub-levels (rooms); each level's `lessons` are the bite-sized nodes on the path. A level `introduce`s a small core glyph set (empty = a review room), lists the `games` its themed lessons draw from, and flags `story` where stories.v1.json has an unlocked tale (Story Time node). Symbol pool at level N = union of `introduce` over 1..N; every symbol gets a Meet card + drill block before games use it. Teaching levels run 4 nodes (meet → sounds → story → reading), review rooms 3 (sounds → story → reading) — deliberately unhurried. `xpToAdvance` is retained for the decoupled rewards layer. Game ids: listen_and_pick, find_the_character, picture_to_word, symbol_hunt, hidden_glyph, feed_the_guide, sound_match, families, echo_read, story_time, build_a_word, blend_reveal, build_a_sentence, fill_blank.",
   "units": [
-    { "id": 1, "title": "Home Meadow", "emoji": "🏡", "levels": [1, 2, 3] },
-    { "id": 2, "title": "The Farm",    "emoji": "🌾", "levels": [4, 5, 6] },
-    { "id": 3, "title": "Little Town", "emoji": "🏘️", "levels": [7, 8, 9] },
-    { "id": 4, "title": "Cozy House",  "emoji": "🛏️", "levels": [10, 11, 12] },
-    { "id": 5, "title": "The Garden",  "emoji": "🌼", "levels": [13, 14, 15] },
-    { "id": 6, "title": "Big Sky",     "emoji": "⛅", "levels": [16, 17, 18, 19] },
-    { "id": 7, "title": "Word Magic",  "emoji": "🌈", "levels": [20, 21, 22, 23] }
+    {
+      "id": 1,
+      "title": "Home Meadow",
+      "emoji": "🏡",
+      "levels": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The Farm",
+      "emoji": "🌾",
+      "levels": [
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Little Town",
+      "emoji": "🏘️",
+      "levels": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Cozy House",
+      "emoji": "🛏️",
+      "levels": [
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": 5,
+      "title": "The Garden",
+      "emoji": "🌼",
+      "levels": [
+        15,
+        16,
+        17
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Big Sky",
+      "emoji": "⛅",
+      "levels": [
+        18,
+        19,
+        20,
+        21
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Word Magic",
+      "emoji": "🌈",
+      "levels": [
+        22,
+        23,
+        24,
+        25
+      ]
+    }
   ],
   "levels": [
-    { "id": 1,  "stage": 1, "title": "First friends",  "introduce": ["cat", "dog"],  "games": ["listen_and_pick", "find_the_character", "symbol_hunt", "feed_the_guide"], "lessons": 4, "story": true, "xpToAdvance": 40 },
-    { "id": 2,  "stage": 1, "title": "Hats off",       "introduce": ["hat", "sun"],  "games": ["listen_and_pick", "feed_the_guide", "symbol_hunt", "hidden_glyph", "find_the_character", "picture_to_word"], "lessons": 4, "story": true, "xpToAdvance": 40 },
-    { "id": 3,  "stage": 1, "title": "Meadow party",   "introduce": [],              "games": ["listen_and_pick", "feed_the_guide", "symbol_hunt", "hidden_glyph", "find_the_character", "picture_to_word", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 40 },
-    { "id": 4,  "stage": 1, "title": "Pen pals",       "introduce": ["pen", "hen"],  "games": ["feed_the_guide", "hidden_glyph", "sound_match", "find_the_character", "picture_to_word", "listen_and_pick"], "lessons": 4, "story": true, "xpToAdvance": 45 },
-    { "id": 5,  "stage": 1, "title": "Bugs & pigs",    "introduce": ["pig", "bug"],  "games": ["sound_match", "hidden_glyph", "feed_the_guide", "picture_to_word", "find_the_character", "blend_reveal"], "lessons": 4, "story": true, "xpToAdvance": 45 },
-    { "id": 6,  "stage": 1, "title": "Barn dance",     "introduce": [],              "games": ["sound_match", "symbol_hunt", "hidden_glyph", "feed_the_guide", "find_the_character", "picture_to_word", "blend_reveal", "build_a_word", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 45 },
-    { "id": 7,  "stage": 1, "title": "Can-can",        "introduce": ["can", "man"],  "games": ["listen_and_pick", "feed_the_guide", "sound_match", "families", "find_the_character", "picture_to_word", "hidden_glyph"], "lessons": 4, "story": true, "xpToAdvance": 50 },
-    { "id": 8,  "stage": 1, "title": "Fox in a box",   "introduce": ["fox", "box"],  "games": ["sound_match", "families", "hidden_glyph", "symbol_hunt", "find_the_character", "picture_to_word", "blend_reveal"], "lessons": 4, "story": true, "xpToAdvance": 50 },
-    { "id": 9,  "stage": 1, "title": "Town fair",      "introduce": [],              "games": ["families", "sound_match", "hidden_glyph", "feed_the_guide", "picture_to_word", "find_the_character", "build_a_word", "blend_reveal", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 50 },
-    { "id": 10, "stage": 1, "title": "Bed & net",      "introduce": ["bed", "net"],  "games": ["sound_match", "families", "feed_the_guide", "hidden_glyph", "find_the_character", "picture_to_word"], "lessons": 4, "story": true, "xpToAdvance": 50 },
-    { "id": 11, "stage": 1, "title": "Pot & pup",      "introduce": ["pot", "pup"],  "games": ["sound_match", "families", "hidden_glyph", "symbol_hunt", "picture_to_word", "find_the_character", "blend_reveal"], "lessons": 4, "story": true, "xpToAdvance": 55 },
-    { "id": 12, "stage": 1, "title": "Pillow fort",    "introduce": [],              "games": ["families", "sound_match", "feed_the_guide", "hidden_glyph", "find_the_character", "picture_to_word", "build_a_word", "blend_reveal", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 55 },
-    { "id": 13, "stage": 1, "title": "Bee & key",      "introduce": ["bee", "key"],  "games": ["sound_match", "families", "hidden_glyph", "feed_the_guide", "find_the_character", "picture_to_word"], "lessons": 4, "story": true, "xpToAdvance": 55 },
-    { "id": 14, "stage": 1, "title": "Ball & ring",    "introduce": ["ball", "ring"],"games": ["sound_match", "families", "symbol_hunt", "hidden_glyph", "picture_to_word", "find_the_character", "blend_reveal"], "lessons": 4, "story": true, "xpToAdvance": 55 },
-    { "id": 15, "stage": 1, "title": "Garden picnic",  "introduce": [],              "games": ["families", "sound_match", "hidden_glyph", "feed_the_guide", "picture_to_word", "find_the_character", "build_a_word", "blend_reveal", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 55 },
-    { "id": 16, "stage": 1, "title": "Rain on my hand","introduce": ["rain", "hand"],"games": ["sound_match", "families", "hidden_glyph", "feed_the_guide", "find_the_character", "picture_to_word", "blend_reveal"], "lessons": 4, "story": true, "xpToAdvance": 60 },
-    { "id": 17, "stage": 1, "title": "Snow & cow",     "introduce": ["snow", "cow"], "games": ["sound_match", "families", "hidden_glyph", "symbol_hunt", "find_the_character", "picture_to_word", "blend_reveal", "build_a_word"], "lessons": 4, "story": true, "xpToAdvance": 60 },
-    { "id": 18, "stage": 1, "title": "Boy in the wind","introduce": ["boy", "wind"], "games": ["sound_match", "families", "hidden_glyph", "symbol_hunt", "picture_to_word", "find_the_character", "blend_reveal", "build_a_word"], "lessons": 4, "story": true, "xpToAdvance": 60 },
-    { "id": 19, "stage": 1, "title": "Cloud parade",   "introduce": [],              "games": ["families", "sound_match", "hidden_glyph", "feed_the_guide", "find_the_character", "picture_to_word", "build_a_word", "blend_reveal", "build_a_sentence"], "lessons": 3, "story": true, "xpToAdvance": 60 },
-    { "id": 20, "stage": 2, "title": "I and O",        "introduce": ["i", "o"],      "games": ["find_the_character", "blend_reveal", "build_a_word", "sound_match", "hidden_glyph", "picture_to_word"], "lessons": 4, "story": true, "xpToAdvance": 60 },
-    { "id": 21, "stage": 2, "title": "Make a word",    "introduce": ["e", "and"],    "games": ["build_a_word", "blend_reveal", "find_the_character", "picture_to_word", "echo_read", "hidden_glyph"], "lessons": 4, "story": true, "xpToAdvance": 65 },
-    { "id": 22, "stage": 2, "title": "Read a sentence","introduce": ["see", "a", "the"], "games": ["fill_blank", "echo_read", "build_a_word", "blend_reveal", "build_a_sentence"], "lessons": 4, "story": true, "xpToAdvance": 65 },
-    { "id": 23, "stage": 2, "title": "Rainbow finale", "introduce": [],              "games": ["fill_blank", "echo_read", "build_a_word", "blend_reveal", "build_a_sentence", "find_the_character", "picture_to_word"], "lessons": 3, "story": true, "xpToAdvance": 70 }
+    {
+      "id": 1,
+      "stage": 1,
+      "title": "First friends",
+      "introduce": [
+        "cat",
+        "dog"
+      ],
+      "games": [
+        "listen_and_pick",
+        "find_the_character",
+        "symbol_hunt",
+        "feed_the_guide"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 40
+    },
+    {
+      "id": 2,
+      "stage": 1,
+      "title": "Hats off",
+      "introduce": [
+        "hat",
+        "sun"
+      ],
+      "games": [
+        "listen_and_pick",
+        "feed_the_guide",
+        "symbol_hunt",
+        "hidden_glyph",
+        "find_the_character",
+        "picture_to_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 40
+    },
+    {
+      "id": 3,
+      "stage": 1,
+      "title": "Fish at home",
+      "introduce": [
+        "fish",
+        "house"
+      ],
+      "games": [
+        "listen_and_pick",
+        "feed_the_guide",
+        "symbol_hunt",
+        "hidden_glyph",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 45
+    },
+    {
+      "id": 4,
+      "stage": 1,
+      "title": "Meadow party",
+      "introduce": [],
+      "games": [
+        "listen_and_pick",
+        "feed_the_guide",
+        "symbol_hunt",
+        "hidden_glyph",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal",
+        "build_a_word",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 40
+    },
+    {
+      "id": 5,
+      "stage": 1,
+      "title": "Pen pals",
+      "introduce": [
+        "pen",
+        "hen"
+      ],
+      "games": [
+        "feed_the_guide",
+        "hidden_glyph",
+        "sound_match",
+        "find_the_character",
+        "picture_to_word",
+        "listen_and_pick"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 45
+    },
+    {
+      "id": 6,
+      "stage": 1,
+      "title": "Bugs & pigs",
+      "introduce": [
+        "pig",
+        "bug"
+      ],
+      "games": [
+        "sound_match",
+        "hidden_glyph",
+        "feed_the_guide",
+        "picture_to_word",
+        "find_the_character",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 45
+    },
+    {
+      "id": 7,
+      "stage": 1,
+      "title": "Star tree",
+      "introduce": [
+        "tree",
+        "star"
+      ],
+      "games": [
+        "sound_match",
+        "hidden_glyph",
+        "feed_the_guide",
+        "picture_to_word",
+        "find_the_character",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 45
+    },
+    {
+      "id": 8,
+      "stage": 1,
+      "title": "Barn dance",
+      "introduce": [],
+      "games": [
+        "sound_match",
+        "symbol_hunt",
+        "hidden_glyph",
+        "feed_the_guide",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal",
+        "build_a_word",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 45
+    },
+    {
+      "id": 9,
+      "stage": 1,
+      "title": "Can-can",
+      "introduce": [
+        "can",
+        "man"
+      ],
+      "games": [
+        "listen_and_pick",
+        "feed_the_guide",
+        "sound_match",
+        "families",
+        "find_the_character",
+        "picture_to_word",
+        "hidden_glyph"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 50
+    },
+    {
+      "id": 10,
+      "stage": 1,
+      "title": "Fox in a box",
+      "introduce": [
+        "fox",
+        "box"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "symbol_hunt",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 50
+    },
+    {
+      "id": 11,
+      "stage": 1,
+      "title": "Town fair",
+      "introduce": [],
+      "games": [
+        "families",
+        "sound_match",
+        "hidden_glyph",
+        "feed_the_guide",
+        "picture_to_word",
+        "find_the_character",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 50
+    },
+    {
+      "id": 12,
+      "stage": 1,
+      "title": "Bed & net",
+      "introduce": [
+        "bed",
+        "net"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "feed_the_guide",
+        "hidden_glyph",
+        "find_the_character",
+        "picture_to_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 50
+    },
+    {
+      "id": 13,
+      "stage": 1,
+      "title": "Pot & pup",
+      "introduce": [
+        "pot",
+        "pup"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "symbol_hunt",
+        "picture_to_word",
+        "find_the_character",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 55
+    },
+    {
+      "id": 14,
+      "stage": 1,
+      "title": "Pillow fort",
+      "introduce": [],
+      "games": [
+        "families",
+        "sound_match",
+        "feed_the_guide",
+        "hidden_glyph",
+        "find_the_character",
+        "picture_to_word",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 55
+    },
+    {
+      "id": 15,
+      "stage": 1,
+      "title": "Bee & key",
+      "introduce": [
+        "bee",
+        "key"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "feed_the_guide",
+        "find_the_character",
+        "picture_to_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 55
+    },
+    {
+      "id": 16,
+      "stage": 1,
+      "title": "Ball & ring",
+      "introduce": [
+        "ball",
+        "ring"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "symbol_hunt",
+        "hidden_glyph",
+        "picture_to_word",
+        "find_the_character",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 55
+    },
+    {
+      "id": 17,
+      "stage": 1,
+      "title": "Garden picnic",
+      "introduce": [],
+      "games": [
+        "families",
+        "sound_match",
+        "hidden_glyph",
+        "feed_the_guide",
+        "picture_to_word",
+        "find_the_character",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 55
+    },
+    {
+      "id": 18,
+      "stage": 1,
+      "title": "Rain on my hand",
+      "introduce": [
+        "rain",
+        "hand"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "feed_the_guide",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 60
+    },
+    {
+      "id": 19,
+      "stage": 1,
+      "title": "Snow & cow",
+      "introduce": [
+        "snow",
+        "cow"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "symbol_hunt",
+        "find_the_character",
+        "picture_to_word",
+        "blend_reveal",
+        "build_a_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 60
+    },
+    {
+      "id": 20,
+      "stage": 1,
+      "title": "Boy in the wind",
+      "introduce": [
+        "boy",
+        "wind"
+      ],
+      "games": [
+        "sound_match",
+        "families",
+        "hidden_glyph",
+        "symbol_hunt",
+        "picture_to_word",
+        "find_the_character",
+        "blend_reveal",
+        "build_a_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 60
+    },
+    {
+      "id": 21,
+      "stage": 1,
+      "title": "Cloud parade",
+      "introduce": [],
+      "games": [
+        "families",
+        "sound_match",
+        "hidden_glyph",
+        "feed_the_guide",
+        "find_the_character",
+        "picture_to_word",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 60
+    },
+    {
+      "id": 22,
+      "stage": 2,
+      "title": "I and O",
+      "introduce": [
+        "i",
+        "o"
+      ],
+      "games": [
+        "find_the_character",
+        "blend_reveal",
+        "build_a_word",
+        "sound_match",
+        "hidden_glyph",
+        "picture_to_word"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 60
+    },
+    {
+      "id": 23,
+      "stage": 2,
+      "title": "Make a word",
+      "introduce": [
+        "e",
+        "and"
+      ],
+      "games": [
+        "build_a_word",
+        "blend_reveal",
+        "find_the_character",
+        "picture_to_word",
+        "echo_read",
+        "hidden_glyph"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 65
+    },
+    {
+      "id": 24,
+      "stage": 2,
+      "title": "Read a sentence",
+      "introduce": [
+        "see",
+        "a",
+        "the"
+      ],
+      "games": [
+        "fill_blank",
+        "echo_read",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence"
+      ],
+      "lessons": 4,
+      "story": true,
+      "xpToAdvance": 65
+    },
+    {
+      "id": 25,
+      "stage": 2,
+      "title": "Rainbow finale",
+      "introduce": [],
+      "games": [
+        "fill_blank",
+        "echo_read",
+        "build_a_word",
+        "blend_reveal",
+        "build_a_sentence",
+        "find_the_character",
+        "picture_to_word",
+        "rebus_quest"
+      ],
+      "lessons": 3,
+      "story": true,
+      "xpToAdvance": 70
+    }
   ]
 }
